@@ -136,13 +136,42 @@ async function openV(v){
   $("ds").textContent=(v.alkoi?new Date(v.alkoi).toLocaleDateString("fi-FI")+" · ":"")+"Jaa "+(v.jaa??"–")+", Ei "+(v.ei??"–")+", Tyhjää "+(v.tyhja??"–")+", Poissa "+(v.poissa??"–");
   const B=$("db");B.textContent="Ladataan…";$("dlg").showModal();
   try{
-    const r=await get("aanestys_edustaja?aanestys_id=eq."+v.id+"&select=puolue,aani&limit=400");
+    const r=await get("aanestys_edustaja?aanestys_id=eq."+v.id+"&select=henkilo,etunimi,sukunimi,puolue,aani&limit=400");
     const g={};r.forEach(x=>{const p=x.puolue||"–";const o=g[p]||(g[p]={jaa:0,ei:0,tyhja:0,poissa:0});o[x.aani]=(o[x.aani]||0)+1});
     B.textContent="";
     if(v.lisaotsikko&&v.lisaotsikko!==v.otsikko)B.appendChild(el("div","note",v.lisaotsikko));
     const t=el("table");const th=el("tr");["Ryhmä","Jaa","Ei","Tyhjää","Poissa"].forEach(x=>th.appendChild(el("th","",x)));t.appendChild(th);
     Object.entries(g).sort((a,b)=>(b[1].jaa+b[1].ei)-(a[1].jaa+a[1].ei)).forEach(([p,o])=>{const tr=el("tr");tr.appendChild(el("td","",p));["jaa","ei","tyhja","poissa"].forEach(k=>tr.appendChild(el("td",k,String(o[k]))));t.appendChild(tr)});
     B.appendChild(t);
+    B.appendChild(el("div","note","Edustajat ja heidän äänensä"));
+    let f="",s="";
+    const bar=el("div","row");
+    const list=el("div");
+    const draw=()=>{
+      list.innerHTML="";
+      const n=s.trim().toLowerCase();
+      const rows=r.filter(x=>(!f||x.aani===f)&&(!n||(full(x)+" "+(x.puolue||"")).toLowerCase().includes(n)))
+        .sort((a,b)=>(a.puolue||"").localeCompare(b.puolue||"","fi")||(a.sukunimi||"").localeCompare(b.sukunimi||"","fi"));
+      list.appendChild(el("div","note",rows.length+" edustajaa"));
+      rows.forEach(x=>{
+        const row=el("div","v");
+        row.appendChild(el("div","t",full(x)));
+        const mm=el("div","meta",(x.puolue||"–")+" · ");
+        mm.appendChild(el("span",x.aani,AANI[x.aani]||x.aani));
+        row.appendChild(mm);list.appendChild(row);
+      });
+    };
+    ["","jaa","ei","tyhja","poissa"].forEach(k=>{
+      const b=el("button",k===f?"on":"",k?AANI[k]:"Kaikki");
+      b.onclick=()=>{f=k;bar.querySelectorAll("button").forEach(x=>{x.className=x===b?"on":""});draw()};
+      bar.appendChild(b);
+    });
+    B.appendChild(bar);
+    const inp=el("input");inp.placeholder="Hae edustajaa tai ryhmää…";inp.style.marginTop="8px";inp.style.width="100%";
+    inp.oninput=()=>{s=inp.value;draw()};
+    B.appendChild(inp);
+    B.appendChild(list);
+    draw();
   }catch(e){B.textContent="Lataus epäonnistui: "+e.message}
 }
 
