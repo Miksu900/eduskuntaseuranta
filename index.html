@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eduskuntavahti – miten kansanedustajat äänestävät</title>
+<meta name="description" content="Katso, miten kansanedustajasi on äänestänyt eduskunnassa, kuinka usein hän on paikalla ja kuinka usein hän äänestää eri tavalla kuin oma ryhmänsä.">
+<meta property="og:title" content="Eduskuntavahti – miten kansanedustajat äänestävät">
+<meta property="og:description" content="Hae kansanedustajasi ja katso hänen äänestyksensä, läsnäolonsa ja eroavuudet oman ryhmän linjasta.">
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:#fff;font:16px/1.4 system-ui,sans-serif}
+header{position:sticky;top:0;background:#111;padding:12px;border-bottom:1px solid #222;z-index:2}
+h1{margin:0;font-size:22px}
+.sub{color:#999;font-size:13px;margin:2px 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+button,select,input{font:inherit;color:#fff;background:#222;border:0;border-radius:16px;padding:8px 14px}
+button.on{background:#2a5db0}
+input{flex:1;min-width:140px;border-radius:8px}
+select{border-radius:8px}
+main{padding:8px 12px 60px;max-width:800px;margin:auto}
+.card{background:#1b1b1b;border-radius:10px;padding:12px 14px;margin:8px 0;cursor:pointer}
+.name{font-weight:600}
+.meta{color:#999;font-size:13px;margin-top:2px}
+.bar{height:6px;background:#2a2a2a;border-radius:3px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:#2a5db0}
+.tag{display:inline-block;background:#2a2a2a;border-radius:6px;padding:1px 7px;font-size:12px;margin-right:6px}
+.jaa{color:#6c6}.ei{color:#e66}.tyhja{color:#ccc}.poissa{color:#888}
+#st,.note{color:#999;font-size:12px;padding:8px 0}
+dialog{background:#161616;color:#fff;border:1px solid #333;border-radius:12px;width:min(780px,96vw);max-height:90vh;padding:0}
+dialog::backdrop{background:#000a}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;padding:14px;position:sticky;top:0;background:#161616;border-bottom:1px solid #2a2a2a}
+.db{padding:6px 14px 20px}
+.v{padding:10px 0;border-bottom:1px solid #262626}
+.v .t{font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 4px;border-bottom:1px solid #262626;text-align:left}
+th{color:#999;font-weight:500}
+</style></head><body>
+<header>
+<h1>Eduskuntavahti</h1>
+<div class="sub">Miten kansanedustajat äänestävät – eduskunnan avoimen datan pohjalta</div>
+<div class="row" id="tabs"></div>
+<div class="row" id="tools"></div>
+</header>
+<main><div id="st">Ladataan…</div><div id="list"></div>
+<div class="note">Lähde: Eduskunnan avoin data. Tilastot on laskettu koneellisesti äänestyksistä ja ovat vain yksi osa edustajan työtä. Poissaolo voi johtua esimerkiksi luottamustehtävästä, sairaudesta tai virkamatkasta. "Ryhmänsä linjasta poikkeava" tarkoittaa äänestystä, jossa edustaja äänesti Jaa tai Ei toisin kuin oman eduskuntaryhmänsä enemmistö.</div>
+</main>
+<dialog id="dlg"><div class="dh"><div><div class="name" id="dt"></div><div class="meta" id="ds"></div></div><button id="dx">Sulje</button></div><div class="db" id="db"></div></dialog>
+<script>
+const URL_="https://arwenhbwzoavbonlwkdr.supabase.co", KEY="sb_publishable_7baeuteHYaarCEv4-j8C_g_OLxcKzJp";
+const H={apikey:KEY};
+const $=id=>document.getElementById(id);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e};
+const pct=(a,b)=>b?Math.round(100*a/b):0;
+const AANI={jaa:"Jaa",ei:"Ei",tyhja:"Tyhjää",poissa:"Poissa"};
+let tab="mp",mps=[],votings=[],totalV=0,loadedV=0;
+let q="",party="",sort="eri";
+
+async function get(path){const r=await fetch(URL_+"/rest/v1/"+path,{headers:H});if(!r.ok)throw new Error(r.status);return r.json()}
+async function count(path){const r=await fetch(URL_+"/rest/v1/"+path,{headers:{...H,Prefer:"count=exact",Range:"0-0"}});const c=r.headers.get("content-range")||"";return +c.split("/")[1]||0}
+
+function tabs(){
+  $("tabs").innerHTML="";
+  [["mp","Edustajat"],["v","Äänestykset"],["p","P
