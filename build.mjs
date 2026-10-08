@@ -7,7 +7,7 @@ const SB = process.env.SUPABASE_URL || "https://arwenhbwzoavbonlwkdr.supabase.co
 const KEY = process.env.SUPABASE_KEY || "sb_publishable_7baeuteHYaarCEv4-j8C_g_OLxcKzJp";
 const SITE = (process.env.SITE_URL || "https://eduskuntaseuranta.fi").replace(/\/$/, "");
 const OUT = "dist";
-const DETAIL_N = 300; // montako uusinta äänestystä saa edustajakohtaiset äänet sivuille
+const DETAIL_N = 1000; // montako uusinta äänestystä saa edustajakohtaiset äänet sivuille
 const QUIZ_N = 12;
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -152,15 +152,18 @@ async function main() {
   // --- Edustajasivut ---
   for (const m of mps) {
     const nm = full(m), s = mpSlug.get(m.henkilo);
-    const list = (byMp.get(m.henkilo) || []).slice(0, 50);
+    const allv = byMp.get(m.henkilo) || [];
+    const list = allv.slice(0, 50);
     const vmap = new Map(votings.map(v => [v.id, v]));
     const li = list.map(x => { const v = vmap.get(x.aid) || { id: x.aid }; return `<a class="card" href="/aanestys/${v.id}/"><div>${esc(vtitle(v))}</div><div class="meta">${dateFi(v.alkoi)} · ${voteTag(x.aani)}</div></a>`; }).join("");
+    const rest = allv.slice(50).map(x => { const v = vmap.get(x.aid) || { id: x.aid }; const t = vtitle(v); return `<a class="card rv" data-q="${esc((t + " " + dateFi(v.alkoi)).toLowerCase())}" href="/aanestys/${v.id}/"><div>${esc(short(t, 140))}</div><div class="meta">${dateFi(v.alkoi)} · ${voteTag(x.aani)}</div></a>`; }).join("");
+    const restBlock = rest ? `<details><summary><b>Näytä kaikki ${allv.length} äänestystä</b></summary><input style="width:100%;box-sizing:border-box;padding:12px 14px;margin:8px 0 12px;font-size:16px;border-radius:10px;border:1px solid #444;background:#1a1a1a;color:inherit" type="search" placeholder="Hae äänestyksistä (esim. laki, aihe)" oninput="var q=this.value.trim().toLowerCase();this.parentNode.querySelectorAll('.rv').forEach(function(e){e.style.display=(!q||e.getAttribute('data-q').indexOf(q)>-1)?'':'none'})">${rest}</details>` : "";
     const body = `<div class="meta"><a href="/puolue/${slug(m.puolue) || "muut"}/">${esc(pname(m.puolue))}</a> · kansanedustaja</div>
 <h1>${esc(nm)} – äänestykset ja läsnäolo</h1>
 <div class="chips"><div class="chip"><b>${lasna(m)} %</b><span>läsnä äänestyksissä</span></div><div class="chip"><b>${eri(m)} %</b><span>ryhmänsä linjasta poikkeavia ääniä</span></div><div class="chip"><b>${m.yhteensa}</b><span>äänestystä yhteensä</span></div></div>
 <p class="meta">Jaa ${m.jaa} · Ei ${m.ei} · Tyhjää ${m.tyhja} · Poissa ${m.poissa}. Poissaolo voi johtua esimerkiksi luottamustehtävästä, sairaudesta tai virkamatkasta.</p>
 ${shareBtns}
-<h2>Viimeisimmät äänestykset</h2>${li || '<p class="note">Yksittäisiä äänestyksiä ei ole vielä saatavilla.</p>'}
+<h2>Äänestykset</h2>${li || '<p class="note">Yksittäisiä äänestyksiä ei ole vielä saatavilla.</p>'}${restBlock}
 <p class="note"><a href="/menetelma/">Miten ”ryhmänsä linjasta poikkeava” lasketaan?</a></p>`;
     put(`/edustaja/${s}/`, shell({ title: `${nm} (${pname(m.puolue)}) – äänestykset | Eduskuntaseuranta`, desc: `Miten ${nm} on äänestänyt eduskunnassa? Läsnäolo ${lasna(m)} %, ryhmästä poikkeavia ääniä ${eri(m)} % (${m.yhteensa} äänestystä).`, path: `/edustaja/${s}/`, body }));
   }
