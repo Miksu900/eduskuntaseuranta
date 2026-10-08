@@ -101,7 +101,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
-<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/viikko/">Viikkokatsaus</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
+<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/viikko/">Viikkokatsaus</a><a href="/tilaa/">Tilaa</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
 <main>${body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
@@ -297,11 +297,14 @@ ${shareBtns}${ptab}${who}`;
     const sum = `${vs.length} äänestystä${divs.length ? `, hallitus ja oppositio eri kannalla ${divs.length}:ssa` : ""}.`;
     return { w, vs, items, divs, uni, topDev, topAbs, range, lines, sum, tulk: TULK[w.key] || null };
   };
+  const SUB_URL = "https://aba151bd.sibforms.com/serve/MUIFACVlzng7cU-kcDGZrtLUtyllWs0ZAD8M-6T8SaurezkvDv9td9lKbDdjRlMMI3S_Wr_zixFtmqBcS47Jgg95hszNzoaHe_Rv0RUwAkUljWy8C5iKCHQ4ffCVl5Guvni--3bV4vEJhM3ifmpUi3cKEGpaxnHQYsHlPDtlgGvM-XmzfNXC9r5ExVg_ZCz6fCw-TA3vConv_LLOZw==";
+  const subBox = `<div class="card" style="border-left:4px solid #1a5fb4"><div><b>Tilaa viikkokatsaus sähköpostiisi</b></div><div class="meta">Kerran viikossa: eduskunnan äänestykset ja tulkinta. Ilmainen, voit perua milloin vain.</div><p><a class="btn" href="${SUB_URL}" target="_blank" rel="noopener" style="display:inline-block;padding:10px 16px;background:#1a5fb4;color:#fff;border-radius:8px;text-decoration:none">Tilaa ilmaiseksi</a></p></div>`;
   const weekBody = a => {
     const { w, items, uni, topDev, topAbs, range, lines, tulk } = a;
     const deep = tulk && Array.isArray(tulk.kappaleet) && tulk.kappaleet.length ? `<h2>Syvempi tulkinta</h2>${tulk.kappaleet.map(k => String(k).startsWith("## ") ? `<h3 style="margin:18px 0 6px;font-size:16px">${esc(String(k).slice(3))}</h3>` : `<p>${esc(k)}</p>`).join("")}<p class="note">Tulkinnan on kirjoittanut tekoäly (Claude) viikon äänestystulosten pohjalta, ja Eduskuntaseuranta on lukenut ja tarkistanut sen ennen julkaisua. Se on tulkinta, ei tosiasia. Luvut löytyvät alta ja datasta.</p>` : "";
     return `<h1>Eduskunnan viikko ${w.week}/${w.year}: äänestykset ja tulkinta</h1><p class="meta">${esc(range)} · ${items.length} äänestystä</p>
 ${deep}
+${subBox}
 <h2>Viikon luvut</h2><ul>${lines.map(l => `<li>${esc(l)}</li>`).join("")}</ul>
 <p class="note">Tulkinnat on laskettu koneellisesti äänestystuloksista. Ne eivät ole toimituksellista arviointia, eivätkä ne kerro syitä sille, miksi joku äänesti niin kuin äänesti.</p>
 ${shareBtns}
@@ -319,6 +322,8 @@ ${topAbs.length ? `<h2>Eniten poissaoloja</h2><p class="meta">Poissaolo ei kerro
     const rssItems = an.slice(0, 20).map(a => `<item><title>${esc(`Eduskunnan viikko ${a.w.week}/${a.w.year}`)}</title><link>${SITE}/viikko/${a.w.key}/</link><guid>${SITE}/viikko/${a.w.key}/</guid><pubDate>${new Date(a.vs[0].alkoi).toUTCString()}</pubDate><description>${esc((a.tulk && a.tulk.kappaleet ? a.tulk.kappaleet.filter(k => !String(k).startsWith("## ")).join(" ") : a.lines.join(" ")))}</description></item>`).join("");
     await writeFile(OUT + "/viikko/rss.xml", `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Eduskuntaseuranta: viikkokatsaus</title><link>${SITE}/viikko/</link><description>Eduskunnan viikon äänestykset ja koneellinen tulkinta</description><language>fi</language>${rssItems}</channel></rss>`);
   }
+
+  put("/tilaa/", shell({ title: "Tilaa viikkokatsaus sähköpostiin | Eduskuntaseuranta", desc: "Tilaa eduskunnan viikon äänestykset ja tulkinta ilmaiseksi sähköpostiisi.", path: "/tilaa/", body: `<h1>Tilaa viikkokatsaus</h1><p>Kerran viikossa sähköpostiisi: mitä eduskunnassa äänestettiin, miten puolueet jakautuivat ja mitä tuloksista voi päätellä. Ilmainen.</p>${subBox}<p class="note">Tilaus tallentaa vain sähköpostiosoitteesi viikkokatsauksen lähettämistä varten. Jokaisessa viestissä on peruutuslinkki. Osoitetta ei luovuteta eteenpäin. Viestit lähetetään Brevo-palvelun kautta (EU).</p>` }));
 
   // --- Menetelmäsivu ---
   put("/menetelma/", shell({ title: "Miten luvut lasketaan | Eduskuntaseuranta", desc: "Eduskuntaseurannan tietolähde, laskutavat ja rajoitukset.", path: "/menetelma/", body: METHOD }));
