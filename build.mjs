@@ -50,28 +50,13 @@ async function pool(items, n, fn) {
 }
 
 
-// Vaalipiirit Eduskunnan avoimesta datasta (MemberOfParliament, XmlData). Jos haku epäonnistuu, sivusto rakentuu ilman vaalipiiritietoa.
+// Vaalipiirit haetaan Supabasen taulusta edustaja_vaalipiiri (täytetään Edge Functionilla Eduskunnan datasta).
+// Jos taulua ei ole tai se on tyhjä, sivusto rakentuu ilman vaalipiiritietoa.
 async function fetchVaalipiirit() {
-  const base = process.env.EDUSKUNTA_URL || "https://avoindata.eduskunta.fi";
   const map = new Map();
   try {
-    for (let page = 0; page < 80; page++) {
-      let j = null;
-      for (let i = 0; i < 3 && !j; i++) {
-        try {
-          const r = await fetch(`${base}/api/v1/tables/MemberOfParliament/rows?perPage=100&page=${page}`, { signal: AbortSignal.timeout(90000), headers: { "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36 Eduskuntaseuranta/1.0 (+https://eduskuntaseuranta.fi)", "Accept": "application/json", "Accept-Language": "fi-FI,fi;q=0.9" } });
-          if (!r.ok) throw new Error(String(r.status));
-          j = await r.json();
-        } catch (e) { if (i === 2) throw e; await new Promise(s => setTimeout(s, 2000 * (i + 1))); }
-      }
-      const xi = j.columnNames.indexOf("XmlData"), pi = j.columnNames.indexOf("personId");
-      for (const row of j.rowData || []) {
-        const m = /<NykyinenVaalipiiri><Nimi>([^<]+)<\/Nimi>/.exec(String(row[xi] || ""));
-        if (m) map.set(String(row[pi]), m[1].trim());
-      }
-      if (!j.hasMore) break;
-    }
-  } catch (e) { console.log("Vaalipiirien haku epäonnistui, jatketaan ilman:", e.message); }
+    for (const r of await all("edustaja_vaalipiiri?select=henkilo,vaalipiiri", "henkilo")) if (r.vaalipiiri) map.set(String(r.henkilo), String(r.vaalipiiri).trim());
+  } catch (e) { console.log("Vaalipiiritaulua ei saatu, jatketaan ilman:", e.message); }
   console.log("Vaalipiiri löytyi", map.size, "henkilölle");
   return map;
 }
@@ -106,6 +91,7 @@ footer{max-width:800px;margin:auto;padding:0 12px 40px;color:#777;font-size:12px
 
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
+let HAS_VP = false;
 function shell({ title, desc, path, body, head = "" }) {
   const url = SITE + path;
   return `<!DOCTYPE html><html lang="fi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -114,7 +100,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
-<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/#p">Puolueet</a><a href="/oma-edustaja/">Oma edustaja</a><a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
+<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
 <main>${body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}</body></html>`;
@@ -133,6 +119,7 @@ async function main() {
   const vpMap = await fetchVaalipiirit();
   const vpName = n => String(n || "").replace(/\s*vaalipiiri$/i, "").replace(/\s*maakunnan$/i, "").trim();
   for (const m of mps) m.vaalipiiri = vpMap.get(String(m.henkilo)) || "";
+  HAS_VP = mps.some(m => m.vaalipiiri);
   let votings;
   try {
     votings = await all("aanestykset?select=id,vuosi,istunto,numero,alkoi,otsikko,lisaotsikko,jaa,ei,tyhja,poissa,ladattu,tiivistelma,aihe", "alkoi.desc,id.desc");
