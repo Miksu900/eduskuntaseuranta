@@ -1,6 +1,6 @@
 // build.mjs – rakentaa Eduskuntaseuranta-sivuston staattiset sivut Supabasen datasta.
 // Ajetaan GitHub Actionsissa (ks. .github/workflows/build.yml). Tulos kirjoitetaan kansioon dist/.
-import { mkdir, writeFile, copyFile, rm } from "node:fs/promises";
+import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
 const SB = process.env.SUPABASE_URL || "https://arwenhbwzoavbonlwkdr.supabase.co";
@@ -101,7 +101,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
-<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
+<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/viikko/">Viikkokatsaus</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
 <main>${body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
@@ -244,6 +244,80 @@ ${shareBtns}${ptab}${who}`;
     }
     put("/oma-edustaja/", shell({ title: "Oma kansanedustaja: löydä vaalipiirisi edustajat | Eduskuntaseuranta", desc: "Valitse vaalipiirisi ja näe alueesi kansanedustajat sekä se, miten he ovat äänestäneet.", path: "/oma-edustaja/",
       body: `<h1>Oma kansanedustaja</h1><p>Valitse vaalipiirisi, niin näet alueesi kansanedustajat ja sen, miten he ovat äänestäneet eduskunnassa.</p><p class="meta">Vaalipiiri on yleensä oma maakuntasi. Esimerkiksi Ylivieska kuuluu Oulun vaalipiiriin. Jos et ole varma, vaalipiirin voi tarkistaa oikeusministeriön vaalit.fi-sivulta.</p>${vpList.map(([k, ms]) => `<a class="card" href="/vaalipiiri/${slug(k)}/"><div>${esc(k)} vaalipiiri</div><div class="meta">${ms.length} edustajaa</div></a>`).join("")}` }));
+  }
+
+  // --- Viikkokatsaus: koneellisesti laskettu yhteenveto ja tulkinta ---
+  const GOV = new Set(["kok", "ps", "rkp", "kd"]); // hallituspuolueet (tarkista, jos hallitus vaihtuu)
+  const hDate = d => new Date(d).toLocaleDateString("sv-SE", { timeZone: "Europe/Helsinki" });
+  const isoWeek = ds => { const [y, m, d] = ds.split("-").map(Number); const t = new Date(Date.UTC(y, m - 1, d)); t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7) + 3); const wy = t.getUTCFullYear(); const j = new Date(Date.UTC(wy, 0, 4)); return { year: wy, week: 1 + Math.round(((t - j) / 86400000 - 3 + ((j.getUTCDay() + 6) % 7)) / 7) }; };
+  const weeks = new Map();
+  for (const v of loaded) { if (!v.alkoi) continue; const w = isoWeek(hDate(v.alkoi)); const k = `${w.year}-${String(w.week).padStart(2, "0")}`; if (!weeks.has(k)) weeks.set(k, { key: k, ...w, vs: [] }); weeks.get(k).vs.push(v); }
+  // Ihmisen tarkistamat syvemmät tulkinnat: tiedosto tulkinnat.json, esim. {"2026-41": {"kappaleet": ["## Otsikko", "Teksti..."]}}
+  let TULK = {};
+  try { TULK = JSON.parse(await readFile("tulkinnat.json", "utf8")); } catch (e) { console.log("tulkinnat.json puuttuu tai on virheellinen, ohitetaan:", e.message); }
+  const weekList = [...weeks.values()].sort((a, b) => b.key.localeCompare(a.key)).slice(0, 52);
+  const pname2 = p => pname(p);
+  const analyse = w => {
+    const vs = w.vs.slice().sort((a, b) => String(b.alkoi).localeCompare(String(a.alkoi)));
+    const pos = s => (s.jaa + s.ei >= 20 ? (s.jaa > s.ei ? "jaa" : s.ei > s.jaa ? "ei" : null) : null);
+    const items = [], unity = new Map(), dev = new Map(), abs = new Map();
+    for (const v of vs) {
+      const pr = paBy.get(v.id) || [];
+      const g = { jaa: 0, ei: 0 }, o = { jaa: 0, ei: 0 }, line = new Map();
+      for (const r of pr) {
+        const side = GOV.has(r.puolue) ? g : o; side.jaa += r.jaa || 0; side.ei += r.ei || 0;
+        const u = unity.get(r.puolue) || { agree: 0, total: 0 }; u.agree += Math.max(r.jaa || 0, r.ei || 0); u.total += (r.jaa || 0) + (r.ei || 0); unity.set(r.puolue, u);
+        if ((r.jaa || 0) + (r.ei || 0) >= 3 && r.jaa !== r.ei) line.set(r.puolue, r.jaa > r.ei ? "jaa" : "ei");
+      }
+      const gp = pos(g), op = pos(o), out = (v.jaa || 0) > (v.ei || 0) ? "jaa" : (v.ei || 0) > (v.jaa || 0) ? "ei" : null;
+      const divided = !!(gp && op && gp !== op);
+      items.push({ v, divided, govWon: divided && out === gp, gp, op, out, margin: Math.abs((v.jaa || 0) - (v.ei || 0)), size: (v.jaa || 0) + (v.ei || 0) });
+      for (const r of byV.get(v.id) || []) {
+        const a = abs.get(r.henkilo) || { n: 0, poissa: 0, r }; a.n++; if (r.aani === "poissa") a.poissa++; abs.set(r.henkilo, a);
+        const l = line.get(r.puolue);
+        if (l && (r.aani === "jaa" || r.aani === "ei")) { const d = dev.get(r.henkilo) || { n: 0, eri: 0, r }; d.n++; if (r.aani !== l) d.eri++; dev.set(r.henkilo, d); }
+      }
+    }
+    const divs = items.filter(i => i.divided);
+    const narrow = items.filter(i => i.size >= 150).sort((a, b) => a.margin - b.margin)[0];
+    const uni = [...unity.entries()].filter(([, u]) => u.total >= 30).map(([p, u]) => ({ p, pct: pct(u.agree, u.total) })).sort((a, b) => b.pct - a.pct);
+    const topDev = [...dev.values()].filter(d => d.n >= 5 && d.eri > 0).sort((a, b) => b.eri - a.eri || b.eri / b.n - a.eri / a.n).slice(0, 5);
+    const topAbs = [...abs.values()].filter(a => a.n >= 5 && a.poissa > 0).sort((a, b) => b.poissa - a.poissa).slice(0, 5);
+    const days = vs.map(v => hDate(v.alkoi)).sort();
+    const range = days.length ? (days[0] === days[days.length - 1] ? dateFi(vs[0].alkoi) : `${dateFi(days[0])}–${dateFi(days[days.length - 1])}`) : "";
+    const lines = [];
+    lines.push(`Viikolla ${w.week}/${w.year} (${range}) eduskunnassa pidettiin ${vs.length} äänestystä.`);
+    if (divs.length) {
+      const won = divs.filter(i => i.govWon).length;
+      lines.push(`Hallituspuolueet (${[...GOV].map(pname).join(", ")}) ja oppositio olivat selvästi eri kannalla ${divs.length} äänestyksessä (${pct(divs.length, vs.length)} % kaikista). Näistä hallituksen kanta voitti ${won} ja hävisi ${divs.length - won}.`);
+    } else lines.push("Hallituksen ja opposition enemmistökannat eivät eronneet selvästi yhdessäkään viikon äänestyksessä.");
+    if (narrow) lines.push(`Viikon niukin äänestys oli ”${short(vtitle(narrow.v), 110)}”: jaa ${narrow.v.jaa}, ei ${narrow.v.ei} (ero ${narrow.margin} ääntä).`);
+    if (uni.length >= 2) lines.push(`Yhtenäisimmin äänesti ${pname(uni[0].p)} (${uni[0].pct} % ryhmän enemmistön linjalla). Vähiten yhtenäisesti äänesti ${pname(uni[uni.length - 1].p)} (${uni[uni.length - 1].pct} %).`);
+    if (topDev.length) lines.push(`Eniten oman ryhmänsä enemmistön linjaa vastaan äänesti ${full(topDev[0].r)} (${pname(topDev[0].r.puolue)}): ${topDev[0].eri} ääntä ${topDev[0].n}:stä.`);
+    const sum = `${vs.length} äänestystä${divs.length ? `, hallitus ja oppositio eri kannalla ${divs.length}:ssa` : ""}.`;
+    return { w, vs, items, divs, uni, topDev, topAbs, range, lines, sum, tulk: TULK[w.key] || null };
+  };
+  const weekBody = a => {
+    const { w, items, uni, topDev, topAbs, range, lines, tulk } = a;
+    const deep = tulk && Array.isArray(tulk.kappaleet) && tulk.kappaleet.length ? `<h2>Syvempi tulkinta</h2>${tulk.kappaleet.map(k => String(k).startsWith("## ") ? `<h3 style="margin:18px 0 6px;font-size:16px">${esc(String(k).slice(3))}</h3>` : `<p>${esc(k)}</p>`).join("")}<p class="note">Tulkinnan on kirjoittanut tekoäly (Claude) viikon äänestystulosten pohjalta, ja Eduskuntaseuranta on lukenut ja tarkistanut sen ennen julkaisua. Se on tulkinta, ei tosiasia. Luvut löytyvät alta ja datasta.</p>` : "";
+    return `<h1>Eduskunnan viikko ${w.week}/${w.year}: äänestykset ja tulkinta</h1><p class="meta">${esc(range)} · ${items.length} äänestystä</p>
+${deep}
+<h2>Viikon luvut</h2><ul>${lines.map(l => `<li>${esc(l)}</li>`).join("")}</ul>
+<p class="note">Tulkinnat on laskettu koneellisesti äänestystuloksista. Ne eivät ole toimituksellista arviointia, eivätkä ne kerro syitä sille, miksi joku äänesti niin kuin äänesti.</p>
+${shareBtns}
+${uni.length ? `<h2>Ryhmien yhtenäisyys</h2><p class="meta">Osuus jaa- ja ei-äänistä, jotka olivat ryhmän enemmistön linjalla.</p>${uni.map(u => `<div class="card"><div>${esc(pname(u.p))} <b>${u.pct} %</b></div></div>`).join("")}` : ""}
+${topDev.length ? `<h2>Eniten ryhmän linjaa vastaan</h2><p class="meta">Vain jaa- ja ei-äänet, vähintään 5 vertailtavaa äänestystä.</p>${topDev.map(d => `<div class="card"><div>${mpLink(d.r.henkilo, full(d.r))} <span class="meta">${esc(pname(d.r.puolue))}</span></div><div class="meta">${d.eri} / ${d.n} ääntä ryhmän linjaa vastaan</div></div>`).join("")}` : ""}
+${topAbs.length ? `<h2>Eniten poissaoloja</h2><p class="meta">Poissaolo ei kerro laiskuudesta: syynä voi olla sairaus, virkamatka tai ministerin tehtävät.</p>${topAbs.map(d => `<div class="card"><div>${mpLink(d.r.henkilo, full(d.r))} <span class="meta">${esc(pname(d.r.puolue))}</span></div><div class="meta">poissa ${d.poissa} / ${d.n} äänestyksessä</div></div>`).join("")}` : ""}
+<h2>Viikon äänestykset</h2>${items.map(i => `<a class="card" href="/aanestys/${i.v.id}/"><div>${esc(short(vtitle(i.v), 160))}</div><div class="meta">${dateFi(i.v.alkoi)} · <span class="jaa">Jaa ${i.v.jaa ?? "–"}</span> · <span class="ei">Ei ${i.v.ei ?? "–"}</span>${i.divided ? " · hallitus ja oppositio eri kannalla" : ""}</div></a>`).join("")}`;
+  };
+  if (weekList.length) {
+    const an = weekList.map(analyse);
+    const archive = an.map(a => `<a class="card" href="/viikko/${a.w.key}/"><div>Viikko ${a.w.week}/${a.w.year}</div><div class="meta">${esc(a.range)} · ${esc(a.sum)}</div></a>`).join("");
+    for (const a of an) put(`/viikko/${a.w.key}/`, shell({ title: `Eduskunnan viikko ${a.w.week}/${a.w.year}: äänestykset ja tulkinta | Eduskuntaseuranta`, desc: `Viikon ${a.w.week} eduskuntaäänestykset: ${a.sum} Ryhmien yhtenäisyys, niukimmat äänestykset ja poissaolot.`, path: `/viikko/${a.w.key}/`, body: `<p class="meta"><a href="/viikko/">← Viikkokatsaukset</a></p>${weekBody(a)}` }));
+    put("/viikko/", shell({ title: `Eduskunnan viikkokatsaus: viikon ${an[0].w.week} äänestykset ja tulkinta | Eduskuntaseuranta`, desc: `Eduskunnan viikon äänestykset ja koneellinen tulkinta: ${an[0].sum}`, path: "/viikko/", body: `${weekBody(an[0])}<h2>Aiemmat viikot</h2><p class="meta"><a href="/viikko/rss.xml">RSS-syöte</a> (seuraa viikkokatsauksia lukijasovelluksella)</p>${archive}` }));
+    await mkdir(OUT + "/viikko", { recursive: true });
+    const rssItems = an.slice(0, 20).map(a => `<item><title>${esc(`Eduskunnan viikko ${a.w.week}/${a.w.year}`)}</title><link>${SITE}/viikko/${a.w.key}/</link><guid>${SITE}/viikko/${a.w.key}/</guid><pubDate>${new Date(a.vs[0].alkoi).toUTCString()}</pubDate><description>${esc((a.tulk && a.tulk.kappaleet ? a.tulk.kappaleet.filter(k => !String(k).startsWith("## ")).join(" ") : a.lines.join(" ")))}</description></item>`).join("");
+    await writeFile(OUT + "/viikko/rss.xml", `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Eduskuntaseuranta: viikkokatsaus</title><link>${SITE}/viikko/</link><description>Eduskunnan viikon äänestykset ja koneellinen tulkinta</description><language>fi</language>${rssItems}</channel></rss>`);
   }
 
   // --- Menetelmäsivu ---
