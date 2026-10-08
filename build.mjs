@@ -7,6 +7,7 @@ const SB = process.env.SUPABASE_URL || "https://arwenhbwzoavbonlwkdr.supabase.co
 const KEY = process.env.SUPABASE_KEY || "sb_publishable_7baeuteHYaarCEv4-j8C_g_OLxcKzJp";
 const SITE = (process.env.SITE_URL || "https://eduskuntaseuranta.fi").replace(/\/$/, "");
 const OUT = "dist";
+const BEACON = `<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3b541d79fcdc4cd684f2a937c50e613b"}'></script>`; // Cloudflare Web Analytics (evästeetön kävijälaskuri)
 const DETAIL_N = 1000; // montako uusinta äänestystä saa edustajakohtaiset äänet sivuille
 const QUIZ_N = 12;
 
@@ -103,7 +104,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
 <main>${body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
-${SHARE_JS}</body></html>`;
+${SHARE_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
 }
 const shareBtns = `<div class="share"><button data-share>Jaa tämä sivu</button></div>`;
 const voteTag = a => `<span class="${a}">${AANI[a] || a}</span>`;
