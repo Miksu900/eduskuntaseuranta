@@ -49,6 +49,33 @@ async function pool(items, n, fn) {
   return out;
 }
 
+
+// Vaalipiirit Eduskunnan avoimesta datasta (MemberOfParliament, XmlData). Jos haku epäonnistuu, sivusto rakentuu ilman vaalipiiritietoa.
+async function fetchVaalipiirit() {
+  const base = process.env.EDUSKUNTA_URL || "https://avoindata.eduskunta.fi";
+  const map = new Map();
+  try {
+    for (let page = 0; page < 80; page++) {
+      let j = null;
+      for (let i = 0; i < 3 && !j; i++) {
+        try {
+          const r = await fetch(`${base}/api/v1/tables/MemberOfParliament/rows?perPage=100&page=${page}`, { signal: AbortSignal.timeout(90000) });
+          if (!r.ok) throw new Error(String(r.status));
+          j = await r.json();
+        } catch (e) { if (i === 2) throw e; await new Promise(s => setTimeout(s, 2000 * (i + 1))); }
+      }
+      const xi = j.columnNames.indexOf("XmlData"), pi = j.columnNames.indexOf("personId");
+      for (const row of j.rowData || []) {
+        const m = /<NykyinenVaalipiiri><Nimi>([^<]+)<\/Nimi>/.exec(String(row[xi] || ""));
+        if (m) map.set(String(row[pi]), m[1].trim());
+      }
+      if (!j.hasMore) break;
+    }
+  } catch (e) { console.log("Vaalipiirien haku epäonnistui, jatketaan ilman:", e.message); }
+  console.log("Vaalipiiri löytyi", map.size, "henkilölle");
+  return map;
+}
+
 // ---------- Ulkoasu ----------
 const CSS = `:root{color-scheme:dark}*{box-sizing:border-box}
 body{margin:0;background:#111;color:#fff;font:16px/1.5 system-ui,sans-serif}
@@ -87,7 +114,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
-<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/#p">Puolueet</a><a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
+<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/#p">Puolueet</a><a href="/oma-edustaja/">Oma edustaja</a><a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
 <main>${body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}</body></html>`;
@@ -103,6 +130,9 @@ async function main() {
 
   const mps = await all("mp_stats?select=*", "henkilo");
   for (const m of mps) m.puolue = pk(m.puolue);
+  const vpMap = await fetchVaalipiirit();
+  const vpName = n => String(n || "").replace(/\s*vaalipiiri$/i, "").replace(/\s*maakunnan$/i, "").trim();
+  for (const m of mps) m.vaalipiiri = vpMap.get(String(m.henkilo)) || "";
   let votings;
   try {
     votings = await all("aanestykset?select=id,vuosi,istunto,numero,alkoi,otsikko,lisaotsikko,jaa,ei,tyhja,poissa,ladattu,tiivistelma,aihe", "alkoi.desc,id.desc");
@@ -158,7 +188,7 @@ async function main() {
     const li = list.map(x => { const v = vmap.get(x.aid) || { id: x.aid }; return `<a class="card" href="/aanestys/${v.id}/"><div>${esc(vtitle(v))}</div><div class="meta">${dateFi(v.alkoi)} · ${voteTag(x.aani)}</div></a>`; }).join("");
     const rest = allv.slice(50).map(x => { const v = vmap.get(x.aid) || { id: x.aid }; const t = vtitle(v); return `<a class="card rv" data-q="${esc((t + " " + dateFi(v.alkoi)).toLowerCase())}" href="/aanestys/${v.id}/"><div>${esc(short(t, 140))}</div><div class="meta">${dateFi(v.alkoi)} · ${voteTag(x.aani)}</div></a>`; }).join("");
     const restBlock = rest ? `<details><summary><b>Näytä kaikki ${allv.length} äänestystä</b></summary><input style="width:100%;box-sizing:border-box;padding:12px 14px;margin:8px 0 12px;font-size:16px;border-radius:10px;border:1px solid #444;background:#1a1a1a;color:inherit" type="search" placeholder="Hae äänestyksistä (esim. laki, aihe)" oninput="var q=this.value.trim().toLowerCase();this.parentNode.querySelectorAll('.rv').forEach(function(e){e.style.display=(!q||e.getAttribute('data-q').indexOf(q)>-1)?'':'none'})">${rest}</details>` : "";
-    const body = `<div class="meta"><a href="/puolue/${slug(m.puolue) || "muut"}/">${esc(pname(m.puolue))}</a> · kansanedustaja</div>
+    const body = `<div class="meta"><a href="/puolue/${slug(m.puolue) || "muut"}/">${esc(pname(m.puolue))}</a> · kansanedustaja${m.vaalipiiri ? ` · <a href="/vaalipiiri/${slug(vpName(m.vaalipiiri))}/">${esc(vpName(m.vaalipiiri))} vaalipiiri</a>` : ""}</div>
 <h1>${esc(nm)} – äänestykset ja läsnäolo</h1>
 <div class="chips"><div class="chip"><b>${lasna(m)} %</b><span>läsnä äänestyksissä</span></div><div class="chip"><b>${eri(m)} %</b><span>ryhmänsä linjasta poikkeavia ääniä</span></div><div class="chip"><b>${m.yhteensa}</b><span>äänestystä yhteensä</span></div></div>
 <p class="meta">Jaa ${m.jaa} · Ei ${m.ei} · Tyhjää ${m.tyhja} · Poissa ${m.poissa}. Poissaolo voi johtua esimerkiksi luottamustehtävästä, sairaudesta tai virkamatkasta.</p>
@@ -213,6 +243,21 @@ ${shareBtns}${ptab}${who}`;
   put("/aanestykset/", shell({ title: "Uusimmat eduskunnan äänestykset | Eduskuntaseuranta", desc: "Eduskunnan uusimmat äänestykset ja niiden tulokset ryhmittäin.", path: "/aanestykset/",
     body: `<h1>Uusimmat äänestykset</h1>${loaded.slice(0, 500).map(v => `<a class="card" href="/aanestys/${v.id}/"><div>${esc(vtitle(v))}</div><div class="meta">${dateFi(v.alkoi)} · <span class="jaa">Jaa ${v.jaa ?? "–"}</span> · <span class="ei">Ei ${v.ei ?? "–"}</span>${v.aihe ? " · " + esc(v.aihe) : ""}</div></a>`).join("")}` }));
 
+
+  // --- Oma kansanedustaja: vaalipiirit ---
+  const vps = new Map();
+  for (const m of mps) if (m.vaalipiiri) { const k = vpName(m.vaalipiiri); if (!vps.has(k)) vps.set(k, []); vps.get(k).push(m); }
+  if (vps.size) {
+    const vpList = [...vps.entries()].sort((a, b) => a[0].localeCompare(b[0], "fi"));
+    for (const [k, ms] of vpList) {
+      const ss = ms.slice().sort((a, b) => String(a.sukunimi).localeCompare(String(b.sukunimi), "fi"));
+      put(`/vaalipiiri/${slug(k)}/`, shell({ title: `${k} vaalipiirin kansanedustajat | Eduskuntaseuranta`, desc: `${k} vaalipiirin ${ms.length} kansanedustajaa: miten he ovat äänestäneet eduskunnassa.`, path: `/vaalipiiri/${slug(k)}/`,
+        body: `<p class="meta"><a href="/oma-edustaja/">← Kaikki vaalipiirit</a></p><h1>${esc(k)} vaalipiirin kansanedustajat</h1><p class="meta">${ms.length} edustajaa. Valitse edustaja nähdäksesi hänen äänensä.</p>${ss.map(m => `<a class="card" href="/edustaja/${mpSlug.get(m.henkilo)}/"><div>${esc(full(m))}</div><div class="meta">${esc(pname(m.puolue))} · läsnä ${lasna(m)} % · poikkeaa ryhmästä ${eri(m)} %</div></a>`).join("")}` }));
+    }
+    put("/oma-edustaja/", shell({ title: "Oma kansanedustaja: löydä vaalipiirisi edustajat | Eduskuntaseuranta", desc: "Valitse vaalipiirisi ja näe alueesi kansanedustajat sekä se, miten he ovat äänestäneet.", path: "/oma-edustaja/",
+      body: `<h1>Oma kansanedustaja</h1><p>Valitse vaalipiirisi, niin näet alueesi kansanedustajat ja sen, miten he ovat äänestäneet eduskunnassa.</p><p class="meta">Vaalipiiri on yleensä oma maakuntasi. Esimerkiksi Ylivieska kuuluu Oulun vaalipiiriin. Jos et ole varma, vaalipiirin voi tarkistaa oikeusministeriön vaalit.fi-sivulta.</p>${vpList.map(([k, ms]) => `<a class="card" href="/vaalipiiri/${slug(k)}/"><div>${esc(k)} vaalipiiri</div><div class="meta">${ms.length} edustajaa</div></a>`).join("")}` }));
+  }
+
   // --- Menetelmäsivu ---
   put("/menetelma/", shell({ title: "Miten luvut lasketaan | Eduskuntaseuranta", desc: "Eduskuntaseurannan tietolähde, laskutavat ja rajoitukset.", path: "/menetelma/", body: METHOD }));
 
@@ -231,8 +276,8 @@ ${shareBtns}${ptab}${who}`;
   };
   await mkdir(OUT + "/data", { recursive: true });
   await addData("edustajat", "Kansanedustajat: äänestysten määrät, läsnäolo ja ryhmästä poikkeavat äänet",
-    ["henkilo", "etunimi", "sukunimi", "puolue", "puolue_nimi", "aanestyksia", "jaa", "ei", "tyhja", "poissa", "lasnaolo_pros", "vertailtavia", "eri_mielta", "eri_mielta_pros"],
-    mps.map(m => ({ henkilo: m.henkilo, etunimi: m.etunimi, sukunimi: m.sukunimi, puolue: m.puolue, puolue_nimi: pname(m.puolue), aanestyksia: m.yhteensa, jaa: m.jaa, ei: m.ei, tyhja: m.tyhja, poissa: m.poissa, lasnaolo_pros: lasna(m), vertailtavia: m.vertailtavia, eri_mielta: m.eri_mielta, eri_mielta_pros: eri(m) })));
+    ["henkilo", "etunimi", "sukunimi", "puolue", "puolue_nimi", "vaalipiiri", "aanestyksia", "jaa", "ei", "tyhja", "poissa", "lasnaolo_pros", "vertailtavia", "eri_mielta", "eri_mielta_pros"],
+    mps.map(m => ({ henkilo: m.henkilo, etunimi: m.etunimi, sukunimi: m.sukunimi, puolue: m.puolue, puolue_nimi: pname(m.puolue), vaalipiiri: m.vaalipiiri || "", aanestyksia: m.yhteensa, jaa: m.jaa, ei: m.ei, tyhja: m.tyhja, poissa: m.poissa, lasnaolo_pros: lasna(m), vertailtavia: m.vertailtavia, eri_mielta: m.eri_mielta, eri_mielta_pros: eri(m) })));
   await addData("aanestykset", "Eduskunnan äänestykset ja niiden kokonaistulokset",
     ["id", "vuosi", "istunto", "numero", "alkoi", "otsikko", "lisaotsikko", "jaa", "ei", "tyhja", "poissa"],
     loaded.map(v => ({ id: v.id, vuosi: v.vuosi, istunto: v.istunto, numero: v.numero, alkoi: v.alkoi, otsikko: v.otsikko, lisaotsikko: v.lisaotsikko, jaa: v.jaa, ei: v.ei, tyhja: v.tyhja, poissa: v.poissa })));
@@ -246,7 +291,7 @@ ${shareBtns}${ptab}${who}`;
   const ld = { "@context": "https://schema.org", "@type": "Dataset", name: "Eduskuntaseuranta: kansanedustajien äänestykset", description: "Suomen eduskunnan äänestysten tulokset, kansanedustajien läsnäolo ja ryhmästä poikkeavat äänet. Pohjana Eduskunnan avoin data.", url: SITE + "/data/", inLanguage: "fi", dateModified: stamp, creator: { "@type": "Organization", name: "Eduskuntaseuranta", url: SITE },
     distribution: FILES.flatMap(f => [{ "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/${f.name}.csv` }, { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: `${SITE}/data/${f.name}.json` }]) };
 
-  const COLDESC = { henkilo: "edustajan tunniste eduskunnan datassa", etunimi: "etunimi", sukunimi: "sukunimi", puolue: "eduskuntaryhmän lyhenne (esim. kok = Kokoomus, rkp = RKP). Selitykset sivun lopussa.", puolue_nimi: "eduskuntaryhmän nimi", aanestyksia: "äänestysten määrä, joihin edustajalla on merkintä", jaa: "Jaa-äänet", ei: "Ei-äänet", tyhja: "tyhjät äänet", poissa: "poissaolot", lasnaolo_pros: "läsnäolo prosentteina (ei poissa)", vertailtavia: "äänestykset, joissa ryhmällä oli selvä linja", eri_mielta: "äänet ryhmän linjaa vastaan", eri_mielta_pros: "ryhmän linjaa vastaan äänestäneet prosentteina", id: "äänestyksen tunniste", vuosi: "valtiopäivävuosi", istunto: "istunnon numero", numero: "äänestyksen numero istunnossa", alkoi: "äänestyksen alkamisaika", otsikko: "äänestyksen otsikko", lisaotsikko: "lisäotsikko", aanestys_id: "äänestyksen tunniste (id)", aani: "ääni: jaa, ei, tyhja tai poissa" };
+  const COLDESC = { henkilo: "edustajan tunniste eduskunnan datassa", etunimi: "etunimi", sukunimi: "sukunimi", puolue: "eduskuntaryhmän lyhenne (esim. kok = Kokoomus, rkp = RKP). Selitykset sivun lopussa.", puolue_nimi: "eduskuntaryhmän nimi", vaalipiiri: "edustajan vaalipiiri (Eduskunnan tietojen mukaan)", aanestyksia: "äänestysten määrä, joihin edustajalla on merkintä", jaa: "Jaa-äänet", ei: "Ei-äänet", tyhja: "tyhjät äänet", poissa: "poissaolot", lasnaolo_pros: "läsnäolo prosentteina (ei poissa)", vertailtavia: "äänestykset, joissa ryhmällä oli selvä linja", eri_mielta: "äänet ryhmän linjaa vastaan", eri_mielta_pros: "ryhmän linjaa vastaan äänestäneet prosentteina", id: "äänestyksen tunniste", vuosi: "valtiopäivävuosi", istunto: "istunnon numero", numero: "äänestyksen numero istunnossa", alkoi: "äänestyksen alkamisaika", otsikko: "äänestyksen otsikko", lisaotsikko: "lisäotsikko", aanestys_id: "äänestyksen tunniste (id)", aani: "ääni: jaa, ei, tyhja tai poissa" };
   const META = {
     edustajat: { title: "Kansanedustajat", what: "Yhteenveto jokaisesta kansanedustajasta: kuinka monessa äänestyksessä hän on ollut mukana, miten hän on äänestänyt, kuinka usein hän on ollut läsnä ja kuinka usein hän on äänestänyt eri tavalla kuin oma eduskuntaryhmänsä.", row: "Yksi rivi on yksi kansanedustaja.", use: "Esimerkiksi: kuka on aktiivisin tai poissaolevin edustaja, tai kuka äänestää useimmin ryhmänsä linjaa vastaan." },
     aanestykset: { title: "Äänestykset", what: "Kaikki eduskunnan äänestykset, jotka sivustolle on ladattu: milloin äänestys pidettiin, mistä asiasta ja mikä oli kokonaistulos.", row: "Yksi rivi on yksi äänestys.", use: "Esimerkiksi: kuinka monta äänestystä pidettiin vuonna 2025, tai mitkä äänestykset menivät niukasti (jaa- ja ei-äänet lähellä toisiaan)." },
