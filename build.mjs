@@ -15,7 +15,7 @@ const slug = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-�
 const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
 const AANI = { jaa: "Jaa", ei: "Ei", tyhja: "Tyhjää", poissa: "Poissa" };
 const PARTY = { kok: "Kokoomus", ps: "Perussuomalaiset", sd: "SDP", kesk: "Keskusta", vihr: "Vihreät", vas: "Vasemmistoliitto", rkp: "RKP", r: "RKP", kd: "Kristillisdemokraatit", liik: "Liike Nyt" };
-const pk = p => String(p ?? "").trim().toLowerCase();
+const pk = p => { const x = String(p ?? "").trim().toLowerCase(); return x === "r" ? "rkp" : x; };
 const pname = p => PARTY[pk(p)] || (pk(p) ? pk(p).toUpperCase() : "Ei ryhmää");
 const dateFi = d => (d ? new Date(d).toLocaleDateString("fi-FI", { timeZone: "Europe/Helsinki" }) : "");
 const short = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
@@ -243,7 +243,14 @@ ${shareBtns}${ptab}${who}`;
   const ld = { "@context": "https://schema.org", "@type": "Dataset", name: "Eduskuntaseuranta: kansanedustajien äänestykset", description: "Suomen eduskunnan äänestysten tulokset, kansanedustajien läsnäolo ja ryhmästä poikkeavat äänet. Pohjana Eduskunnan avoin data.", url: SITE + "/data/", inLanguage: "fi", dateModified: stamp, creator: { "@type": "Organization", name: "Eduskuntaseuranta", url: SITE },
     distribution: FILES.flatMap(f => [{ "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/${f.name}.csv` }, { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: `${SITE}/data/${f.name}.json` }]) };
 
-  const COLDESC = { henkilo: "edustajan tunniste eduskunnan datassa", etunimi: "etunimi", sukunimi: "sukunimi", puolue: "eduskuntaryhmän lyhenne", puolue_nimi: "eduskuntaryhmän nimi", aanestyksia: "äänestysten määrä, joihin edustajalla on merkintä", jaa: "Jaa-äänet", ei: "Ei-äänet", tyhja: "tyhjät äänet", poissa: "poissaolot", lasnaolo_pros: "läsnäolo prosentteina (ei poissa)", vertailtavia: "äänestykset, joissa ryhmällä oli selvä linja", eri_mielta: "äänet ryhmän linjaa vastaan", eri_mielta_pros: "ryhmän linjaa vastaan äänestäneet prosentteina", id: "äänestyksen tunniste", vuosi: "valtiopäivävuosi", istunto: "istunnon numero", numero: "äänestyksen numero istunnossa", alkoi: "äänestyksen alkamisaika", otsikko: "äänestyksen otsikko", lisaotsikko: "lisäotsikko", aanestys_id: "äänestyksen tunniste (id)", aani: "ääni: jaa, ei, tyhja tai poissa" };
+  const COLDESC = { henkilo: "edustajan tunniste eduskunnan datassa", etunimi: "etunimi", sukunimi: "sukunimi", puolue: "eduskuntaryhmän lyhenne (esim. kok = Kokoomus, rkp = RKP). Selitykset sivun lopussa.", puolue_nimi: "eduskuntaryhmän nimi", aanestyksia: "äänestysten määrä, joihin edustajalla on merkintä", jaa: "Jaa-äänet", ei: "Ei-äänet", tyhja: "tyhjät äänet", poissa: "poissaolot", lasnaolo_pros: "läsnäolo prosentteina (ei poissa)", vertailtavia: "äänestykset, joissa ryhmällä oli selvä linja", eri_mielta: "äänet ryhmän linjaa vastaan", eri_mielta_pros: "ryhmän linjaa vastaan äänestäneet prosentteina", id: "äänestyksen tunniste", vuosi: "valtiopäivävuosi", istunto: "istunnon numero", numero: "äänestyksen numero istunnossa", alkoi: "äänestyksen alkamisaika", otsikko: "äänestyksen otsikko", lisaotsikko: "lisäotsikko", aanestys_id: "äänestyksen tunniste (id)", aani: "ääni: jaa, ei, tyhja tai poissa" };
+  const META = {
+    edustajat: { title: "Kansanedustajat", what: "Yhteenveto jokaisesta kansanedustajasta: kuinka monessa äänestyksessä hän on ollut mukana, miten hän on äänestänyt, kuinka usein hän on ollut läsnä ja kuinka usein hän on äänestänyt eri tavalla kuin oma eduskuntaryhmänsä.", row: "Yksi rivi on yksi kansanedustaja.", use: "Esimerkiksi: kuka on aktiivisin tai poissaolevin edustaja, tai kuka äänestää useimmin ryhmänsä linjaa vastaan." },
+    aanestykset: { title: "Äänestykset", what: "Kaikki eduskunnan äänestykset, jotka sivustolle on ladattu: milloin äänestys pidettiin, mistä asiasta ja mikä oli kokonaistulos.", row: "Yksi rivi on yksi äänestys.", use: "Esimerkiksi: kuinka monta äänestystä pidettiin vuonna 2025, tai mitkä äänestykset menivät niukasti (jaa- ja ei-äänet lähellä toisiaan)." },
+    puolueaanet: { title: "Äänet puolueittain", what: "Jokaisessa äänestyksessä: kuinka monta jaa-, ei-, tyhjää ja poissa-ääntä kullakin eduskuntaryhmällä oli.", row: "Yksi rivi on yksi eduskuntaryhmä yhdessä äänestyksessä.", use: "Esimerkiksi: miten Kokoomus ja SDP ovat äänestäneet samoissa asioissa. Liitä äänestyksen otsikko mukaan sarakkeen aanestys_id avulla (se vastaa tiedoston Äänestykset saraketta id)." },
+    aanet: { title: "Jokaisen edustajan ääni", what: "Tarkin tieto: miten jokainen edustaja äänesti jokaisessa mukana olevassa äänestyksessä. Mukana ovat vain uusimmat äänestykset.", row: "Yksi rivi on yksi edustajan ääni yhdessä äänestyksessä.", use: "Esimerkiksi: miten tietty edustaja äänesti tietyssä asiassa. Nimen saat liittämällä sarakkeen henkilo tiedostoon Kansanedustajat, ja äänestyksen otsikon liittämällä sarakkeen aanestys_id tiedostoon Äänestykset." }
+  };
+  const PCODES = Object.entries(PARTY).filter(([k]) => k !== "r");
   const TABLE_CSS = `<style>.tw{overflow-x:auto;margin:12px -12px;padding:0 12px}.tw table{min-width:max-content}.tw td,.tw th{white-space:nowrap;padding:8px 10px}.tw td.w{white-space:normal;min-width:260px}.tw th{position:sticky;top:0;background:#111}</style>`;
   const LIMIT = 200;
   for (const f of FILES) {
@@ -251,20 +258,33 @@ ${shareBtns}${ptab}${who}`;
     const cut = shown.length < f.rows.length;
     const head = `<tr>${f.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr>`;
     const trs = shown.map(r => `<tr>${f.cols.map(c => `<td${c === "otsikko" || c === "lisaotsikko" ? ' class="w"' : ""}>${esc(r[c] ?? "")}</td>`).join("")}</tr>`).join("");
-    const body = `<p class="meta"><a href="/data/">← Data</a></p><h1>${esc(f.name)}</h1><p>${esc(f.desc)}.</p>
-<div class="share"><a class="btn" href="/data/${f.name}-excel.csv" download>Lataa CSV suomalaiseen Exceliin</a><a class="btn" href="/data/${f.name}.csv" download>Lataa CSV (Sheets, muu)</a><a class="btn" href="/data/${f.name}.json" download>Lataa JSON (ohjelmille)</a></div>
-${cut ? `<p class="note">Tässä näkyy vain ensimmäiset ${LIMIT} riviä ${f.n.toLocaleString("fi-FI")} rivistä. Koko aineisto on ladattavissa CSV- tai JSON-tiedostona.</p>` : `<p class="note">${f.n.toLocaleString("fi-FI")} riviä. Selaa taulukkoa sivusuunnassa.</p>`}
+    const M = META[f.name] || { title: f.name, what: f.desc, row: "", use: "" };
+    const ex = f.rows[0] || {};
+    const body = `<p class="meta"><a href="/data/">← Kaikki tiedostot</a></p><h1>${esc(M.title)}</h1>
+<p>${esc(M.what)}</p><p><b>${esc(M.row)}</b></p><p class="meta">${esc(M.use)}</p>
+<h2>Lataa</h2>
+<div class="share"><a class="btn" href="/data/${f.name}-excel.csv" download>Lataa Exceliin (CSV)</a><a class="btn" href="/data/${f.name}.csv" download>Lataa muuhun taulukko-ohjelmaan (CSV)</a><a class="btn" href="/data/${f.name}.json" download>Lataa ohjelmoijille (JSON)</a></div>
+<h2>Esikatselu</h2>
+${cut ? `<p class="note">Tässä näkyy vain ensimmäiset ${LIMIT} riviä ${f.n.toLocaleString("fi-FI")} rivistä. Koko aineisto on ladattavissa.</p>` : `<p class="note">${f.n.toLocaleString("fi-FI")} riviä. Selaa taulukkoa sivusuunnassa.</p>`}
 <div class="tw"><table>${head}${trs}</table></div>
-<h2>Sarakkeiden selitykset</h2><ul>${f.cols.map(c => `<li><b>${esc(c)}</b>: ${esc(COLDESC[c] || "")}</li>`).join("")}</ul>`;
-    jobs.push({ path: `/data/${f.name}/`, html: shell({ title: `${f.name} – avoin data | Eduskuntaseuranta`, desc: f.desc, path: `/data/${f.name}/`, body, head: TABLE_CSS + '<meta name="robots" content="noindex">' }) });
+<h2>Mitä sarakkeet tarkoittavat</h2><ul>${f.cols.map(c => `<li><b>${esc(c)}</b>: ${esc(COLDESC[c] || "")}${ex[c] !== undefined && ex[c] !== null && String(ex[c]).length < 40 ? ` <span class="meta">(esim. ${esc(ex[c])})</span>` : ""}</li>`).join("")}</ul>
+${f.cols.includes("puolue") ? `<h2>Puolueiden lyhenteet</h2><ul>${PCODES.map(([k, v]) => `<li><b>${k}</b> = ${esc(v)}</li>`).join("")}</ul>` : ""}`;
+    jobs.push({ path: `/data/${f.name}/`, html: shell({ title: `${M.title} – avoin data | Eduskuntaseuranta`, desc: f.desc, path: `/data/${f.name}/`, body, head: TABLE_CSS + '<meta name="robots" content="noindex">' }) });
   }
-  const dataBody = `<h1>Avoin data toimittajille, opiskelijoille ja tutkijoille</h1>
-<p>Kaikki sivuston luvut voi ladata ilmaiseksi taulukkona (CSV) tai JSON-tiedostona. Tiedostot päivittyvät automaattisesti noin kuuden tunnin välein. Viimeksi päivitetty ${dateFi(new Date())}.</p>
-<h2>Ladattavat tiedostot</h2>
-${FILES.map(f => `<div class="card"><div><b>${esc(f.name)}</b> · ${f.n.toLocaleString("fi-FI")} riviä</div><div class="meta">${esc(f.desc)}</div><div class="share"><a class="btn on" href="/data/${f.name}/">Katso taulukkona</a><a class="btn" href="/data/${f.name}-excel.csv" download>CSV (Excel)</a><a class="btn" href="/data/${f.name}.csv" download>CSV</a><a class="btn" href="/data/${f.name}.json" download>JSON</a></div><div class="meta">Sarakkeet: ${f.cols.join(", ")}</div></div>`).join("")}
-<h2>Käyttö</h2>
-<p><b>Katso taulukkona</b> avaa tiedot suoraan sivulla, ilman että mitään tarvitsee ladata. CSV on tarkoitettu taulukko-ohjelmiin ja JSON ohjelmille (puhelin näyttää JSONin raakatekstinä). </p>
-<p>CSV-tiedostot ovat UTF-8-koodattuja. Suomenkieliseen Exceliin valitse <b>CSV (Excel)</b>, joka erottaa sarakkeet puolipisteellä ja aukeaa kaksoisnapsautuksella. Muille ohjelmille (Google Sheets, LibreOffice, Python, R) sopii tavallinen pilkuilla erotettu <b>CSV</b>. JSON-tiedostot sopivat suoraan ohjelmointiin, esimerkiksi Pythonin ja R:n kautta.</p>
+  const dataBody = `<h1>Avoin data: eduskunnan äänestykset ladattavana</h1>
+<p>Täältä voit ladata sivuston tiedot ilmaiseksi taulukkona. Tiedot päivittyvät itsestään noin kuuden tunnin välein. Viimeksi päivitetty ${dateFi(new Date())}.</p>
+<h2>Näin pääset alkuun</h2>
+<ol><li>Valitse alta tiedosto, jonka haluat.</li><li>Paina <b>Katso taulukkona</b>, jos haluat vain selata tietoja. Siellä on myös selitys jokaiselle sarakkeelle.</li><li>Paina <b>Lataa Exceliin</b>, jos haluat tiedoston omalle koneellesi taulukko-ohjelmaan. (Puhelimessa tiedosto latautuu, mutta avaaminen onnistuu parhaiten tietokoneella.)</li></ol>
+<h2>Tiedostot</h2>
+${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row: "" }; return `<div class="card"><div><b>${esc(M.title)}</b> · ${f.n.toLocaleString("fi-FI")} riviä</div><div class="meta">${esc(M.what)}</div><div class="meta"><b>${esc(M.row)}</b></div><div class="share"><a class="btn on" href="/data/${f.name}/">Katso taulukkona</a><a class="btn" href="/data/${f.name}-excel.csv" download>Lataa Exceliin</a><a class="btn" href="/data/${f.name}.csv" download>CSV</a><a class="btn" href="/data/${f.name}.json" download>JSON</a></div></div>`; }).join("")}
+<h2>Mikä on CSV ja mikä JSON?</h2>
+<ul><li><b>CSV</b> on tavallinen taulukkotiedosto. Se aukeaa Excelissä, Google Sheetsissä ja LibreOfficessa. Suomalaiseen Exceliin käytä painiketta <b>Lataa Exceliin</b>.</li><li><b>JSON</b> on ohjelmoijille tarkoitettu muoto (Python, R, verkkosovellukset). Jos et ohjelmoi, älä välitä siitä.</li></ul>
+<h2>Miten tiedostot liittyvät toisiinsa</h2>
+<ul><li>Äänestyksen tunniste: <b>id</b> (tiedosto Äänestykset) = <b>aanestys_id</b> (tiedostot Äänet puolueittain ja Jokaisen edustajan ääni).</li><li>Edustajan tunniste: <b>henkilo</b> on sama tiedostoissa Kansanedustajat ja Jokaisen edustajan ääni.</li></ul>
+<h2>Esimerkkejä kysymyksistä, joihin datalla voi vastata</h2>
+<ul><li>Kuka kansanedustaja on äänestänyt useimmin oman ryhmänsä linjaa vastaan?</li><li>Miten paljon eri puolueiden edustajat ovat poissa äänestyksistä?</li><li>Mitkä äänestykset ovat menneet niukimmin?</li></ul>
+<h2>Puolueiden lyhenteet</h2>
+<ul>${PCODES.map(([k, v]) => `<li><b>${k}</b> = ${esc(v)}</li>`).join("")}</ul>
 <h2>Lähteen merkitseminen</h2>
 <p>Voit käyttää tietoja vapaasti toimituksissa, opetuksessa ja tutkimuksessa. Mainitse lähteeksi ”Eduskuntaseuranta.fi, perustuu Eduskunnan avoimeen dataan (avoindata.eduskunta.fi)” ja hakupäivä. Esimerkki: <i>Eduskuntaseuranta.fi (${dateFi(new Date())}). Kansanedustajien äänestykset. ${SITE}/data/</i></p>
 <h2>Muista</h2>
