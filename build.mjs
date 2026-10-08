@@ -14,8 +14,9 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 const slug = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
 const AANI = { jaa: "Jaa", ei: "Ei", tyhja: "Tyhjää", poissa: "Poissa" };
-const PARTY = { kok: "Kokoomus", ps: "Perussuomalaiset", sd: "SDP", kesk: "Keskusta", vihr: "Vihreät", vas: "Vasemmistoliitto", rkp: "RKP", kd: "Kristillisdemokraatit", liik: "Liike Nyt" };
-const pname = p => PARTY[String(p || "").toLowerCase()] || (p ? String(p).toUpperCase() : "Ei ryhmää");
+const PARTY = { kok: "Kokoomus", ps: "Perussuomalaiset", sd: "SDP", kesk: "Keskusta", vihr: "Vihreät", vas: "Vasemmistoliitto", rkp: "RKP", r: "RKP", kd: "Kristillisdemokraatit", liik: "Liike Nyt" };
+const pk = p => String(p ?? "").trim().toLowerCase();
+const pname = p => PARTY[pk(p)] || (pk(p) ? pk(p).toUpperCase() : "Ei ryhmää");
 const dateFi = d => (d ? new Date(d).toLocaleDateString("fi-FI", { timeZone: "Europe/Helsinki" }) : "");
 const short = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
 const vtitle = v => v.otsikko || v.lisaotsikko || "Äänestys " + v.id;
@@ -86,7 +87,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
-<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/#p">Puolueet</a><a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/menetelma/">Menetelmä</a></nav></header>
+<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/#p">Puolueet</a><a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
 <main>${body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}</body></html>`;
@@ -101,6 +102,7 @@ async function main() {
   await mkdir(OUT, { recursive: true });
 
   const mps = await all("mp_stats?select=*", "henkilo");
+  for (const m of mps) m.puolue = pk(m.puolue);
   let votings;
   try {
     votings = await all("aanestykset?select=id,vuosi,istunto,numero,alkoi,otsikko,lisaotsikko,jaa,ei,tyhja,poissa,ladattu,tiivistelma,aihe", "alkoi.desc,id.desc");
@@ -116,7 +118,7 @@ async function main() {
   try { pa = await all("puolue_aanet?select=aanestys_id,puolue,jaa,ei,tyhja,poissa", "aanestys_id,puolue"); }
   catch (e) { console.log("puolue_aanet-näkymä puuttuu, puoluetaulukot jäävät pois:", e.message); }
   const paBy = new Map();
-  for (const r of pa) { if (!paBy.has(r.aanestys_id)) paBy.set(r.aanestys_id, []); paBy.get(r.aanestys_id).push(r); }
+  for (const r of pa) { r.puolue = pk(r.puolue); if (!paBy.has(r.aanestys_id)) paBy.set(r.aanestys_id, []); paBy.get(r.aanestys_id).push(r); }
 
   // Edustajakohtaiset äänet uusimmista äänestyksistä
   const detail = loaded.slice(0, DETAIL_N);
@@ -125,6 +127,7 @@ async function main() {
   const parts = await pool(batches, 4, b => all(`aanestys_edustaja?select=aanestys_id,henkilo,etunimi,sukunimi,puolue,aani&aanestys_id=in.(${b.join(",")})`, "aanestys_id,henkilo"));
   const byV = new Map(), byMp = new Map();
   for (const rows of parts) for (const r of rows) {
+    r.puolue = pk(r.puolue);
     if (!byV.has(r.aanestys_id)) byV.set(r.aanestys_id, []);
     byV.get(r.aanestys_id).push(r);
   }
@@ -209,6 +212,45 @@ ${shareBtns}${ptab}${who}`;
 
   // --- Menetelmäsivu ---
   put("/menetelma/", shell({ title: "Miten luvut lasketaan | Eduskuntaseuranta", desc: "Eduskuntaseurannan tietolähde, laskutavat ja rajoitukset.", path: "/menetelma/", body: METHOD }));
+
+
+  // --- Avoin data: ladattavat tiedostot toimittajille, kouluille ja tutkijoille ---
+  const cell = x => { const t = x === null || x === undefined ? "" : String(x); return /[",\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const toCsv = (cols, rows) => "\uFEFF" + [cols.join(","), ...rows.map(r => cols.map(c => cell(r[c])).join(","))].join("\r\n") + "\r\n";
+  const FILES = [];
+  const addData = async (name, desc, cols, rows) => {
+    await writeFile(`${OUT}/data/${name}.csv`, toCsv(cols, rows));
+    await writeFile(`${OUT}/data/${name}.json`, JSON.stringify(rows));
+    FILES.push({ name, desc, cols, n: rows.length });
+  };
+  await mkdir(OUT + "/data", { recursive: true });
+  await addData("edustajat", "Kansanedustajat: äänestysten määrät, läsnäolo ja ryhmästä poikkeavat äänet",
+    ["henkilo", "etunimi", "sukunimi", "puolue", "puolue_nimi", "aanestyksia", "jaa", "ei", "tyhja", "poissa", "lasnaolo_pros", "vertailtavia", "eri_mielta", "eri_mielta_pros"],
+    mps.map(m => ({ henkilo: m.henkilo, etunimi: m.etunimi, sukunimi: m.sukunimi, puolue: m.puolue, puolue_nimi: pname(m.puolue), aanestyksia: m.yhteensa, jaa: m.jaa, ei: m.ei, tyhja: m.tyhja, poissa: m.poissa, lasnaolo_pros: lasna(m), vertailtavia: m.vertailtavia, eri_mielta: m.eri_mielta, eri_mielta_pros: eri(m) })));
+  await addData("aanestykset", "Eduskunnan äänestykset ja niiden kokonaistulokset",
+    ["id", "vuosi", "istunto", "numero", "alkoi", "otsikko", "lisaotsikko", "jaa", "ei", "tyhja", "poissa"],
+    loaded.map(v => ({ id: v.id, vuosi: v.vuosi, istunto: v.istunto, numero: v.numero, alkoi: v.alkoi, otsikko: v.otsikko, lisaotsikko: v.lisaotsikko, jaa: v.jaa, ei: v.ei, tyhja: v.tyhja, poissa: v.poissa })));
+  if (pa.length) await addData("puolueaanet", "Äänet puolueittain jokaisessa äänestyksessä",
+    ["aanestys_id", "puolue", "puolue_nimi", "jaa", "ei", "tyhja", "poissa"],
+    pa.map(r => ({ aanestys_id: r.aanestys_id, puolue: r.puolue, puolue_nimi: pname(r.puolue), jaa: r.jaa, ei: r.ei, tyhja: r.tyhja, poissa: r.poissa })));
+  const voteRows = [];
+  for (const v of detail) for (const r of byV.get(v.id) || []) voteRows.push({ aanestys_id: v.id, henkilo: r.henkilo, puolue: r.puolue, aani: r.aani });
+  if (voteRows.length) await addData("aanet", `Jokaisen edustajan ääni ${detail.length} uusimmassa äänestyksessä`, ["aanestys_id", "henkilo", "puolue", "aani"], voteRows);
+  const stamp = new Date().toISOString().slice(0, 10);
+  const ld = { "@context": "https://schema.org", "@type": "Dataset", name: "Eduskuntaseuranta: kansanedustajien äänestykset", description: "Suomen eduskunnan äänestysten tulokset, kansanedustajien läsnäolo ja ryhmästä poikkeavat äänet. Pohjana Eduskunnan avoin data.", url: SITE + "/data/", inLanguage: "fi", dateModified: stamp, creator: { "@type": "Organization", name: "Eduskuntaseuranta", url: SITE },
+    distribution: FILES.flatMap(f => [{ "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/${f.name}.csv` }, { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: `${SITE}/data/${f.name}.json` }]) };
+  const dataBody = `<h1>Avoin data toimittajille, opiskelijoille ja tutkijoille</h1>
+<p>Kaikki sivuston luvut voi ladata ilmaiseksi taulukkona (CSV) tai JSON-tiedostona. Tiedostot päivittyvät automaattisesti noin kuuden tunnin välein. Viimeksi päivitetty ${dateFi(new Date())}.</p>
+<h2>Ladattavat tiedostot</h2>
+${FILES.map(f => `<div class="card"><div><b>${esc(f.name)}</b> · ${f.n.toLocaleString("fi-FI")} riviä</div><div class="meta">${esc(f.desc)}</div><div class="share"><a class="btn" href="/data/${f.name}.csv" download>CSV</a><a class="btn" href="/data/${f.name}.json" download>JSON</a></div><div class="meta">Sarakkeet: ${f.cols.join(", ")}</div></div>`).join("")}
+<h2>Käyttö</h2>
+<p>CSV-tiedostot ovat UTF-8-koodattuja ja pilkulla erotettuja. Suomenkielisessä Excelissä ne aukeavat parhaiten valinnalla Data → Tekstistä/CSV:stä. Google Sheetsissä: Tiedosto → Tuo. JSON-tiedostot sopivat suoraan ohjelmointiin, esimerkiksi Pythonin ja R:n kautta.</p>
+<h2>Lähteen merkitseminen</h2>
+<p>Voit käyttää tietoja vapaasti toimituksissa, opetuksessa ja tutkimuksessa. Mainitse lähteeksi ”Eduskuntaseuranta.fi, perustuu Eduskunnan avoimeen dataan (avoindata.eduskunta.fi)” ja hakupäivä. Esimerkki: <i>Eduskuntaseuranta.fi (${dateFi(new Date())}). Kansanedustajien äänestykset. ${SITE}/data/</i></p>
+<h2>Muista</h2>
+<ul><li>Äänikohtaiset tiedot (tiedosto <b>aanet</b>) kattavat vain ${detail.length} uusinta äänestystä. Kaikkien äänestysten yhteenvedot ovat tiedostoissa <b>edustajat</b> ja <b>aanestykset</b>.</li><li>Poissaolo ei tarkoita laiskuutta: syynä voi olla sairaus, virkamatka tai ministerin tehtävät.</li><li>Laskutavat on kuvattu <a href="/menetelma/">Menetelmä-sivulla</a>. Alkuperäinen virallinen tieto on aina eduskunnan omissa palveluissa.</li></ul>
+<p class="meta">Kysymyksiä tai toiveita datasta? Kerro, mitä tietoa tarvitset, niin tarkistetaan, voiko sen lisätä.</p>`;
+  put("/data/", shell({ title: "Avoin data: kansanedustajien äänestykset CSV ja JSON | Eduskuntaseuranta", desc: "Lataa eduskunnan äänestysten ja kansanedustajien läsnäolon tiedot ilmaiseksi CSV- ja JSON-muodossa toimittajille, opiskelijoille ja tutkijoille.", path: "/data/", body: dataBody, head: `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>` }));
 
   // --- Testi: kuka äänestää kuten sinä ---
   const cand = detail.filter(v => Math.min(v.jaa || 0, v.ei || 0) >= 35 && (v.jaa || 0) + (v.ei || 0) >= 150);
