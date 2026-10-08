@@ -252,12 +252,25 @@ ${shareBtns}${ptab}${who}`;
   };
   const PCODES = Object.entries(PARTY).filter(([k]) => k !== "r");
   const TABLE_CSS = `<style>.tw{overflow-x:auto;margin:12px -12px;padding:0 12px}.tw table{min-width:max-content}.tw td,.tw th{white-space:nowrap;padding:8px 10px}.tw td.w{white-space:normal;min-width:260px}.tw th{position:sticky;top:0;background:#111}</style>`;
-  const LIMIT = 200;
+  const LIMIT = 300;
+  const CARD_CSS = `<style>.sr{width:100%;box-sizing:border-box;padding:12px 14px;margin:8px 0 12px;font-size:16px;border-radius:10px;border:1px solid #444;background:#1a1a1a;color:inherit}.rc{border:1px solid #333;border-radius:10px;padding:10px 12px;margin:8px 0}.rc .t{font-weight:600;margin-bottom:6px}.rc .g{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px}.rc .g span{color:#9aa}.rc .g b{color:inherit;font-weight:500}.hid{display:none}</style>`;
+  const TITLE = { edustajat: r => `${r.sukunimi ?? ""} ${r.etunimi ?? ""}`.trim(), aanestykset: r => r.otsikko || "(ei otsikkoa)", puolueaanet: r => `${r.puolue_nimi} · äänestys ${r.aanestys_id}`, aanet: r => `Edustaja ${r.henkilo} · äänestys ${r.aanestys_id}` };
+  const SKIP = { edustajat: ["etunimi", "sukunimi", "puolue"], aanestykset: ["otsikko"], puolueaanet: ["puolue_nimi", "aanestys_id"], aanet: ["henkilo", "aanestys_id"] };
+  const LABEL = { henkilo: "tunniste", puolue: "puolue", puolue_nimi: "puolue", aanestyksia: "äänestyksiä", jaa: "jaa", ei: "ei", tyhja: "tyhjä", poissa: "poissa", lasnaolo_pros: "läsnä %", vertailtavia: "vertailtavia", eri_mielta: "eri mieltä", eri_mielta_pros: "eri mieltä %", id: "tunniste", vuosi: "vuosi", istunto: "istunto", numero: "numero", alkoi: "päivä", lisaotsikko: "lisätieto", aani: "ääni" };
+  const fmtVal = (c, v) => c === "alkoi" ? dateFi(v) : v;
   for (const f of FILES) {
-    const shown = f.rows.length > 5000 ? f.rows.slice(0, LIMIT) : f.rows;
+    const shown = f.rows.slice(0, LIMIT);
     const cut = shown.length < f.rows.length;
-    const head = `<tr>${f.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr>`;
-    const trs = shown.map(r => `<tr>${f.cols.map(c => `<td${c === "otsikko" || c === "lisaotsikko" ? ' class="w"' : ""}>${esc(r[c] ?? "")}</td>`).join("")}</tr>`).join("");
+    const tf = TITLE[f.name] || (r => String(r[f.cols[0]] ?? ""));
+    const skip = SKIP[f.name] || [];
+    const cards = shown.map(r => {
+      const t = tf(r);
+      const g = f.cols.filter(c => !skip.includes(c) && r[c] !== null && r[c] !== undefined && r[c] !== "").map(c => `<div><span>${esc(LABEL[c] || c)}:</span> <b>${esc(fmtVal(c, r[c]))}</b></div>`).join("");
+      return `<div class="rc" data-q="${esc((t + " " + f.cols.map(c => r[c] ?? "").join(" ")).toLowerCase())}"><div class="t">${esc(t)}</div><div class="g">${g}</div></div>`;
+    }).join("");
+    const script = `<script>(function(){var i=document.getElementById("sr"),n=document.getElementById("cnt"),c=document.querySelectorAll(".rc");i.addEventListener("input",function(){var q=i.value.trim().toLowerCase(),k=0;c.forEach(function(e){var m=!q||e.getAttribute("data-q").indexOf(q)>-1;e.classList.toggle("hid",!m);if(m)k++});n.textContent=k+" riviä näkyvissä"})})();</script>`;
+    const head = "";
+    const trs = "";
     const M = META[f.name] || { title: f.name, what: f.desc, row: "", use: "" };
     const ex = f.rows[0] || {};
     const body = `<p class="meta"><a href="/data/">← Kaikki tiedostot</a></p><h1>${esc(M.title)}</h1>
@@ -265,11 +278,12 @@ ${shareBtns}${ptab}${who}`;
 <h2>Lataa</h2>
 <div class="share"><a class="btn" href="/data/${f.name}-excel.csv" download>Lataa Exceliin (CSV)</a><a class="btn" href="/data/${f.name}.csv" download>Lataa muuhun taulukko-ohjelmaan (CSV)</a><a class="btn" href="/data/${f.name}.json" download>Lataa ohjelmoijille (JSON)</a></div>
 <h2>Esikatselu</h2>
-${cut ? `<p class="note">Tässä näkyy vain ensimmäiset ${LIMIT} riviä ${f.n.toLocaleString("fi-FI")} rivistä. Koko aineisto on ladattavissa.</p>` : `<p class="note">${f.n.toLocaleString("fi-FI")} riviä. Selaa taulukkoa sivusuunnassa.</p>`}
-<div class="tw"><table>${head}${trs}</table></div>
+${cut ? `<p class="note">Tässä näkyy ${LIMIT} ensimmäistä riviä ${f.n.toLocaleString("fi-FI")} rivistä. Haku etsii vain näistä. Koko aineisto on ladattavissa painikkeista.</p>` : `<p class="note">${f.n.toLocaleString("fi-FI")} riviä.</p>`}
+<input id="sr" class="sr" type="search" placeholder="Hae esikatselusta (nimi, puolue, aihe...)"><p class="note" id="cnt">${shown.length} riviä näkyvissä</p>
+${cards}${script}
 <h2>Mitä sarakkeet tarkoittavat</h2><ul>${f.cols.map(c => `<li><b>${esc(c)}</b>: ${esc(COLDESC[c] || "")}${ex[c] !== undefined && ex[c] !== null && String(ex[c]).length < 40 ? ` <span class="meta">(esim. ${esc(ex[c])})</span>` : ""}</li>`).join("")}</ul>
 ${f.cols.includes("puolue") ? `<h2>Puolueiden lyhenteet</h2><ul>${PCODES.map(([k, v]) => `<li><b>${k}</b> = ${esc(v)}</li>`).join("")}</ul>` : ""}`;
-    jobs.push({ path: `/data/${f.name}/`, html: shell({ title: `${M.title} – avoin data | Eduskuntaseuranta`, desc: f.desc, path: `/data/${f.name}/`, body, head: TABLE_CSS + '<meta name="robots" content="noindex">' }) });
+    jobs.push({ path: `/data/${f.name}/`, html: shell({ title: `${M.title} – avoin data | Eduskuntaseuranta`, desc: f.desc, path: `/data/${f.name}/`, body, head: CARD_CSS + '<meta name="robots" content="noindex">' }) });
   }
   const dataBody = `<h1>Avoin data: eduskunnan äänestykset ladattavana</h1>
 <p>Täältä voit ladata sivuston tiedot ilmaiseksi taulukkona. Tiedot päivittyvät itsestään noin kuuden tunnin välein. Viimeksi päivitetty ${dateFi(new Date())}.</p>
