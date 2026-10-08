@@ -59,7 +59,7 @@ async function fetchVaalipiirit() {
       let j = null;
       for (let i = 0; i < 3 && !j; i++) {
         try {
-          const r = await fetch(`${base}/api/v1/tables/MemberOfParliament/rows?perPage=100&page=${page}`, { signal: AbortSignal.timeout(90000) });
+          const r = await fetch(`${base}/api/v1/tables/MemberOfParliament/rows?perPage=100&page=${page}`, { signal: AbortSignal.timeout(90000), headers: { "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Mobile Safari/537.36 Eduskuntaseuranta/1.0 (+https://eduskuntaseuranta.fi)", "Accept": "application/json", "Accept-Language": "fi-FI,fi;q=0.9" } });
           if (!r.ok) throw new Error(String(r.status));
           j = await r.json();
         } catch (e) { if (i === 2) throw e; await new Promise(s => setTimeout(s, 2000 * (i + 1))); }
