@@ -217,11 +217,14 @@ ${shareBtns}${ptab}${who}`;
   // --- Avoin data: ladattavat tiedostot toimittajille, kouluille ja tutkijoille ---
   const cell = x => { const t = x === null || x === undefined ? "" : String(x); return /[",\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
   const toCsv = (cols, rows) => "\uFEFF" + [cols.join(","), ...rows.map(r => cols.map(c => cell(r[c])).join(","))].join("\r\n") + "\r\n";
+  const cellSemi = x => { const t = x === null || x === undefined ? "" : String(x); return /[";\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const toCsvSemi = (cols, rows) => "\uFEFF" + [cols.join(";"), ...rows.map(r => cols.map(c => cellSemi(r[c])).join(";"))].join("\r\n") + "\r\n";
   const FILES = [];
   const addData = async (name, desc, cols, rows) => {
     await writeFile(`${OUT}/data/${name}.csv`, toCsv(cols, rows));
+    await writeFile(`${OUT}/data/${name}-excel.csv`, toCsvSemi(cols, rows));
     await writeFile(`${OUT}/data/${name}.json`, JSON.stringify(rows));
-    FILES.push({ name, desc, cols, n: rows.length });
+    FILES.push({ name, desc, cols, n: rows.length, rows });
   };
   await mkdir(OUT + "/data", { recursive: true });
   await addData("edustajat", "Kansanedustajat: äänestysten määrät, läsnäolo ja ryhmästä poikkeavat äänet",
@@ -239,12 +242,29 @@ ${shareBtns}${ptab}${who}`;
   const stamp = new Date().toISOString().slice(0, 10);
   const ld = { "@context": "https://schema.org", "@type": "Dataset", name: "Eduskuntaseuranta: kansanedustajien äänestykset", description: "Suomen eduskunnan äänestysten tulokset, kansanedustajien läsnäolo ja ryhmästä poikkeavat äänet. Pohjana Eduskunnan avoin data.", url: SITE + "/data/", inLanguage: "fi", dateModified: stamp, creator: { "@type": "Organization", name: "Eduskuntaseuranta", url: SITE },
     distribution: FILES.flatMap(f => [{ "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/${f.name}.csv` }, { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: `${SITE}/data/${f.name}.json` }]) };
+
+  const COLDESC = { henkilo: "edustajan tunniste eduskunnan datassa", etunimi: "etunimi", sukunimi: "sukunimi", puolue: "eduskuntaryhmän lyhenne", puolue_nimi: "eduskuntaryhmän nimi", aanestyksia: "äänestysten määrä, joihin edustajalla on merkintä", jaa: "Jaa-äänet", ei: "Ei-äänet", tyhja: "tyhjät äänet", poissa: "poissaolot", lasnaolo_pros: "läsnäolo prosentteina (ei poissa)", vertailtavia: "äänestykset, joissa ryhmällä oli selvä linja", eri_mielta: "äänet ryhmän linjaa vastaan", eri_mielta_pros: "ryhmän linjaa vastaan äänestäneet prosentteina", id: "äänestyksen tunniste", vuosi: "valtiopäivävuosi", istunto: "istunnon numero", numero: "äänestyksen numero istunnossa", alkoi: "äänestyksen alkamisaika", otsikko: "äänestyksen otsikko", lisaotsikko: "lisäotsikko", aanestys_id: "äänestyksen tunniste (id)", aani: "ääni: jaa, ei, tyhja tai poissa" };
+  const TABLE_CSS = `<style>.tw{overflow-x:auto;margin:12px -12px;padding:0 12px}.tw table{min-width:max-content}.tw td,.tw th{white-space:nowrap;padding:8px 10px}.tw td.w{white-space:normal;min-width:260px}.tw th{position:sticky;top:0;background:#111}</style>`;
+  const LIMIT = 200;
+  for (const f of FILES) {
+    const shown = f.rows.length > 5000 ? f.rows.slice(0, LIMIT) : f.rows;
+    const cut = shown.length < f.rows.length;
+    const head = `<tr>${f.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr>`;
+    const trs = shown.map(r => `<tr>${f.cols.map(c => `<td${c === "otsikko" || c === "lisaotsikko" ? ' class="w"' : ""}>${esc(r[c] ?? "")}</td>`).join("")}</tr>`).join("");
+    const body = `<p class="meta"><a href="/data/">← Data</a></p><h1>${esc(f.name)}</h1><p>${esc(f.desc)}.</p>
+<div class="share"><a class="btn" href="/data/${f.name}-excel.csv" download>Lataa CSV suomalaiseen Exceliin</a><a class="btn" href="/data/${f.name}.csv" download>Lataa CSV (Sheets, muu)</a><a class="btn" href="/data/${f.name}.json" download>Lataa JSON (ohjelmille)</a></div>
+${cut ? `<p class="note">Tässä näkyy vain ensimmäiset ${LIMIT} riviä ${f.n.toLocaleString("fi-FI")} rivistä. Koko aineisto on ladattavissa CSV- tai JSON-tiedostona.</p>` : `<p class="note">${f.n.toLocaleString("fi-FI")} riviä. Selaa taulukkoa sivusuunnassa.</p>`}
+<div class="tw"><table>${head}${trs}</table></div>
+<h2>Sarakkeiden selitykset</h2><ul>${f.cols.map(c => `<li><b>${esc(c)}</b>: ${esc(COLDESC[c] || "")}</li>`).join("")}</ul>`;
+    jobs.push({ path: `/data/${f.name}/`, html: shell({ title: `${f.name} – avoin data | Eduskuntaseuranta`, desc: f.desc, path: `/data/${f.name}/`, body, head: TABLE_CSS + '<meta name="robots" content="noindex">' }) });
+  }
   const dataBody = `<h1>Avoin data toimittajille, opiskelijoille ja tutkijoille</h1>
 <p>Kaikki sivuston luvut voi ladata ilmaiseksi taulukkona (CSV) tai JSON-tiedostona. Tiedostot päivittyvät automaattisesti noin kuuden tunnin välein. Viimeksi päivitetty ${dateFi(new Date())}.</p>
 <h2>Ladattavat tiedostot</h2>
-${FILES.map(f => `<div class="card"><div><b>${esc(f.name)}</b> · ${f.n.toLocaleString("fi-FI")} riviä</div><div class="meta">${esc(f.desc)}</div><div class="share"><a class="btn" href="/data/${f.name}.csv" download>CSV</a><a class="btn" href="/data/${f.name}.json" download>JSON</a></div><div class="meta">Sarakkeet: ${f.cols.join(", ")}</div></div>`).join("")}
+${FILES.map(f => `<div class="card"><div><b>${esc(f.name)}</b> · ${f.n.toLocaleString("fi-FI")} riviä</div><div class="meta">${esc(f.desc)}</div><div class="share"><a class="btn on" href="/data/${f.name}/">Katso taulukkona</a><a class="btn" href="/data/${f.name}-excel.csv" download>CSV (Excel)</a><a class="btn" href="/data/${f.name}.csv" download>CSV</a><a class="btn" href="/data/${f.name}.json" download>JSON</a></div><div class="meta">Sarakkeet: ${f.cols.join(", ")}</div></div>`).join("")}
 <h2>Käyttö</h2>
-<p>CSV-tiedostot ovat UTF-8-koodattuja ja pilkulla erotettuja. Suomenkielisessä Excelissä ne aukeavat parhaiten valinnalla Data → Tekstistä/CSV:stä. Google Sheetsissä: Tiedosto → Tuo. JSON-tiedostot sopivat suoraan ohjelmointiin, esimerkiksi Pythonin ja R:n kautta.</p>
+<p><b>Katso taulukkona</b> avaa tiedot suoraan sivulla, ilman että mitään tarvitsee ladata. CSV on tarkoitettu taulukko-ohjelmiin ja JSON ohjelmille (puhelin näyttää JSONin raakatekstinä). </p>
+<p>CSV-tiedostot ovat UTF-8-koodattuja. Suomenkieliseen Exceliin valitse <b>CSV (Excel)</b>, joka erottaa sarakkeet puolipisteellä ja aukeaa kaksoisnapsautuksella. Muille ohjelmille (Google Sheets, LibreOffice, Python, R) sopii tavallinen pilkuilla erotettu <b>CSV</b>. JSON-tiedostot sopivat suoraan ohjelmointiin, esimerkiksi Pythonin ja R:n kautta.</p>
 <h2>Lähteen merkitseminen</h2>
 <p>Voit käyttää tietoja vapaasti toimituksissa, opetuksessa ja tutkimuksessa. Mainitse lähteeksi ”Eduskuntaseuranta.fi, perustuu Eduskunnan avoimeen dataan (avoindata.eduskunta.fi)” ja hakupäivä. Esimerkki: <i>Eduskuntaseuranta.fi (${dateFi(new Date())}). Kansanedustajien äänestykset. ${SITE}/data/</i></p>
 <h2>Muista</h2>
