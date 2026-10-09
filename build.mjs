@@ -2,6 +2,7 @@
 // Ajetaan GitHub Actionsissa (ks. .github/workflows/build.yml). Tulos kirjoitetaan kansioon dist/.
 import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS } from "./budget.mjs";
 
 const SB = process.env.SUPABASE_URL || "https://arwenhbwzoavbonlwkdr.supabase.co";
 const KEY = process.env.SUPABASE_KEY || "sb_publishable_7baeuteHYaarCEv4-j8C_g_OLxcKzJp";
@@ -30,6 +31,29 @@ function voteMeaning(v) {
   }
   return out.jaa || out.ei ? out : null;
 }
+
+// ---------- Aiheet (avainsanasäännöt otsikosta; tekoälyn antama aihe käytetään, jos se on olemassa) ----------
+const TOPICS = [
+  { name: "Maahanmuutto ja kansalaisuus", re: /maahanmuut|ulkomaalais|kansalaisuus|turvapaikka|oleskelu|pakolai|kotouttam/, info: "Maahanmuuttoon, oleskelulupiin, turvapaikkaan ja kansalaisuuteen liittyvät äänestykset." },
+  { name: "Ulkoasiat ja EU", re: /euroopan|\beu\b|eu:n|ulkoasi|ukrain|kehitysyhteistyö|kansainväli|pakote|sopimuksen hyväksymi/, info: "Suhteet muihin maihin, EU-asiat ja kansainväliset sopimukset." },
+  { name: "Turvallisuus ja puolustus", re: /puolustus|sotilas|rajavartio|poliisi|turvallisuus|kriisi|valmius|asevelvoll|pelastus|vakoilu|terror|maanpuolustus|aseet|ampuma/, info: "Puolustus, poliisi, rajaturvallisuus ja varautuminen kriiseihin." },
+  { name: "Sosiaali- ja terveysasiat", re: /sosiaali|terveys|hyvinvointialue|sairaan|lääke|potilas|eläke|toimeentulo|vammais|päihde|lastensuojelu|hoiva|työttömyysturva|asumistuki|\bkela|etuus/, info: "Sosiaaliturva, terveydenhuolto, hyvinvointialueet, eläkkeet ja etuudet." },
+  { name: "Koulutus ja tiede", re: /koulu|opetus|oppivelvoll|yliopisto|ammattikorkea|varhaiskasvatus|opintotuki|tutkimus|korkeakoulu|oppilaitos|kulttuuri|taide|urheilu|liikunta/, info: "Koulutus, tutkimus, kulttuuri ja liikunta." },
+  { name: "Asuminen ja ympäristö", re: /asum|asunto|vuokra|ympäristö|ilmasto|energia|luonto|päästö|kaava|rakennus|maankäyttö|jäte|ydin|sähkö|vesi/, info: "Asuminen, rakentaminen, ympäristö, ilmasto ja energia." },
+  { name: "Liikenne ja viestintä", re: /liikenne|\brata|raide|ajoneuvo|ajokortti|satama|viestintä|tietoliikenne|posti|lentoasema|lento/, info: "Tiet, raiteet, ajoneuvot ja viestintäverkot." },
+  { name: "Maatalous, metsät ja eläimet", re: /maatalous|maa- ja metsä|metsä|eläin|kiss[aoi]|koira|koiri|kalastus|metsästys|riista|maaseutu|elintarvike|\bporo/, info: "Maatalous, metsät, kalastus, metsästys ja eläinten pito." },
+  { name: "Työ ja elinkeinot", re: /\btyö|työ(?:sopimus|lain)|elinkeino|yritys|yrittäj|kilpailu|matkailu|palkka|lomautus|irtisano|kauppa/, info: "Työelämä, yritykset ja elinkeinoelämän säännöt." },
+  { name: "Talous ja verot", re: /vero|talousarvio|budjetti|valtion|tulo|vakuutus|rahoitus|velka|pankki|arvonlisä|korko|kehys|lisätalous/, info: "Verot, valtion talousarvio ja julkinen talous." },
+  { name: "Oikeus ja hallinto", re: /rikos|oikeus|rangaistus|tuomio|vankeus|hallinto|kunta|vaali|perustuslaki|tietosuoja|kielilaki|julkisuus|laki/, info: "Rikos- ja oikeusasiat, hallinto, kunnat ja vaalit." },
+  { name: "Muut aiheet", re: /$^/, info: "Äänestykset, joiden aihetta ei voitu päätellä otsikosta." },
+];
+const TOPIC_ALIAS = { "Maatalous ja metsät": "Maatalous, metsät ja eläimet", "Työ ja elinkeinot": "Työ ja elinkeinot", "Muu": "Muut aiheet" };
+const topicOf = v => {
+  if (v.aihe) { const n = TOPIC_ALIAS[v.aihe] || v.aihe; const t = TOPICS.find(x => x.name === n); if (t) return t; }
+  const txt = ((v.otsikko || "") + " " + (v.lisaotsikko || "")).toLowerCase();
+  return TOPICS.find(t => t.re.test(txt)) || TOPICS[TOPICS.length - 1];
+};
+const tslug = t => slug(t.name);
 const lc1 = x => x.charAt(0).toLowerCase() + x.slice(1);
 
 // ---------- Datan haku ----------
@@ -111,10 +135,20 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
-<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/viikko/">Viikkokatsaus</a><a href="/tilaa/">Tilaa</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
+<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/aiheet/">Aiheet</a><a href="/budjetti/">Budjetti</a><a href="/haku/">Kysy</a><a href="/viikko/">Viikkokatsaus</a><a href="/tilaa/">Tilaa</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
 <main>${body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
+}
+
+// Asiakirjatunnukset (HE 123/2026, VaVM 5/2026 ...) otsikosta -> linkit Eduskunnan omille sivuille
+function docLinks(v) {
+  const txt = `${v.otsikko || ""} ${v.lisaotsikko || ""}`;
+  const codes = [...new Set([...txt.matchAll(/\b(HE|KA|VNS|VNK|LA|TAA|KK|EV|HaVM|VaVM|StVM|TyVM|SiVM|LaVM|PuVM|UaVM|YmVM|MmVM|PeVM|TaVM|TrVM|SuVM|LiVM|SoVM|PeVL|VaVM)\s+(\d{1,3})\/(20\d\d)\b/g)].map(m => `${m[1]} ${m[2]}/${m[3]}`))];
+  const he = codes.filter(c => c.startsWith("HE "));
+  const items = he.map(c => `<a href="https://www.eduskunta.fi/FI/Vaski/KasittelytiedotValtiopaivaasia/Sivut/${c.replace(" ", "_").replace("/", "+")}.aspx" rel="noopener">${esc(c)} – hallituksen esitys ja käsittelytiedot (Eduskunta)</a>`);
+  const others = codes.filter(c => !c.startsWith("HE "));
+  return `<div class="note"><b>Lähteet ja asiakirjat</b><br>${items.join("<br>")}${items.length && others.length ? "<br>" : ""}${others.length ? "Mainitut asiakirjat: " + esc(others.join(", ")) + "<br>" : ""}${items.length || others.length ? "" : "Tämän äänestyksen otsikossa ei ole asiakirjatunnusta. "}<a href="https://www.eduskunta.fi/FI/valtiopaivaasiakirjat/Sivut/default.aspx" rel="noopener">Hae asiakirjoja Eduskunnan sivuilta</a> · <a href="/valtioneuvosto/">Valtioneuvoston tiedot</a></div>`;
 }
 const shareBtns = `<div class="share"><button data-share>Jaa tämä sivu</button></div>`;
 const voteTag = a => `<span class="${a}">${AANI[a] || a}</span>`;
@@ -217,9 +251,9 @@ ${shareBtns}
       }).join("");
     }
     const ai = v.tiivistelma ? `<div class="ai"><b>Selkokielellä:</b> ${esc(v.tiivistelma)}<small>Tekoälyn tekemä selitys äänestyksen otsikosta – voi sisältää virheitä. Virallinen otsikko on yllä.</small></div>` : "";
-    const body = `<div class="meta">Äänestys ${dateFi(v.alkoi)}${v.aihe ? " · " + esc(v.aihe) : ""}</div><h1>${esc(t)}</h1>
+    const body = `<div class="meta">Äänestys ${dateFi(v.alkoi)} · <a href="/aihe/${tslug(topicOf(v))}/">${esc(topicOf(v).name)}</a></div><h1>${esc(t)}</h1>
 ${v.lisaotsikko && v.lisaotsikko !== v.otsikko ? `<p class="meta">${esc(v.lisaotsikko)}</p>` : ""}${ai}
-${meaningBox(v)}
+${meaningBox(v)}${docLinks(v)}
 <div class="chips"><div class="chip"><b class="jaa">${v.jaa ?? "–"}</b><span>Jaa</span></div><div class="chip"><b class="ei">${v.ei ?? "–"}</b><span>Ei</span></div><div class="chip"><b class="tyhja">${v.tyhja ?? "–"}</b><span>Tyhjää</span></div><div class="chip"><b class="poissa">${v.poissa ?? "–"}</b><span>Poissa</span></div></div>
 ${shareBtns}${ptab}${who}`;
     put(`/aanestys/${v.id}/`, shell({
@@ -248,6 +282,23 @@ ${shareBtns}${ptab}${who}`;
   put("/aanestykset/", shell({ title: "Uusimmat eduskunnan äänestykset | Eduskuntaseuranta", desc: "Eduskunnan uusimmat äänestykset ja niiden tulokset ryhmittäin.", path: "/aanestykset/",
     body: `<h1>Uusimmat äänestykset</h1>${loaded.slice(0, 500).map(v => `<a class="card" href="/aanestys/${v.id}/"><div>${esc(vtitle(v))}</div><div class="meta">${dateFi(v.alkoi)} · <span class="jaa">Jaa ${v.jaa ?? "–"}</span> · <span class="ei">Ei ${v.ei ?? "–"}</span>${v.aihe ? " · " + esc(v.aihe) : ""}</div></a>`).join("")}` }));
 
+
+  // --- Aiheet ---
+  {
+    const groupsT = new Map(TOPICS.map(t => [t.name, []]));
+    for (const v of loaded) groupsT.get(topicOf(v).name).push(v);
+    const shown = TOPICS.filter(t => groupsT.get(t.name).length);
+    put("/aiheet/", shell({ title: "Eduskunnan äänestysten aiheet | Eduskuntaseuranta", desc: "Selaa eduskunnan äänestyksiä aiheittain: maahanmuutto, talous, terveys, koulutus, ympäristö ja muut.", path: "/aiheet/",
+      body: `<h1>Aiheet</h1><p class="meta">Valitse aihe ja näe sen äänestykset. Aihe on arvioitu äänestyksen otsikon avainsanoista, joten se voi joskus olla epätarkka.</p>${shown.map(t => `<a class="card" href="/aihe/${tslug(t)}/"><div><b>${esc(t.name)}</b> · ${groupsT.get(t.name).length} äänestystä</div><div class="meta">${esc(t.info)}</div></a>`).join("")}` }));
+    for (const t of shown) {
+      const vs = groupsT.get(t.name);
+      const close = vs.filter(v => (v.jaa || 0) + (v.ei || 0) >= 100).map(v => ({ v, m: Math.abs((v.jaa || 0) - (v.ei || 0)) })).sort((a, b) => a.m - b.m).slice(0, 3);
+      const closeBox = close.length ? `<h2>Niukimmat äänestykset</h2>${close.map(x => `<a class="card" href="/aanestys/${x.v.id}/"><div>${esc(short(vtitle(x.v), 160))}</div><div class="meta">${dateFi(x.v.alkoi)} · Jaa ${x.v.jaa} · Ei ${x.v.ei} (ero ${x.m} ääntä)</div></a>`).join("")}` : "";
+      const list = vs.slice(0, 300).map(v => { const mn = voteMeaning(v); return `<a class="card" href="/aanestys/${v.id}/"><div>${esc(short(vtitle(v), 200))}</div><div class="meta">${dateFi(v.alkoi)} · <span class="jaa">Jaa ${v.jaa ?? "–"}</span> · <span class="ei">Ei ${v.ei ?? "–"}</span></div>${mn ? `<div class="meta">${esc([mn.jaa ? "Jaa = " + mn.jaa : "", mn.ei ? "Ei = " + mn.ei : ""].filter(Boolean).join(" · "))}</div>` : ""}</a>`; }).join("");
+      put(`/aihe/${tslug(t)}/`, shell({ title: `${t.name}: eduskunnan äänestykset | Eduskuntaseuranta`, desc: `${t.info} ${vs.length} äänestystä Eduskuntaseurannassa.`, path: `/aihe/${tslug(t)}/`,
+        body: `<p class="meta"><a href="/aiheet/">← Kaikki aiheet</a></p><h1>${esc(t.name)}</h1><p>${esc(t.info)}</p><p class="meta">${vs.length} äänestystä. Aihe on arvioitu otsikon avainsanoista, joten se voi olla epätarkka. Huom. Jaa tai Ei ei aina tarkoita otsikon asian kannattamista: katso kunkin äänestyksen sivulta, mitä vaihtoehdot tarkoittavat.</p>${shareBtns}${closeBox}<h2>Äänestykset${vs.length > 300 ? " (300 uusinta)" : ""}</h2>${list}` }));
+    }
+  }
 
   // --- Oma kansanedustaja: vaalipiirit ---
   const vps = new Map();
@@ -362,6 +413,55 @@ ${topAbs.length ? `<h2>Eniten poissaoloja</h2><p class="meta">Poissaolo ei kerro
     await mkdir(OUT + "/viikko", { recursive: true });
     const rssItems = an.slice(0, 20).map(a => `<item><title>${esc(`Eduskunnan viikko ${a.w.week}/${a.w.year}`)}</title><link>${SITE}/viikko/${a.w.key}/</link><guid>${SITE}/viikko/${a.w.key}/</guid><pubDate>${new Date(a.vs[0].alkoi).toUTCString()}</pubDate><description>${esc((a.tulk && a.tulk.kappaleet ? a.tulk.kappaleet.filter(k => !String(k).startsWith("## ")).join(" ") : a.lines.join(" ")))}</description></item>`).join("");
     await writeFile(OUT + "/viikko/rss.xml", `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Eduskuntaseuranta: viikkokatsaus</title><link>${SITE}/viikko/</link><description>Eduskunnan viikon äänestykset ja koneellinen tulkinta</description><language>fi</language>${rssItems}</channel></rss>`);
+  }
+
+
+  // --- Budjetti, Valtioneuvosto, Kysy ---
+  {
+    const srcLink = k => `<a href="${SRC[k].url}" rel="noopener">${esc(SRC[k].label)}</a>`;
+    const tbl = (rows, h = ["Asia", "Luku", "Huomio"]) => `<div class="tw"><table><tr>${h.map(x => `<th>${x}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((c, i) => `<td${i === 1 ? ' style="white-space:nowrap"' : ""}>${esc(c)}</td>`).join("")}</tr>`).join("")}</table></div>`;
+    const stageNote = `<p class="note">Kaikki luvut ovat hallituksen ja valtiovarainministeriön omia tietoja niiden tiedotteista. Lyhyet selitykset ovat hallituksen oma sanamuoto tiivistettynä, eivät Eduskuntaseurannan arvio. Aikajanalla on kerrottu, minkä vaiheen tieto on kyseessä, koska luvut muuttuvat vaiheesta toiseen.</p>`;
+    const tl = `<div class="tw"><table><tr><th>Milloin</th><th>Vaihe</th><th>Huomio</th></tr>${TIMELINE.map(x => `<tr><td style="white-space:nowrap"><b>${esc(x.d)}</b></td><td>${esc(x.t)}</td><td>${esc(x.n)}${x.s ? ` <small>(<a href="${SRC[x.s].url}" rel="noopener">lähde</a>)</small>` : ""}</td></tr>`).join("")}</table></div>`;
+    const partyCards = PARTIES.map(p => `<div class="card" style="display:block"><b>${esc(p.n)}</b><div class="meta">Vuoden 2027 vaihtoehtobudjettia ei ole vielä julkaistu. Uusimmat löydetyt asiakirjat:</div>${p.links.map(l => `<div><a href="${l.u}" rel="noopener">${esc(l.t)}</a></div>`).join("")}</div>`).join("");
+    const partyLists = PARTIES.map(p => `<h3>${esc(p.n)}</h3>${tbl([["Leikkaukset ja säästöt", "–", "Lisätään, kun puolueen 2027-vaihtoehto on julkaistu"], ["Veronkorotukset", "–", "Lisätään, kun puolueen 2027-vaihtoehto on julkaistu"], ["Verojen kevennykset", "–", "Lisätään, kun puolueen 2027-vaihtoehto on julkaistu"]])}`).join("");
+    put("/budjetti/", shell({ head: "<style>.tw{overflow-x:auto;margin:8px 0}.tw td,.tw th{padding:8px;vertical-align:top;text-align:left}.tw td{border-top:1px solid #2a2a2a}</style>", title: "Valtion budjetti 2027: hallituksen esitys ja opposition vaihtoehdot | Eduskuntaseuranta", desc: "Valtion budjettiesitys 2027 selkeästi: aikajana, verot, leikkaukset ja lisäykset lähteineen. Opposition vaihtoehdot samassa muodossa, kun ne julkaistaan.", path: "/budjetti/",
+      body: `<h1>Valtion budjetti 2027</h1><p>Tähän on koottu hallituksen budjettiesitys ja myöhemmin opposition vaihtoehdot samassa muodossa, jotta niitä voi verrata. Jokaisella luvulla on lähde.</p>
+<div class="chips"><a class="chip" href="#aikajana"><b>1</b><span>Aikajana</span></a><a class="chip" href="#esitys"><b>2</b><span>Hallituksen esitys</span></a><a class="chip" href="#verot"><b>3</b><span>Verot</span></a><a class="chip" href="#leikkaukset"><b>4</b><span>Leikkaukset</span></a><a class="chip" href="#oppositio"><b>5</b><span>Oppositio</span></a></div>${stageNote}${shareBtns}
+<h2 id="aikajana">1. Missä vaiheessa budjetti on?</h2>${tl}
+<h2 id="esitys">2. Hallituksen esitys: keskeiset luvut</h2><p class="meta">Lähde: ${srcLink("vn")}. Valtiovarainministeriön ehdotus 6.8.2026: menot 92,2 mrd €, alijäämä 12,9 mrd € (${srcLink("vm")}).</p>${tbl(BGOV.kehys)}
+<h2 id="verot">3. Verot: korotukset, kevennykset ja toteutumatta jäävät</h2><h3>Veronkorotukset ja verotuloja lisäävät muutokset</h3>${tbl(BGOV.tax.up)}<h3>Verojen kevennykset</h3>${tbl(BGOV.tax.down)}<h3>Hallituksen mukaan toteutumatta</h3><ul>${BGOV.tax.notDone.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+<h2 id="leikkaukset">4. Leikkaukset ja lisäykset</h2><h3>Leikkaukset ja säästöt</h3>${tbl(BGOV.cuts)}<h3>Lisäykset ja panostukset (poimintoja)</h3>${tbl(BGOV.plus)}<p class="note">Lista on poiminta hallituksen tiedotteesta, ei koko budjetti. Koko talousarvioesitys julkaistaan 21.9. osoitteessa <a href="https://budjetti.vm.fi" rel="noopener">budjetti.vm.fi</a>.</p>
+<h2 id="oppositio">5. Opposition vaihtoehdot</h2><p>Oppositiopuolueet esittävät vaihtoehtonsa talousarvioaloitteina ja vaihtoehtobudjetteina. Vuoden 2027 versioita ei ole vielä julkaistu: viime vuonna ne tulivat marraskuussa. Kun ne julkaistaan, luvut lisätään tähän samassa muodossa kuin hallituksen esitys. Virallinen lähde ovat Eduskunnan <a href="https://www.eduskunta.fi/FI/valtiopaivaasiakirjat/Sivut/default.aspx" rel="noopener">talousarvioaloitteet (KA)</a>.</p>${partyCards}
+<h3 style="margin-top:20px">Leikkaus- ja veronkorotuslistat puolueittain</h3><p class="meta">Sama kolmen rivin muoto jokaiselle puolueelle. Hallituspuolueiden (Kok, PS, RKP, KD) linja on yllä oleva hallituksen esitys.</p>${partyLists}
+<p class="note">Lähteet: ${srcLink("vn")} · ${srcLink("vm")} · ${srcLink("edBudjetti")}. Tämä sivu ei ota kantaa budjetin sisältöön.</p>` }));
+
+    const VN = [
+      ["Valtioneuvosto: tiedotteet ja päätökset", "https://valtioneuvosto.fi/tiedotteet", "Hallituksen ja ministeriöiden virallinen tiedotus."],
+      ["Budjetti (valtiovarainministeriö)", "https://budjetti.vm.fi", "Valtion talousarvioesitys ja budjetin luvut."],
+      ["Hankeikkuna", "https://valtioneuvosto.fi/hankkeet", "Valtioneuvoston hankkeet ja lainvalmistelu."],
+      ["Lausuntopalvelu.fi", "https://www.lausuntopalvelu.fi", "Lakiluonnokset ja niistä annetut lausunnot."],
+      ["Eduskunta: valtiopäiväasiakirjat", "https://www.eduskunta.fi/FI/valtiopaivaasiakirjat/Sivut/default.aspx", "Hallituksen esitykset (HE), valiokuntien mietinnöt ja aloitteet."],
+      ["Finlex", "https://www.finlex.fi", "Voimassa oleva lainsäädäntö."],
+    ];
+    put("/valtioneuvosto/", shell({ title: "Valtioneuvoston julkiset tiedot ja asiakirjat | Eduskuntaseuranta", desc: "Mistä löytyvät hallituksen esitykset, budjetti, lakiluonnokset ja lausunnot: selkeä lista virallisista lähteistä.", path: "/valtioneuvosto/",
+      body: `<h1>Valtioneuvoston julkiset tiedot</h1><p>Virallisista lähteistä oikeat paikat yhdessä listassa. Eduskuntaseuranta ei kopioi asiakirjoja, vaan linkittää alkuperäisiin.</p>${VN.map(x => `<a class="card" href="${x[1]}" rel="noopener"><div><b>${esc(x[0])}</b></div><div class="meta">${esc(x[2])}</div></a>`).join("")}<h2>Ajankohtaista</h2><a class="card" href="/budjetti/"><div><b>Valtion budjetti 2027</b></div><div class="meta">Hallituksen esitys, verot, leikkaukset ja opposition vaihtoehdot</div></a>` }));
+
+    const SEARCH_URL = `${SB}/functions/v1/haku`;
+    put("/haku/", shell({ title: "Kysy eduskunnasta ja budjetista | Eduskuntaseuranta", desc: "Kysy mitä tahansa eduskunnan äänestyksistä tai valtion budjetista. Vastaus perustuu vain sivuston tietoihin ja kertoo lähteet.", path: "/haku/",
+      body: `<h1>Kysy eduskunnasta ja budjetista</h1><p>Kirjoita kysymys, esimerkiksi ”Mitä budjetti 2027 tekee veroille?” tai ”Milloin eduskunta äänesti kissoista?”. Tekoäly vastaa vain Eduskuntaseurannan omien tietojen perusteella ja näyttää lähteet. Se voi erehtyä, joten tarkista tärkeät asiat lähteestä.</p>
+<form id="qf"><input id="q" type="search" maxlength="300" placeholder="Kirjoita kysymys" style="width:100%;padding:12px 14px;font-size:16px;border-radius:10px;border:1px solid #444;background:#1a1a1a;color:inherit;margin:8px 0"><button type="submit" id="qb" style="padding:12px 18px;font-size:16px;border-radius:10px;border:0;background:#3b6fd4;color:#fff">Kysy</button></form><div id="ans" aria-live="polite" style="margin-top:16px"></div>
+<p class="note">Vastaus on tekoälyn tekemä. Se käyttää vain tämän sivuston äänestystietoja ja budjettitietoja. Kysymyksiä ei tallenneta henkilöihin yhdistettynä.</p>
+<script>(function(){var f=document.getElementById("qf"),q=document.getElementById("q"),b=document.getElementById("qb"),a=document.getElementById("ans");
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+f.addEventListener("submit",function(e){e.preventDefault();var v=q.value.trim();if(v.length<3){a.textContent="Kirjoita kysymys.";return}
+b.disabled=true;a.textContent="Haetaan…";
+fetch(${JSON.stringify(SEARCH_URL)},{method:"POST",headers:{"Content-Type":"application/json",apikey:${JSON.stringify(KEY)},Authorization:"Bearer "+${JSON.stringify(KEY)}},body:JSON.stringify({q:v})}).then(function(r){return r.json()}).then(function(j){b.disabled=false;
+if(j.virhe){a.innerHTML='<div class="ai">'+esc(j.virhe)+'</div>';return}
+var h='<div class="ai"><b>Vastaus</b><div style="white-space:pre-wrap;margin-top:6px">'+esc(j.vastaus||"")+'</div><small>Tekoälyn tekemä vastaus sivuston tietojen perusteella – voi sisältää virheitä.</small></div>';
+if(j.lahteet&&j.lahteet.length){h+='<h2>Lähteet</h2>'+j.lahteet.map(function(s){return'<a class="card" href="'+esc(s.url)+'"><div>'+esc(s.otsikko)+'</div></a>'}).join("")}
+a.innerHTML=h}).catch(function(){b.disabled=false;a.textContent="Haku ei onnistunut juuri nyt. Yritä myöhemmin uudelleen."})})})()</script>` }));
+    await mkdir(OUT, { recursive: true });
+    await writeFile(OUT + "/budjetti-data.json", JSON.stringify(AI_FACTS()));
   }
 
   put("/tilaa/", shell({ title: "Tilaa viikkokatsaus sähköpostiin | Eduskuntaseuranta", desc: "Tilaa eduskunnan viikon äänestykset ja tulkinta ilmaiseksi sähköpostiisi.", path: "/tilaa/", head: SUB_HEAD, body: `<h1>Tilaa viikkokatsaus</h1><p>Kerran viikossa sähköpostiisi: mitä eduskunnassa äänestettiin, miten puolueet jakautuivat ja mitä tuloksista voi päätellä. Ilmainen.</p>${SUB_FORM}${SUB_JS}<p class="note">Tilaus tallentaa vain sähköpostiosoitteesi viikkokatsauksen lähettämistä varten. Jokaisessa viestissä on peruutuslinkki. Osoitetta ei luovuteta eteenpäin. Viestit lähetetään Brevo-palvelun kautta (EU).</p>` }));
@@ -494,6 +594,7 @@ const METHOD = `<h1>Miten luvut lasketaan</h1>
 <h2>Läsnäolo</h2><p>Läsnäolo on niiden äänestysten osuus, joissa edustajan ääni oli jotain muuta kuin ”Poissa”. Poissaolo ei kerro laiskuudesta: syynä voi olla esimerkiksi sairaus, virkamatka, eduskunnan edustustehtävä tai ministerin tehtävät. Luku ei myöskään mittaa edustajan kokonaistyötä, koska suurin osa työstä tehdään valiokunnissa ja vaalipiirissä.</p>
 <h2>Ryhmänsä linjasta poikkeava ääni</h2><p>Ryhmän ”linja” on äänestyksessä se vaihtoehto, Jaa tai Ei, jota useampi ryhmän edustaja äänesti. Edustajan ääni lasketaan poikkeavaksi, kun hän äänesti Jaa tai Ei toisin kuin ryhmän enemmistö. Tasatilanteita ei lasketa mukaan, eikä myöskään Tyhjää- tai Poissa-ääniä. Pienessä ryhmässä yksittäinen ääni vaikuttaa linjaan paljon. Poikkeaminen ei ole itsessään hyvä tai huono asia.</p>
 <h2>Mitä Jaa ja Ei tarkoittavat</h2><p>Eduskunnan äänestyksen otsikko kertoo yleensä asian aiheen, ei sitä, mitä Jaa tai Ei tarkoittaa. Usein äänestetään valiokunnan mietinnöstä tai vastaehdotuksesta: esimerkiksi kansalaisaloitteessa Jaa voi tarkoittaa mietinnön kannattamista eli aloitteen hylkäämistä. Kun eduskunnan lisäotsikko kertoo vaihtoehtojen merkityksen, näytämme sen jokaisen äänestyksen sivulla.</p>
+<h2>Aiheet</h2><p>Äänestys sijoitetaan aiheeseen otsikon ja lisäotsikon avainsanojen perusteella (esimerkiksi sana "vero" vie aiheeseen Talous ja verot). Jos äänestykselle on tekoälyn antama aihe, käytetään sitä. Luokittelu on karkea eikä aina osu oikeaan, ja yksi äänestys kuuluu vain yhteen aiheeseen.</p>
 <h2>Tekoälyn tekemät selitykset</h2><p>Osalle äänestyksistä on tehty lyhyt selkokielinen selitys tekoälyn avulla. Selitys perustuu eduskunnan antamaan otsikkoon, ja se on aina merkitty tekoälyn tekemäksi. Se voi sisältää virheitä, joten virallinen otsikko on aina näkyvissä sen yläpuolella.</p>
 <h2>Testi ”Kuka äänestää kuten sinä?”</h2><p>Testi valitsee uusimmista äänestyksistä sellaisia, joissa eduskunta jakautui selvästi. Se ei ole vaalikone: se vertaa vastauksiasi vain näihin muutamaan äänestykseen eikä kerro, ketä kannattaa äänestää.</p>
 <h2>Riippumattomuus ja mainokset</h2><p>Sivusto ei ole eduskunnan tai minkään puolueen ylläpitämä. Sivustolla voi olla tulevaisuudessa mainoksia. Mainokset eivät vaikuta tietojen sisältöön.</p>`;
@@ -525,4 +626,4 @@ function restart(){var b=el("button","","Tee testi uudelleen");b.onclick=functio
 })();
 </script>`;
 
-main().catch(e => { console.error("VIRHE:", e.message); process.exit(1); });
+main().catch(e => { console.error("VIRHE:", e.stack); process.exit(1); });
