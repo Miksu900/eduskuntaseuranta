@@ -8,7 +8,7 @@ export const SRC = {
 
 export const TIMELINE = [
   { d: "6.8.2026", t: "Valtiovarainministeriö julkaisee budjettiehdotuksen", n: "Menot 92,2 mrd €, alijäämä 12,9 mrd €.", s: "vm" },
-  { d: "1.–2.9.2026", t: "Hallitus neuvottelee budjettiriihessä ja päättää talousarvioesityksestä", n: "Hallituksen oman tiedotteen mukaan alijäämä 12,4 mrd €.", s: "vn" },
+  { d: "1.9.2026", t: "Hallitus julkistaa talousarvioesityksensä (tiedote)", n: "Hallituksen oman tiedotteen mukaan alijäämä 12,4 mrd €.", s: "vn" },
   { d: "21.9.2026", t: "Talousarvioesitys annetaan eduskunnalle", n: "VM:n tiedotteen mukaan esitys julkaistaan 21. syyskuuta.", s: "vm" },
   { d: "1.10.2026", t: "Valtioneuvosto raportoi EU:lle liiallisen alijäämän korjaamisesta", n: "Raportointi tehdään alustavassa talousarviosuunnitelmassa.", s: "vn" },
   { d: "Syksy 2026", t: "Oppositio jättää vaihtoehtonsa talousarvioaloitteina", n: "Viime vuonna puolueiden vaihtoehtobudjetit julkaistiin marraskuussa.", s: null },
