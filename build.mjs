@@ -332,7 +332,13 @@ ${shareBtns}${ptab}${who}`;
 <input type="hidden" name="locale" value="en">
 </form></div></div>`;
   const SUB_HEAD = `<link rel="stylesheet" href="https://sibforms.com/forms/end-form/build/sib-styles.css"><style>:where(.sib-form-message-panel){display:none}#sib-container input::placeholder{color:#99a5b5}</style>`;
-  const SUB_JS = `<script>window.REQUIRED_CODE_ERROR_MESSAGE="Valitse maakoodi";window.LOCALE="en";window.EMAIL_INVALID_MESSAGE=window.SMS_INVALID_MESSAGE="Antamasi tiedot eivät kelpaa. Tarkista sähköpostiosoite.";window.REQUIRED_ERROR_MESSAGE="Tämä kenttä ei saa olla tyhjä.";window.GENERIC_INVALID_MESSAGE="Antamasi tiedot eivät kelpaa. Tarkista sähköpostiosoite.";window.INVALID_NUMBER="Antamasi tiedot eivät kelpaa. Tarkista sähköpostiosoite.";window.INVALID_DATE="Anna kelvollinen päivämäärä";window.REQUIRED_MULTISELECT_MESSAGE="Valitse vähintään yksi vaihtoehto";window.translation={common:{selectedList:"{quantity} lista valittu",selectedLists:"{quantity} listaa valittu",selectedOption:"{quantity} valittu",selectedOptions:"{quantity} valittu"}};var AUTOHIDE=Boolean(0);</script><script defer src="https://sibforms.com/forms/end-form/build/main.js"></script>`;
+  const SUB_JS = `<script>(function(){var f=document.getElementById("sib-form");if(!f)return;var ok=document.getElementById("success-message"),er=document.getElementById("error-message"),inp=document.getElementById("EMAIL"),bt=f.querySelector("button"),lab=f.querySelector(".entry__error");
+function show(el,t){ok.style.display="none";er.style.display="none";if(el){el.style.display="block";if(t)el.querySelector(".sib-form-message-panel__inner-text").textContent=t}}
+f.addEventListener("submit",function(e){e.preventDefault();var v=inp.value.trim();lab.textContent="";
+if(!v){lab.textContent="Tämä kenttä ei saa olla tyhjä.";return}
+if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v)){lab.textContent="Antamasi tiedot eivät kelpaa. Tarkista sähköpostiosoite.";return}
+bt.disabled=true;show(null);
+fetch(f.action,{method:"POST",body:new FormData(f),headers:{Accept:"application/json"}}).then(function(r){bt.disabled=false;if(r.ok){show(ok);inp.value=""}else show(er)}).catch(function(){bt.disabled=false;show(er)})})})()</script>`;
   const subBox = `<div class="card" style="border-left:4px solid #1a5fb4"><div><b>Tilaa viikkokatsaus sähköpostiisi</b></div><div class="meta">Kerran viikossa: eduskunnan äänestykset ja tulkinta. Ilmainen, voit perua milloin vain.</div><p><a class="btn" href="/tilaa/" style="display:inline-block;padding:10px 16px;background:#1a5fb4;color:#fff;border-radius:8px;text-decoration:none">Tilaa ilmaiseksi</a></p></div>`;
   const weekBody = a => {
     const { w, items, uni, topDev, topAbs, range, lines, tulk } = a;
