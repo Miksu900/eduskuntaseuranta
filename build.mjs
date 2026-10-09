@@ -21,6 +21,16 @@ const pname = p => PARTY[pk(p)] || (pk(p) ? pk(p).toUpperCase() : "Ei ryhmää")
 const dateFi = d => (d ? new Date(d).toLocaleDateString("fi-FI", { timeZone: "Europe/Helsinki" }) : "");
 const short = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
 const vtitle = v => v.otsikko || v.lisaotsikko || "Äänestys " + v.id;
+// Lisäotsikko on usein muotoa "Mietintö JAA / Anna Kontulan lausumaehdotus EI": kertoo, mitä Jaa ja Ei tarkoittavat.
+function voteMeaning(v) {
+  const out = {};
+  for (const part of String(v.lisaotsikko || "").split("/")) {
+    const m = part.trim().match(/^(.*?)\s+(JAA|EI)\s*$/i);
+    if (m && m[1].trim()) out[m[2].toLowerCase() === "jaa" ? "jaa" : "ei"] = m[1].trim();
+  }
+  return out.jaa || out.ei ? out : null;
+}
+const lc1 = x => x.charAt(0).toLowerCase() + x.slice(1);
 
 // ---------- Datan haku ----------
 async function rest(path) {
@@ -187,6 +197,12 @@ ${shareBtns}
   }
 
   // --- Äänestyssivut ---
+  const hint = x => (/mietintö/i.test(x) ? " (valiokunnan ehdotus eduskunnalle)" : "");
+  const meaningBox = v => {
+    const mn = voteMeaning(v);
+    const rows = mn ? `<div><b class="jaa">Jaa</b> = ${esc(mn.jaa ? mn.jaa + hint(mn.jaa) : "ei tietoa")}</div><div><b class="ei">Ei</b> = ${esc(mn.ei ? mn.ei + hint(mn.ei) : "ei tietoa")}</div>` : "";
+    return `<div class="ai" style="border-left-color:#c9a227"><b>Mitä Jaa ja Ei tarkoittavat tässä äänestyksessä?</b><span class="meta"> Eduskunnan tietojen mukaan:</span>${rows}<small>Otsikko kertoo, mistä asiasta on kyse, mutta Jaa tai Ei ei aina tarkoita otsikon asian kannattamista. Usein äänestetään valiokunnan mietinnöstä tai vastaehdotuksesta, ja Jaa voi tarkoittaa esimerkiksi aloitteen hylkäämistä.${mn ? "" : " Tämän äänestyksen tarkkaa vaihtoehtoa ei ole saatavilla, joten tarkista se eduskunnan omilta sivuilta."}</small></div>`;
+  };
   for (const v of loaded) {
     const t = vtitle(v);
     const parties = (paBy.get(v.id) || []).slice().sort((a, b) => (b.jaa + b.ei) - (a.jaa + a.ei));
@@ -203,6 +219,7 @@ ${shareBtns}
     const ai = v.tiivistelma ? `<div class="ai"><b>Selkokielellä:</b> ${esc(v.tiivistelma)}<small>Tekoälyn tekemä selitys äänestyksen otsikosta – voi sisältää virheitä. Virallinen otsikko on yllä.</small></div>` : "";
     const body = `<div class="meta">Äänestys ${dateFi(v.alkoi)}${v.aihe ? " · " + esc(v.aihe) : ""}</div><h1>${esc(t)}</h1>
 ${v.lisaotsikko && v.lisaotsikko !== v.otsikko ? `<p class="meta">${esc(v.lisaotsikko)}</p>` : ""}${ai}
+${meaningBox(v)}
 <div class="chips"><div class="chip"><b class="jaa">${v.jaa ?? "–"}</b><span>Jaa</span></div><div class="chip"><b class="ei">${v.ei ?? "–"}</b><span>Ei</span></div><div class="chip"><b class="tyhja">${v.tyhja ?? "–"}</b><span>Tyhjää</span></div><div class="chip"><b class="poissa">${v.poissa ?? "–"}</b><span>Poissa</span></div></div>
 ${shareBtns}${ptab}${who}`;
     put(`/aanestys/${v.id}/`, shell({
@@ -433,7 +450,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       if ((c.match(/[je]/g) || []).length >= 5) m.push({ s: mpSlug.get(mp.henkilo), n: full(mp), p: pname(mp.puolue), c });
     }
     await mkdir(OUT + "/data", { recursive: true });
-    await writeFile(OUT + "/data/quiz.json", JSON.stringify({ q: qs.map(v => ({ t: vtitle(v), s: v.tiivistelma || "", d: dateFi(v.alkoi), j: v.jaa, e: v.ei, id: v.id })), m }));
+    await writeFile(OUT + "/data/quiz.json", JSON.stringify({ q: qs.map(v => ({ t: vtitle(v), s: v.tiivistelma || "", m: (() => { const x = voteMeaning(v); return x ? [x.jaa ? "Jaa = " + x.jaa : "", x.ei ? "Ei = " + x.ei : ""].filter(Boolean).join(" · ") : ""; })(), d: dateFi(v.alkoi), j: v.jaa, e: v.ei, id: v.id })), m }));
     put("/testi/", shell({ title: "Kuka kansanedustaja äänestää kuten sinä? | Eduskuntaseuranta", desc: `Vastaa ${qs.length} oikeaan eduskunnan äänestykseen ja katso, ketkä kansanedustajat ja puolueet äänestivät samoin kuin sinä.`, path: "/testi/", body: QUIZ_HTML }));
   } else console.log("Testiin ei löytynyt tarpeeksi äänestyksiä, ohitetaan.");
 
@@ -452,6 +469,7 @@ const METHOD = `<h1>Miten luvut lasketaan</h1>
 <h2>Tietolähde</h2><p>Kaikki tiedot tulevat Eduskunnan avoimesta datasta (avoindata.eduskunta.fi): äänestysten tulokset ja jokaisen kansanedustajan ääni nykyiseltä vaalikaudelta (vuodesta 2023). Sivusto päivittyy automaattisesti, kun uusia äänestyksiä tulee.</p>
 <h2>Läsnäolo</h2><p>Läsnäolo on niiden äänestysten osuus, joissa edustajan ääni oli jotain muuta kuin ”Poissa”. Poissaolo ei kerro laiskuudesta: syynä voi olla esimerkiksi sairaus, virkamatka, eduskunnan edustustehtävä tai ministerin tehtävät. Luku ei myöskään mittaa edustajan kokonaistyötä, koska suurin osa työstä tehdään valiokunnissa ja vaalipiirissä.</p>
 <h2>Ryhmänsä linjasta poikkeava ääni</h2><p>Ryhmän ”linja” on äänestyksessä se vaihtoehto, Jaa tai Ei, jota useampi ryhmän edustaja äänesti. Edustajan ääni lasketaan poikkeavaksi, kun hän äänesti Jaa tai Ei toisin kuin ryhmän enemmistö. Tasatilanteita ei lasketa mukaan, eikä myöskään Tyhjää- tai Poissa-ääniä. Pienessä ryhmässä yksittäinen ääni vaikuttaa linjaan paljon. Poikkeaminen ei ole itsessään hyvä tai huono asia.</p>
+<h2>Mitä Jaa ja Ei tarkoittavat</h2><p>Eduskunnan äänestyksen otsikko kertoo yleensä asian aiheen, ei sitä, mitä Jaa tai Ei tarkoittaa. Usein äänestetään valiokunnan mietinnöstä tai vastaehdotuksesta: esimerkiksi kansalaisaloitteessa Jaa voi tarkoittaa mietinnön kannattamista eli aloitteen hylkäämistä. Kun eduskunnan lisäotsikko kertoo vaihtoehtojen merkityksen, näytämme sen jokaisen äänestyksen sivulla.</p>
 <h2>Tekoälyn tekemät selitykset</h2><p>Osalle äänestyksistä on tehty lyhyt selkokielinen selitys tekoälyn avulla. Selitys perustuu eduskunnan antamaan otsikkoon, ja se on aina merkitty tekoälyn tekemäksi. Se voi sisältää virheitä, joten virallinen otsikko on aina näkyvissä sen yläpuolella.</p>
 <h2>Testi ”Kuka äänestää kuten sinä?”</h2><p>Testi valitsee uusimmista äänestyksistä sellaisia, joissa eduskunta jakautui selvästi. Se ei ole vaalikone: se vertaa vastauksiasi vain näihin muutamaan äänestykseen eikä kerro, ketä kannattaa äänestää.</p>
 <h2>Riippumattomuus ja mainokset</h2><p>Sivusto ei ole eduskunnan tai minkään puolueen ylläpitämä. Sivustolla voi olla tulevaisuudessa mainoksia. Mainokset eivät vaikuta tietojen sisältöön.</p>`;
@@ -465,7 +483,7 @@ function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==und
 fetch("/data/quiz.json").then(function(r){return r.json()}).then(function(d){D=d;show()}).catch(function(){A.textContent="Lataus epäonnistui."});
 function show(){A.textContent="";if(i>=D.q.length)return result();var q=D.q[i],c=el("div","q");
 c.appendChild(el("div","meta","Kysymys "+(i+1)+" / "+D.q.length+" · "+q.d));
-c.appendChild(el("div","t",q.s||q.t));if(q.s)c.appendChild(el("div","meta","Virallinen otsikko: "+q.t));
+c.appendChild(el("div","t",q.s||q.t));if(q.s)c.appendChild(el("div","meta","Virallinen otsikko: "+q.t));c.appendChild(el("div","note",q.m?"Mitä vaihtoehdot tarkoittavat: "+q.m:"Huom. Jaa tai Ei voi tarkoittaa muutakin kuin otsikon asian kannattamista."));
 var row=el("div","share");[["j","Jaa"],["e","Ei"],["-","Ohita"]].forEach(function(o){var b=el("button","",o[1]);b.onclick=function(){ans[i]=o[0];var n=el("div","note","Eduskunnassa: Jaa "+q.j+", Ei "+q.e);c.appendChild(n);row.querySelectorAll("button").forEach(function(x){x.disabled=true});var nx=el("button","on",i+1<D.q.length?"Seuraava":"Näytä tulos");nx.onclick=function(){i++;show()};c.appendChild(nx)};row.appendChild(b)});
 c.appendChild(row);A.appendChild(c)}
 function result(){var R=[],P={};D.m.forEach(function(m){var s=0,n=0;for(var k=0;k<D.q.length;k++){var a=ans[k],b=m.c[k];if((a==="j"||a==="e")&&(b==="j"||b==="e")){n++;if(a===b)s++}}
