@@ -100,36 +100,57 @@ async function fetchVaalipiirit() {
 }
 
 // ---------- Ulkoasu ----------
-const CSS = `:root{color-scheme:dark}*{box-sizing:border-box}
-body{margin:0;background:#111;color:#fff;font:16px/1.5 system-ui,sans-serif}
-a{color:#7ab0ff;text-decoration:none}a:hover{text-decoration:underline}
-.top{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:12px;border-bottom:1px solid #222;background:#111}
-.brand{font-weight:700;font-size:18px;color:#fff}
-.top nav{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px}
-main{max-width:800px;margin:auto;padding:14px 12px 50px}
-h1{font-size:24px;line-height:1.25;margin:6px 0 4px}h2{font-size:18px;margin:26px 0 8px}
-.meta{color:#999;font-size:13px}.note{color:#999;font-size:13px;margin:8px 0}
+const CSS = `:root{color-scheme:dark;--bg:#0a1424;--surface:#101f36;--line:#1e3252;--text:#eef3fb;--mute:#93a4bd;--jaa:#3ddc97;--ei:#ff6b81;--tyhja:#ffc857;--poissa:#5b6b86;--link:#7cc4ff;--accent:#7cc4ff}*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.top{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:18px;letter-spacing:-.01em;color:var(--text)}.brand:hover{text-decoration:none}
+.tr{display:flex;align-items:center;gap:6px}
+.acct{color:var(--text);font-size:15px;padding:8px 10px;border-radius:10px}.acct:hover{background:var(--surface);text-decoration:none}
+.menu summary{list-style:none;cursor:pointer;color:var(--bg);background:var(--text);font-weight:700;font-size:15px;padding:8px 14px;border-radius:999px}
+.menu summary::-webkit-details-marker{display:none}
+.menu[open] summary{background:var(--surface);color:var(--text)}
+.menu nav{position:absolute;left:0;right:0;top:100%;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;max-height:calc(100vh - 56px);overflow:auto}
+.menu nav div{display:flex;flex-direction:column}
+.menu nav b{font-size:14px;color:var(--mute);font-weight:600;margin:14px 0 4px}
+.menu nav a{color:var(--text);padding:8px 0;font-size:16px}
+@media(min-width:720px){.menu nav{left:auto;right:16px;width:460px;border:1px solid var(--line);border-radius:16px;top:calc(100% + 6px)}}
+main{max-width:760px;margin:auto;padding:14px 16px 56px}
+h1{font-size:28px;line-height:1.15;letter-spacing:-.02em;font-weight:800;margin:10px 0 6px}h2{font-size:20px;letter-spacing:-.01em;font-weight:800;margin:30px 0 8px}
+.meta{color:var(--mute);font-size:13px}.note{color:var(--mute);font-size:13px;margin:8px 0}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.chip{background:#1b1b1b;border-radius:10px;padding:8px 12px;min-width:110px}
-.chip b{display:block;font-size:20px}.chip span{color:#999;font-size:12px}
-.card{display:block;background:#1b1b1b;border-radius:10px;padding:10px 14px;margin:8px 0;color:#fff}
-.card:hover{text-decoration:none;background:#222}
-.jaa{color:#6c6}.ei{color:#e66}.tyhja{color:#ccc}.poissa{color:#888}
+.chip{background:var(--surface);border-radius:12px;padding:10px 14px;min-width:110px}
+.chip b{display:block;font-size:22px;letter-spacing:-.01em}.chip span{color:var(--mute);font-size:12px}
+.card{display:block;background:var(--surface);border-radius:14px;padding:12px 16px;margin:8px 0;color:var(--text)}
+.card:hover{text-decoration:none;background:#14284a}
+.jaa{color:var(--jaa)}.ei{color:var(--ei)}.tyhja{color:var(--tyhja)}.poissa{color:var(--poissa)}
 table{width:100%;border-collapse:collapse;font-size:14px}
-td,th{padding:8px 4px;border-bottom:1px solid #262626;text-align:left}th{color:#999;font-weight:500}
-.ai{background:#17202e;border-left:3px solid #2a5db0;border-radius:6px;padding:10px 12px;margin:12px 0}
+td,th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mute);font-weight:500}
+.ai{background:#0f2036;border-left:3px solid #2a5db0;border-radius:8px;padding:10px 12px;margin:12px 0}
 .ai small{display:block;color:#8aa;margin-top:6px}
 .share{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
-button,.btn{font:inherit;color:#fff;background:#222;border:0;border-radius:16px;padding:8px 14px;cursor:pointer;display:inline-block}
+button,.btn{font:inherit;color:var(--text);background:#1b2f50;border:0;border-radius:999px;padding:9px 16px;cursor:pointer;display:inline-block}
 button.on,.btn.on{background:#2a5db0}button:disabled{opacity:.4}
 .names a{display:inline-block;margin:2px 10px 2px 0}
-footer{max-width:800px;margin:auto;padding:0 12px 40px;color:#777;font-size:12px}
-.q{background:#1b1b1b;border-radius:12px;padding:16px;margin:12px 0}
+footer{max-width:760px;margin:auto;padding:0 16px 40px;color:#7d8794;font-size:12px}
+.q{background:var(--surface);border-radius:14px;padding:16px;margin:12px 0}
 .q .t{font-size:17px;margin-bottom:6px}.bar{height:6px;background:#2a2a2a;border-radius:3px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:#2a5db0}`;
+
+const navGroups = () => {
+  const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
+  return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
+    + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
+    + g("Työkalut", [["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
+};
+const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
 
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
+const footerHtml = () => `<footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>`;
 function shell({ title, desc, path, body, head = "" }) {
   const url = SITE + path;
   return `<!DOCTYPE html><html lang="fi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -138,9 +159,9 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
-<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/aiheet/">Aiheet</a><a href="/budjetti/">Budjetti</a><a href="/haku/">Kysy</a><a href="/viikko/">Viikkokatsaus</a><a href="/uutiset/">Uutiset</a><a href="/blogi/">Blogi</a><a href="/vieraskyna/">Vieraskynä</a><a href="/tilaa/">Tilaa</a><a id="acct" href="/kirjaudu/">Kirjaudu</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
+${headerHtml()}
 <main>${commentsWanted(path) ? (body.includes("<!--KOM-->") ? body.replace("<!--KOM-->", () => commentsBlock({ path, SB, KEY })) : body + commentsBlock({ path, SB, KEY })) : body}</main>
-<footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
+${footerHtml()}
 ${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
 }
 
@@ -282,6 +303,9 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
 <h2>Edustajat</h2>${ms.map(m => `<a class="card" href="/edustaja/${mpSlug.get(m.henkilo)}/"><div>${esc(full(m))}</div><div class="meta">läsnä ${lasna(m)} % · poikkeaa ryhmästä ${eri(m)} %</div></a>`).join("")}`;
     put(`/puolue/${k}/`, shell({ title: `${pname(p)} – edustajien äänestykset | Eduskuntaseuranta`, desc: `${pname(p)}: ${ms.length} kansanedustajaa, läsnäolo ${pct(y - po, y)} %, ryhmän linjasta poikkeavia ääniä ${pct(ee, ve)} %.`, path: `/puolue/${k}/`, body }));
   }
+
+  put("/puolueet/", shell({ title: "Eduskuntaryhmät – edustajien äänestykset | Eduskuntaseuranta", desc: "Eduskuntaryhmät, edustajien määrä ja ryhmien äänestystiedot.", path: "/puolueet/",
+    body: `<h1>Puolueet</h1><p class="meta">Valitse eduskuntaryhmä nähdäksesi sen edustajat ja äänestystunnusluvut.</p>${[...groups.entries()].sort((a, b) => b[1].length - a[1].length).map(([k, ms]) => `<a class="card" href="/puolue/${k}/"><div><b>${esc(pname(ms[0].puolue))}</b></div><div class="meta">${ms.length} edustajaa</div></a>`).join("")}` }));
 
   // --- Hakemistosivut (jotta hakukoneet löytävät kaiken) ---
   const sorted = mps.slice().sort((a, b) => String(a.sukunimi).localeCompare(String(b.sukunimi), "fi"));
@@ -608,7 +632,16 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   // --- Kirjoitus levylle ---
   await pool(jobs, 16, async j => { const dir = OUT + j.path; await mkdir(dir, { recursive: true }); await writeFile(dir + "index.html", j.html); });
   if (blogRss) await writeFile(OUT + "/blogi/rss.xml", blogRss);
-  for (const f of ["index.html", "og.png"]) if (existsSync(f)) await copyFile(f, `${OUT}/${f}`);
+  if (existsSync("og.png")) await copyFile("og.png", `${OUT}/og.png`);
+  {
+    const topicChips = TOPICS.filter(t => loaded.some(v => topicOf(v).name === t.name) && t.name !== "Muut aiheet").map(t => `<a class="tag" href="/aihe/${tslug(t)}/">${esc(t.name)}</a>`).join("");
+    const partyMap = {}; for (const [k, v] of Object.entries(PARTY)) partyMap[k] = v;
+    let idx = await readFile("index.html", "utf8");
+    idx = idx.replace("/*CSS*/", () => CSS).replace("<!--HEADER-->", () => headerHtml(true)).replace("<!--NAV-->", () => navGroups()).replace("<!--AIHEET-->", () => topicChips)
+      .replace("/*PARTIES*/", () => JSON.stringify(partyMap)).replace("%%SB%%", () => SB).replace("%%KEY%%", () => KEY)
+      .replace("<!--FOOT-->", () => `${footerHtml()}\n${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}`);
+    await writeFile(`${OUT}/index.html`, idx);
+  }
   const today = new Date().toISOString().slice(0, 10);
   await writeFile(OUT + "/aihe-kartta.json", JSON.stringify(Object.fromEntries(loaded.map(v => [v.id, tslug(topicOf(v))]))));
   await writeFile(OUT + "/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["/", ...urls].map(u => `<url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod></url>`).join("")}</urlset>`);

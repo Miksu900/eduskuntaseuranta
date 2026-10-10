@@ -34,7 +34,7 @@ return {session:session,rest:rest,otp:otp,signOut:function(){save(null)},hashErr
 }
 
 export function authPages({ shell, esc, SB, KEY }) {
-  const css = `<style>.af label{display:block;margin:14px 0 4px;font-size:14px}.af input,.af textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:#1b1b1b;border:1px solid #333;border-radius:10px;padding:10px}.af textarea{min-height:90px}.af button{margin-top:14px;background:#2a5db0}#am{margin:12px 0;color:#9ad}#am.err{color:#f99}.af small{color:#999}</style>`;
+  const css = `<style>.af label{display:block;margin:14px 0 4px;font-size:14px}.af input,.af textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px}.af textarea{min-height:90px}.af button{margin-top:14px;background:#2a5db0}#am{margin:12px 0;color:#9ad}#am.err{color:#f99}.af small{color:#999}</style>`;
   const body = `<h1>Kirjaudu</h1>
 <p>Kirjautuminen tapahtuu sähköpostilinkillä. Salasanaa ei tarvita. Kirjautuneena voit kommentoida ja kirjoittaa oman vieraskynäsi.</p>
 <div id="lo" class="af" style="display:none">
@@ -89,7 +89,7 @@ export function commentsWanted(path) {
 }
 
 export function commentsBlock({ path, SB, KEY }) {
-  const css = `<style>#kom{margin-top:32px;border-top:1px solid #2a2a2a;padding-top:8px}.kc{background:#1b1b1b;border-radius:12px;padding:12px 14px;margin:10px 0}.kc .kh{font-size:13px;color:#999;margin-bottom:4px}.kc .kt{white-space:pre-wrap;overflow-wrap:anywhere}.kc button{background:none;color:#999;padding:2px 0;margin-right:14px;font-size:13px;border-radius:0}#kf textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:#1b1b1b;border:1px solid #333;border-radius:10px;padding:10px;min-height:90px}#kf button{margin-top:8px;background:#2a5db0}#km{margin:8px 0;color:#9ad}#km.err{color:#f99}</style>`;
+  const css = `<style>#kom{margin-top:32px;border-top:1px solid var(--line);padding-top:8px}.kc{background:var(--surface);border-radius:12px;padding:12px 14px;margin:10px 0}.kc .kh{font-size:13px;color:#999;margin-bottom:4px}.kc .kt{white-space:pre-wrap;overflow-wrap:anywhere}.kc button{background:none;color:#999;padding:2px 0;margin-right:14px;font-size:13px;border-radius:0}#kf textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:90px}#kf button{margin-top:8px;background:#2a5db0}#km{margin:8px 0;color:#9ad}#km.err{color:#f99}</style>`;
   return `${css}<section id="kom"><h2>Keskustelu</h2>
 <div id="kf"></div><p id="km"></p><div id="kl"><p class="note">Ladataan kommentteja...</p></div>
 <p class="note">Kommentit julkaistaan heti, eikä niitä tarkisteta etukäteen. Kommentoija vastaa itse kirjoituksestaan. Jos kommentti rikkoo lakia (esimerkiksi uhkailu, kunnianloukkaus tai vihapuhe), paina Ilmianna. Kun kolme lukijaa on ilmiantanut kommentin, se piilotetaan automaattisesti, ja poistan selvästi laittoman sisällön viipymättä. Voit myös kirjoittaa osoitteeseen miika@eduskuntaseuranta.fi.</p></section>
@@ -135,7 +135,7 @@ ES.session().then(function(s){cur=s;
 }
 
 // ---- Käyttäjien vieraskynät (haetaan selaimessa tietokannasta) ----
-const GCSS = `<style>.af label{display:block;margin:14px 0 4px;font-size:14px}.af input,.af textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:#1b1b1b;border:1px solid #333;border-radius:10px;padding:10px}.af textarea{min-height:320px}.af button,.gb{margin-top:12px;background:#2a5db0}#gm{margin:12px 0;color:#9ad}#gm.err{color:#f99}.gt p{white-space:pre-wrap;overflow-wrap:anywhere}.gt h3{margin:20px 0 6px;font-size:17px}.gx{background:none;color:#999;padding:2px 0;margin-right:14px;font-size:13px;border-radius:0}</style>`;
+const GCSS = `<style>.af label{display:block;margin:14px 0 4px;font-size:14px}.af input,.af textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px}.af textarea{min-height:320px}.af button,.gb{margin-top:12px;background:#2a5db0}#gm{margin:12px 0;color:#9ad}#gm.err{color:#f99}.gt p{white-space:pre-wrap;overflow-wrap:anywhere}.gt h3{margin:20px 0 6px;font-size:17px}.gx{background:none;color:#999;padding:2px 0;margin-right:14px;font-size:13px;border-radius:0}</style>`;
 const GCOMMON = `var $=function(i){return document.getElementById(i)};
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x)e.textContent=x;return e}
 function msg(t,e){var m=$("gm");if(m){m.textContent=t;m.className=e?"err":""}}
