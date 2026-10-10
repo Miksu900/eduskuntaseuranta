@@ -610,6 +610,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   if (blogRss) await writeFile(OUT + "/blogi/rss.xml", blogRss);
   for (const f of ["index.html", "og.png"]) if (existsSync(f)) await copyFile(f, `${OUT}/${f}`);
   const today = new Date().toISOString().slice(0, 10);
+  await writeFile(OUT + "/aihe-kartta.json", JSON.stringify(Object.fromEntries(loaded.map(v => [v.id, tslug(topicOf(v))]))));
   await writeFile(OUT + "/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["/", ...urls].map(u => `<url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod></url>`).join("")}</urlset>`);
   await writeFile(OUT + "/robots.txt", `User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`);
   await writeFile(OUT + "/CNAME", new URL(SITE).host + "\n");

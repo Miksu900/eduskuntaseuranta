@@ -1,7 +1,7 @@
 // Seuranta: kirjautunut käyttäjä voi seurata aihetta tai edustajaa. Hälytykset lähetetään myöhemmin sähköpostilla.
 import { esJs } from "./auth.mjs";
 
-const NOTE = "Seuranta tallennetaan tiliisi. Sähköpostihälytysten lähettäminen käynnistyy pian.";
+const NOTE = "Saat enintään yhden sähköpostin päivässä, kun seuraamastasi aiheesta tai edustajasta on äänestetty. Viesti tulee kirjautumisosoitteeseesi.";
 
 export function followBlock({ tyyppi, kohde, nimi, osoite, SB, KEY }) {
   const j = JSON.stringify;
@@ -11,7 +11,7 @@ export function followBlock({ tyyppi, kohde, nimi, osoite, SB, KEY }) {
 var T=${j(tyyppi)},K=${j(String(kohde))},N=${j(nimi)},O=${j(osoite)};
 var b=document.getElementById("fb"),m=document.getElementById("fm"),cur=null,on=false;
 function paint(){b.textContent=!cur?"Kirjaudu ja seuraa":(on?"✓ Seuraat":"Seuraa");b.style.background=on?"#2f7d4f":"#2a5db0";
- m.textContent=on?"${NOTE} Hallitse seurantoja: /seuranta/":"";}
+ m.textContent="";if(on){m.textContent=${JSON.stringify(NOTE)}+" ";var a=document.createElement("a");a.href="/seuranta/";a.textContent="Hallitse seurantoja";m.appendChild(a)}}
 b.onclick=function(){
  if(!cur){location.href="/kirjaudu/";return}
  b.disabled=true;
