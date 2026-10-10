@@ -1,6 +1,7 @@
 // build.mjs – rakentaa Eduskuntaseuranta-sivuston staattiset sivut Supabasen datasta.
 // Ajetaan GitHub Actionsissa (ks. .github/workflows/build.yml). Tulos kirjoitetaan kansioon dist/.
 import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
+import { loadNews, newsPage, blogPages } from "./extras.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -135,7 +136,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
-<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/aiheet/">Aiheet</a><a href="/budjetti/">Budjetti</a><a href="/haku/">Kysy</a><a href="/viikko/">Viikkokatsaus</a><a href="/tilaa/">Tilaa</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
+<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/aiheet/">Aiheet</a><a href="/budjetti/">Budjetti</a><a href="/haku/">Kysy</a><a href="/viikko/">Viikkokatsaus</a><a href="/uutiset/">Uutiset</a><a href="/blogi/">Blogi</a><a href="/vieraskyna/">Vieraskynä</a><a href="/tilaa/">Tilaa</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
 <main>${body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
@@ -585,8 +586,21 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     put("/testi/", shell({ title: "Kuka kansanedustaja äänestää kuten sinä? | Eduskuntaseuranta", desc: `Vastaa ${qs.length} oikeaan eduskunnan äänestykseen ja katso, ketkä kansanedustajat ja puolueet äänestivät samoin kuin sinä.`, path: "/testi/", body: QUIZ_HTML }));
   } else console.log("Testiin ei löytynyt tarpeeksi äänestyksiä, ohitetaan.");
 
+  // --- Uutiset ja blogi ---
+  let blogRss = "";
+  try {
+    const news = await loadNews();
+    put("/uutiset/", newsPage(news, { shell, esc }));
+  } catch (e) { console.log("Uutiset ohitettu:", e.message); }
+  try {
+    const b = blogPages({ shell, esc, SITE, SB, KEY, dateFi });
+    for (const pg of b.pages) put(pg.path, pg.html);
+    blogRss = b.rss;
+  } catch (e) { console.log("Blogi ohitettu:", e.message); }
+
   // --- Kirjoitus levylle ---
   await pool(jobs, 16, async j => { const dir = OUT + j.path; await mkdir(dir, { recursive: true }); await writeFile(dir + "index.html", j.html); });
+  if (blogRss) await writeFile(OUT + "/blogi/rss.xml", blogRss);
   for (const f of ["index.html", "og.png"]) if (existsSync(f)) await copyFile(f, `${OUT}/${f}`);
   const today = new Date().toISOString().slice(0, 10);
   await writeFile(OUT + "/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["/", ...urls].map(u => `<url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod></url>`).join("")}</urlset>`);
