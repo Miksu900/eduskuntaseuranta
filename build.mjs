@@ -167,7 +167,12 @@ async function main() {
   HAS_VP = mps.some(m => m.vaalipiiri);
   let votings;
   try {
-    votings = await all("aanestykset?select=id,vuosi,istunto,numero,alkoi,otsikko,lisaotsikko,jaa,ei,tyhja,poissa,ladattu,tiivistelma,aihe", "alkoi.desc,id.desc");
+    try {
+      votings = await all("aanestykset?select=id,vuosi,istunto,numero,alkoi,otsikko,lisaotsikko,jaa,ei,tyhja,poissa,ladattu,tiivistelma,aihe,kysymys", "alkoi.desc,id.desc");
+    } catch (e0) {
+      console.log("Kysymys-saraketta ei ole vielä, jatketaan ilman:", e0.message);
+      votings = await all("aanestykset?select=id,vuosi,istunto,numero,alkoi,otsikko,lisaotsikko,jaa,ei,tyhja,poissa,ladattu,tiivistelma,aihe", "alkoi.desc,id.desc");
+    }
   } catch (e) {
     console.log("Tiivistelmä-sarakkeita ei ole vielä, jatketaan ilman:", e.message);
     votings = await all("aanestykset?select=id,vuosi,istunto,numero,alkoi,otsikko,lisaotsikko,jaa,ei,tyhja,poissa,ladattu", "alkoi.desc,id.desc");
@@ -563,7 +568,9 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   put("/data/", shell({ title: "Avoin data: kansanedustajien äänestykset CSV ja JSON | Eduskuntaseuranta", desc: "Lataa eduskunnan äänestysten ja kansanedustajien läsnäolon tiedot ilmaiseksi CSV- ja JSON-muodossa toimittajille, opiskelijoille ja tutkijoille.", path: "/data/", body: dataBody, head: `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>` }));
 
   // --- Testi: kuka äänestää kuten sinä ---
-  const cand = detail.filter(v => Math.min(v.jaa || 0, v.ei || 0) >= 35 && (v.jaa || 0) + (v.ei || 0) >= 150);
+  // Testiin vain sisältöäänestyksiä (Jaa = hyväksyminen, Ei = hylkääminen); menettelyäänestykset (esim. valiokuntaan lähettäminen) jätetään pois, koska ne johtaisivat harhaan.
+  const isContent = v => { const x = voteMeaning(v); return !!(x && /hyväksy/i.test(x.jaa || "") && /hylkää/i.test(x.ei || "")); };
+  const cand = detail.filter(v => Math.min(v.jaa || 0, v.ei || 0) >= 35 && (v.jaa || 0) + (v.ei || 0) >= 150 && isContent(v)).sort((a, b) => (b.kysymys ? 1 : 0) - (a.kysymys ? 1 : 0));
   const seen = new Set(), qs = [];
   for (const v of cand) { const k = (v.otsikko || "").trim().toLowerCase(); if (!k || seen.has(k)) continue; seen.add(k); qs.push(v); if (qs.length === QUIZ_N) break; }
   if (qs.length >= 5) {
@@ -574,7 +581,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       if ((c.match(/[je]/g) || []).length >= 5) m.push({ s: mpSlug.get(mp.henkilo), n: full(mp), p: pname(mp.puolue), c });
     }
     await mkdir(OUT + "/data", { recursive: true });
-    await writeFile(OUT + "/data/quiz.json", JSON.stringify({ q: qs.map(v => ({ t: vtitle(v), s: v.tiivistelma || "", m: (() => { const x = voteMeaning(v); return x ? [x.jaa ? "Jaa = " + x.jaa : "", x.ei ? "Ei = " + x.ei : ""].filter(Boolean).join(" · ") : ""; })(), d: dateFi(v.alkoi), j: v.jaa, e: v.ei, id: v.id })), m }));
+    await writeFile(OUT + "/data/quiz.json", JSON.stringify({ q: qs.map(v => ({ t: vtitle(v), k: v.kysymys || "", s: v.tiivistelma || "", m: (() => { const x = voteMeaning(v); return x ? [x.jaa ? "Jaa = " + x.jaa : "", x.ei ? "Ei = " + x.ei : ""].filter(Boolean).join(" · ") : ""; })(), d: dateFi(v.alkoi), j: v.jaa, e: v.ei, id: v.id })), m }));
     put("/testi/", shell({ title: "Kuka kansanedustaja äänestää kuten sinä? | Eduskuntaseuranta", desc: `Vastaa ${qs.length} oikeaan eduskunnan äänestykseen ja katso, ketkä kansanedustajat ja puolueet äänestivät samoin kuin sinä.`, path: "/testi/", body: QUIZ_HTML }));
   } else console.log("Testiin ei löytynyt tarpeeksi äänestyksiä, ohitetaan.");
 
@@ -608,7 +615,7 @@ function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==und
 fetch("/data/quiz.json").then(function(r){return r.json()}).then(function(d){D=d;show()}).catch(function(){A.textContent="Lataus epäonnistui."});
 function show(){A.textContent="";if(i>=D.q.length)return result();var q=D.q[i],c=el("div","q");
 c.appendChild(el("div","meta","Kysymys "+(i+1)+" / "+D.q.length+" · "+q.d));
-c.appendChild(el("div","t",q.s||q.t));if(q.s)c.appendChild(el("div","meta","Virallinen otsikko: "+q.t));c.appendChild(el("div","note",q.m?"Mitä vaihtoehdot tarkoittavat: "+q.m:"Huom. Jaa tai Ei voi tarkoittaa muutakin kuin otsikon asian kannattamista."));
+c.appendChild(el("div","t",q.k||q.s||q.t));if(q.k&&q.s)c.appendChild(el("div","meta",q.s));c.appendChild(el("div","meta","Virallinen otsikko: "+q.t));c.appendChild(el("div","note",q.m?"Mitä vaihtoehdot tarkoittavat: "+q.m:"Huom. Jaa tai Ei voi tarkoittaa muutakin kuin otsikon asian kannattamista."));
 var row=el("div","share");[["j","Jaa"],["e","Ei"],["-","Ohita"]].forEach(function(o){var b=el("button","",o[1]);b.onclick=function(){ans[i]=o[0];var n=el("div","note","Eduskunnassa: Jaa "+q.j+", Ei "+q.e);c.appendChild(n);row.querySelectorAll("button").forEach(function(x){x.disabled=true});var nx=el("button","on",i+1<D.q.length?"Seuraava":"Näytä tulos");nx.onclick=function(){i++;show()};c.appendChild(nx)};row.appendChild(b)});
 c.appendChild(row);A.appendChild(c)}
 function result(){var R=[],P={};D.m.forEach(function(m){var s=0,n=0;for(var k=0;k<D.q.length;k++){var a=ans[k],b=m.c[k];if((a==="j"||a==="e")&&(b==="j"||b==="e")){n++;if(a===b)s++}}
