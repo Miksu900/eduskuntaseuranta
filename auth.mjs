@@ -56,3 +56,55 @@ sb.auth.onAuthStateChange(function(ev,s){if(ev==="SIGNED_IN")setTimeout(function
 })();</script>`;
   return [{ path: "/kirjaudu/", html: shell({ title: "Kirjaudu | Eduskuntaseuranta", desc: "Kirjaudu sähköpostilinkillä ja luo oma profiili.", path: "/kirjaudu/", head: css, body }) }];
 }
+
+// Kommenttiosio: näytetään äänestys-, edustaja-, viikkokatsaus-, blogi- ja vieraskynäsivuilla.
+export function commentsWanted(path) {
+  return /^\/(aanestys|edustaja|viikko|blogi|vieraskyna)\/[^/]+\/$/.test(path) && path !== "/vieraskyna/kirjoita/";
+}
+
+export function commentsBlock({ path, SB, KEY }) {
+  const css = `<style>#kom{margin-top:32px;border-top:1px solid #2a2a2a;padding-top:8px}.kc{background:#1b1b1b;border-radius:12px;padding:12px 14px;margin:10px 0}.kc .kh{font-size:13px;color:#999;margin-bottom:4px}.kc .kt{white-space:pre-wrap;overflow-wrap:anywhere}.kc button{background:none;color:#999;padding:2px 0;margin-right:14px;font-size:13px;border-radius:0}#kf textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:#1b1b1b;border:1px solid #333;border-radius:10px;padding:10px;min-height:90px}#kf button{margin-top:8px;background:#2a5db0}#km{margin:8px 0;color:#9ad}#km.err{color:#f99}</style>`;
+  const html = `${css}<section id="kom"><h2>Keskustelu</h2><div id="kl"><p class="note">Ladataan kommentteja...</p></div>
+<div id="kf"></div><p id="km"></p>
+<p class="note">Kommentit julkaistaan heti, eikä niitä tarkisteta etukäteen. Kommentoija vastaa itse kirjoituksestaan. Jos kommentti rikkoo lakia (esimerkiksi uhkailu, kunnianloukkaus tai vihapuhe), paina Ilmianna. Kun kolme lukijaa on ilmiantanut kommentin, se piilotetaan automaattisesti, ja poistan selvästi laittoman sisällön viipymättä. Voit myös kirjoittaa osoitteeseen miika@eduskuntaseuranta.fi.</p></section>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script>(function(){
+var PATH=${JSON.stringify(path)},sb=supabase.createClient(${JSON.stringify(SB)},${JSON.stringify(KEY)});
+var $=function(i){return document.getElementById(i)},km=$("km"),cur=null,hasProf=false;
+function msg(t,e){km.textContent=t;km.className=e?"err":""}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x)e.textContent=x;return e}
+function list(){
+ sb.from("kommentit").select("id,teksti,luotu,profiili_id,profiilit(nayttonimi)").eq("sivu",PATH).order("luotu",{ascending:true}).then(function(r){
+  var box=$("kl");box.textContent="";
+  if(r.error){box.appendChild(el("p","note","Kommentteja ei voitu ladata."));return}
+  if(!r.data.length){box.appendChild(el("p","note","Ei vielä kommentteja. Kirjoita ensimmäinen."));return}
+  r.data.forEach(function(k){
+   var c=el("div","kc"),h=el("div","kh",(k.profiilit?k.profiilit.nayttonimi:"Käyttäjä")+" · "+new Date(k.luotu).toLocaleString("fi-FI",{dateStyle:"short",timeStyle:"short"}));
+   c.appendChild(h);c.appendChild(el("div","kt",k.teksti));
+   var b=el("button","","Ilmianna");b.type="button";b.onclick=function(){report(k.id)};c.appendChild(b);
+   if(cur&&cur.user.id===k.profiili_id){var d=el("button","","Poista");d.type="button";d.onclick=function(){del(k.id)};c.appendChild(d)}
+   box.appendChild(c)})})}
+function report(id){
+ if(!cur){msg("Kirjaudu sisään ilmiantaaksesi kommentin.",1);return}
+ if(!confirm("Ilmiannetaanko kommentti lainvastaisena?"))return;
+ sb.from("ilmiannot").insert({kommentti_id:id,ilmoittaja:cur.user.id}).then(function(r){
+  if(r.error){msg(r.error.code==="23505"?"Olet jo ilmiantanut tämän kommentin.":"Ilmianto epäonnistui.",1)}else{msg("Kiitos ilmiannosta.");list()}})}
+function del(id){if(!confirm("Poistetaanko kommentti?"))return;sb.from("kommentit").delete().eq("id",id).then(function(){list()})}
+function form(){
+ var f=$("kf");f.textContent="";
+ if(!cur){var p=el("p");var a=el("a","","Kirjaudu sisään");a.href="/kirjaudu/";p.appendChild(a);p.appendChild(document.createTextNode(" kommentoidaksesi. Kirjautuminen tapahtuu sähköpostilinkillä, salasanaa ei tarvita."));f.appendChild(p);return}
+ if(!hasProf){var p2=el("p");var a2=el("a","","Luo ensin profiili");a2.href="/kirjaudu/";p2.appendChild(a2);p2.appendChild(document.createTextNode(" (nimimerkki ja näytettävä nimi), niin voit kommentoida."));f.appendChild(p2);return}
+ var ta=el("textarea");ta.maxLength=2000;ta.placeholder="Kirjoita kommentti (2–2000 merkkiä)";
+ var b=el("button","","Lähetä kommentti");b.type="button";
+ b.onclick=function(){var t=ta.value.trim();if(t.length<2){msg("Kommentti on liian lyhyt.",1);return}
+  b.disabled=true;msg("Lähetetään...");
+  sb.from("kommentit").insert({sivu:PATH,profiili_id:cur.user.id,teksti:t}).then(function(r){
+   b.disabled=false;if(r.error){msg(r.error.message.indexOf("tunnissa")>-1?"Liian monta kommenttia tunnissa. Yritä myöhemmin.":"Lähetys epäonnistui.",1)}else{ta.value="";msg("");list()}})};
+ f.appendChild(ta);f.appendChild(b)}
+list();
+sb.auth.getSession().then(function(x){cur=x.data.session;
+ if(!cur){form();return}
+ sb.from("profiilit").select("id").eq("id",cur.user.id).maybeSingle().then(function(r){hasProf=!!r.data;form();list()})});
+})();</script>`;
+  return html;
+}

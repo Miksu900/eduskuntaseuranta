@@ -2,7 +2,7 @@
 // Ajetaan GitHub Actionsissa (ks. .github/workflows/build.yml). Tulos kirjoitetaan kansioon dist/.
 import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
 import { loadNews, newsPage, blogPages } from "./extras.mjs";
-import { authPages, ACCT_JS } from "./auth.mjs";
+import { authPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -138,7 +138,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
 <header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/aiheet/">Aiheet</a><a href="/budjetti/">Budjetti</a><a href="/haku/">Kysy</a><a href="/viikko/">Viikkokatsaus</a><a href="/uutiset/">Uutiset</a><a href="/blogi/">Blogi</a><a href="/vieraskyna/">Vieraskynä</a><a href="/tilaa/">Tilaa</a><a id="acct" href="/kirjaudu/">Kirjaudu</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
-<main>${body}</main>
+<main>${body}${commentsWanted(path) ? commentsBlock({ path, SB, KEY }) : ""}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
 }
