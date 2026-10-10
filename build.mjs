@@ -606,13 +606,14 @@ const METHOD = `<h1>Miten luvut lasketaan</h1>
 <h2>Testi ”Kuka äänestää kuten sinä?”</h2><p>Testi valitsee uusimmista äänestyksistä sellaisia, joissa eduskunta jakautui selvästi. Se ei ole vaalikone: se vertaa vastauksiasi vain näihin muutamaan äänestykseen eikä kerro, ketä kannattaa äänestää.</p>
 <h2>Riippumattomuus ja mainokset</h2><p>Sivusto ei ole eduskunnan tai minkään puolueen ylläpitämä. Sivustolla voi olla tulevaisuudessa mainoksia. Mainokset eivät vaikuta tietojen sisältöön.</p>`;
 
+const BUILD_ID = Date.now().toString(36);
 const QUIZ_HTML = `<h1>Kuka kansanedustaja äänestää kuten sinä?</h1>
 <p class="meta">Valitse jokaiseen oikeaan eduskunnan äänestykseen Jaa, Ei tai Ohita. Lopuksi näet, ketkä edustajat ja puolueet äänestivät eniten samoin kuin sinä. Tämä ei ole vaalikone.</p>
 <div id="app"><p class="note">Ladataan…</p></div>
 <script>
 (function(){var A=document.getElementById("app"),D,i=0,ans=[];
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
-fetch("/data/quiz.json").then(function(r){return r.json()}).then(function(d){D=d;show()}).catch(function(){A.textContent="Lataus epäonnistui."});
+fetch("/data/quiz.json?v=${BUILD_ID}").then(function(r){return r.json()}).then(function(d){D=d;show()}).catch(function(){A.textContent="Lataus epäonnistui."});
 function show(){A.textContent="";if(i>=D.q.length)return result();var q=D.q[i],c=el("div","q");
 c.appendChild(el("div","meta","Kysymys "+(i+1)+" / "+D.q.length+" · "+q.d));
 c.appendChild(el("div","t",q.k||q.s||q.t));if(q.k&&q.s)c.appendChild(el("div","meta",q.s));c.appendChild(el("div","meta","Virallinen otsikko: "+q.t));c.appendChild(el("div","note",q.m?"Mitä vaihtoehdot tarkoittavat: "+q.m:"Huom. Jaa tai Ei voi tarkoittaa muutakin kuin otsikon asian kannattamista."));
