@@ -3,6 +3,7 @@
 import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
 import { loadNews, newsPage, blogPages } from "./extras.mjs";
 import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
+import { followBlock, followPages } from "./seuranta.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -231,7 +232,7 @@ async function main() {
 <h1>${esc(nm)} – äänestykset ja läsnäolo</h1>
 <div class="chips"><div class="chip"><b>${lasna(m)} %</b><span>läsnä äänestyksissä</span></div><div class="chip"><b>${eri(m)} %</b><span>ryhmänsä linjasta poikkeavia ääniä</span></div><div class="chip"><b>${m.yhteensa}</b><span>äänestystä yhteensä</span></div></div>
 <p class="meta">Jaa ${m.jaa} · Ei ${m.ei} · Tyhjää ${m.tyhja} · Poissa ${m.poissa}. Poissaolo voi johtua esimerkiksi luottamustehtävästä, sairaudesta tai virkamatkasta.</p>
-${shareBtns}
+${shareBtns}${followBlock({ tyyppi: "edustaja", kohde: m.henkilo, nimi: nm, osoite: `/edustaja/${s}/`, SB, KEY })}
 <h2>Äänestykset</h2>${li || '<p class="note">Yksittäisiä äänestyksiä ei ole vielä saatavilla.</p>'}${restBlock}
 <p class="note"><a href="/menetelma/">Miten ”ryhmänsä linjasta poikkeava” lasketaan?</a></p>`;
     put(`/edustaja/${s}/`, shell({ title: `${nm} (${pname(m.puolue)}) – äänestykset | Eduskuntaseuranta`, desc: `Miten ${nm} on äänestänyt eduskunnassa? Läsnäolo ${lasna(m)} %, ryhmästä poikkeavia ääniä ${eri(m)} % (${m.yhteensa} äänestystä).`, path: `/edustaja/${s}/`, body }));
@@ -303,7 +304,7 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
       const closeBox = close.length ? `<h2>Niukimmat äänestykset</h2>${close.map(x => `<a class="card" href="/aanestys/${x.v.id}/"><div>${esc(short(vtitle(x.v), 160))}</div><div class="meta">${dateFi(x.v.alkoi)} · Jaa ${x.v.jaa} · Ei ${x.v.ei} (ero ${x.m} ääntä)</div></a>`).join("")}` : "";
       const list = vs.slice(0, 300).map(v => { const mn = voteMeaning(v); return `<a class="card" href="/aanestys/${v.id}/"><div>${esc(short(vtitle(v), 200))}</div><div class="meta">${dateFi(v.alkoi)} · <span class="jaa">Jaa ${v.jaa ?? "–"}</span> · <span class="ei">Ei ${v.ei ?? "–"}</span></div>${mn ? `<div class="meta">${esc([mn.jaa ? "Jaa = " + mn.jaa : "", mn.ei ? "Ei = " + mn.ei : ""].filter(Boolean).join(" · "))}</div>` : ""}</a>`; }).join("");
       put(`/aihe/${tslug(t)}/`, shell({ title: `${t.name}: eduskunnan äänestykset | Eduskuntaseuranta`, desc: `${t.info} ${vs.length} äänestystä Eduskuntaseurannassa.`, path: `/aihe/${tslug(t)}/`,
-        body: `<p class="meta"><a href="/aiheet/">← Kaikki aiheet</a></p><h1>${esc(t.name)}</h1><p>${esc(t.info)}</p><p class="meta">${vs.length} äänestystä. Aihe on arvioitu otsikon avainsanoista, joten se voi olla epätarkka. Huom. Jaa tai Ei ei aina tarkoita otsikon asian kannattamista: katso kunkin äänestyksen sivulta, mitä vaihtoehdot tarkoittavat.</p>${shareBtns}${closeBox}<h2>Äänestykset${vs.length > 300 ? " (300 uusinta)" : ""}</h2>${list}` }));
+        body: `<p class="meta"><a href="/aiheet/">← Kaikki aiheet</a></p><h1>${esc(t.name)}</h1><p>${esc(t.info)}</p><p class="meta">${vs.length} äänestystä. Aihe on arvioitu otsikon avainsanoista, joten se voi olla epätarkka. Huom. Jaa tai Ei ei aina tarkoita otsikon asian kannattamista: katso kunkin äänestyksen sivulta, mitä vaihtoehdot tarkoittavat.</p>${shareBtns}${followBlock({ tyyppi: "aihe", kohde: tslug(t), nimi: t.name, osoite: `/aihe/${tslug(t)}/`, SB, KEY })}${closeBox}<h2>Äänestykset${vs.length > 300 ? " (300 uusinta)" : ""}</h2>${list}` }));
     }
   }
 
@@ -596,6 +597,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   try {
     for (const pg of authPages({ shell, esc, SB, KEY })) put(pg.path, pg.html);
     for (const pg of guestPages({ shell, esc, SB, KEY })) put(pg.path, pg.html);
+    for (const pg of followPages({ shell, esc, SB, KEY })) put(pg.path, pg.html);
   } catch (e) { console.log("Kirjautuminen ohitettu:", e.message); }
   try {
     const b = blogPages({ shell, esc, SITE, SB, KEY, dateFi });

@@ -1,7 +1,7 @@
 // Kirjautuminen sähköpostilinkillä (Supabase Auth REST) ja kommentit. Ei supabase-js-kirjastoa.
 export const ACCT_JS = `<script>(function(){try{var n=localStorage.getItem("es_nick"),a=document.getElementById("acct");if(a&&n){a.textContent=n;a.href="/kirjaudu/"}}catch(e){}})()</script>`;
 
-function esJs(SB, KEY) {
+export function esJs(SB, KEY) {
   return `var ES=(function(SB,KEY){
 var K="es_sess";
 function load(){try{return JSON.parse(localStorage.getItem(K))}catch(e){return null}}
@@ -42,7 +42,7 @@ export function authPages({ shell, esc, SB, KEY }) {
 <p class="note">Saat viestin, jossa on linkki. Linkin painaminen kirjaa sinut sisään. Tarkista tarvittaessa roskaposti. Sähköpostiosoitettasi ei näytetä muille.</p>
 </div>
 <div id="li" class="af" style="display:none">
-<p>Kirjautunut: <b id="who"></b></p>
+<p>Kirjautunut: <b id="who"></b> · <a href="/seuranta/">Seurantani</a></p>
 <form id="pf">
 <label for="nm">Nimimerkki (osoitteeseen, 3–30 merkkiä: a–z, 0–9 ja viiva)</label><input id="nm" required maxlength="30" pattern="[a-z0-9\\-]{3,30}" placeholder="esim. matti-m">
 <label for="dn">Näytettävä nimi</label><input id="dn" required minlength="2" maxlength="60" placeholder="Oma nimi suositeltu">
