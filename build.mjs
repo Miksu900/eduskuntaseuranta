@@ -138,7 +138,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <style>${CSS}</style>${head}</head><body>
 <header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><nav><a href="/edustajat/">Edustajat</a><a href="/aanestykset/">Äänestykset</a><a href="/aiheet/">Aiheet</a><a href="/budjetti/">Budjetti</a><a href="/haku/">Kysy</a><a href="/viikko/">Viikkokatsaus</a><a href="/uutiset/">Uutiset</a><a href="/blogi/">Blogi</a><a href="/vieraskyna/">Vieraskynä</a><a href="/tilaa/">Tilaa</a><a id="acct" href="/kirjaudu/">Kirjaudu</a><a href="/#p">Puolueet</a>${HAS_VP ? '<a href="/oma-edustaja/">Oma edustaja</a>' : ""}<a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/data/">Data</a><a href="/menetelma/">Menetelmä</a></nav></header>
-<main>${body}${commentsWanted(path) ? commentsBlock({ path, SB, KEY }) : ""}</main>
+<main>${commentsWanted(path) ? (body.includes("<!--KOM-->") ? body.replace("<!--KOM-->", () => commentsBlock({ path, SB, KEY })) : body + commentsBlock({ path, SB, KEY })) : body}</main>
 <footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>
 ${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
 }
@@ -262,7 +262,7 @@ ${shareBtns}
 ${v.lisaotsikko && v.lisaotsikko !== v.otsikko ? `<p class="meta">${esc(v.lisaotsikko)}</p>` : ""}${ai}
 ${meaningBox(v)}${docLinks(v)}
 <div class="chips"><div class="chip"><b class="jaa">${v.jaa ?? "–"}</b><span>Jaa</span></div><div class="chip"><b class="ei">${v.ei ?? "–"}</b><span>Ei</span></div><div class="chip"><b class="tyhja">${v.tyhja ?? "–"}</b><span>Tyhjää</span></div><div class="chip"><b class="poissa">${v.poissa ?? "–"}</b><span>Poissa</span></div></div>
-${shareBtns}${ptab}${who}`;
+${shareBtns}<!--KOM-->${ptab}${who}`;
     put(`/aanestys/${v.id}/`, shell({
       title: `${short(t, 70)} – äänestys ${dateFi(v.alkoi)} | Eduskuntaseuranta`,
       desc: v.tiivistelma ? short(v.tiivistelma, 200) : `Eduskunnan äänestys ${dateFi(v.alkoi)}: Jaa ${v.jaa ?? "–"}, Ei ${v.ei ?? "–"}. Katso miten ryhmät ja kansanedustajat äänestivät.`,
