@@ -95,7 +95,7 @@ export function commentsBlock({ path, SB, KEY }) {
 <p class="note">Kommentit julkaistaan heti, eikä niitä tarkisteta etukäteen. Kommentoija vastaa itse kirjoituksestaan. Jos kommentti rikkoo lakia (esimerkiksi uhkailu, kunnianloukkaus tai vihapuhe), paina Ilmianna. Kun kolme lukijaa on ilmiantanut kommentin, se piilotetaan automaattisesti, ja poistan selvästi laittoman sisällön viipymättä. Voit myös kirjoittaa osoitteeseen miika@eduskuntaseuranta.fi.</p></section>
 <script>${esJs(SB, KEY)}
 (function(){
-var PATH=${JSON.stringify(path)};
+var PATH=${path === "/vieraskyna/lue/" ? "location.pathname+location.search" : JSON.stringify(path)};
 var $=function(i){return document.getElementById(i)},km=$("km"),cur=null,hasProf=false;
 function msg(t,e){km.textContent=t;km.className=e?"err":""}
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x)e.textContent=x;return e}
@@ -132,4 +132,93 @@ ES.session().then(function(s){cur=s;
  if(!cur){form();return}
  ES.rest("GET","profiilit?select=id&id=eq."+cur.uid,cur.token).then(function(r){hasProf=!!(r.ok&&r.data&&r.data.length);form();list()})});
 })();</script>`;
+}
+
+// ---- Käyttäjien vieraskynät (haetaan selaimessa tietokannasta) ----
+const GCSS = `<style>.af label{display:block;margin:14px 0 4px;font-size:14px}.af input,.af textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:#1b1b1b;border:1px solid #333;border-radius:10px;padding:10px}.af textarea{min-height:320px}.af button,.gb{margin-top:12px;background:#2a5db0}#gm{margin:12px 0;color:#9ad}#gm.err{color:#f99}.gt p{white-space:pre-wrap;overflow-wrap:anywhere}.gt h3{margin:20px 0 6px;font-size:17px}.gx{background:none;color:#999;padding:2px 0;margin-right:14px;font-size:13px;border-radius:0}</style>`;
+const GCOMMON = `var $=function(i){return document.getElementById(i)};
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x)e.textContent=x;return e}
+function msg(t,e){var m=$("gm");if(m){m.textContent=t;m.className=e?"err":""}}
+var NL=String.fromCharCode(10);
+function fin(d){return new Date(d).toLocaleDateString("fi-FI")}
+function paras(box,t){var cur=[];function flush(){if(cur.length){var x=cur.join(NL);if(x.indexOf("## ")===0)box.appendChild(el("h3","",x.slice(3)));else box.appendChild(el("p","",x));cur=[]}}
+ t.split(NL).forEach(function(l){if(l.trim()==="")flush();else cur.push(l)});flush()}
+function who(k){var n=k.profiilit&&k.profiilit.nimimerkki,a=el("a","",k.profiilit?k.profiilit.nayttonimi:"Käyttäjä");if(n)a.href="/kayttaja/?n="+encodeURIComponent(n);return a}`;
+const GNOTE = "Vieraskynät ovat kirjoittajiensa omia kirjoituksia. Näkemykset ovat kirjoittajan, eivät Eduskuntaseurannan. Kirjoituksia ei tarkisteta ennen julkaisua. Jos kirjoitus rikkoo lakia, paina Ilmianna.";
+
+export function guestPages({ shell, esc, SB, KEY }) {
+  const pages = [];
+  const rd = (path, title, desc, body, script) => pages.push({ path, html: shell({ title: title + " | Eduskuntaseuranta", desc, path, head: GCSS, body: body + `<script>${esJs(SB, KEY)}\n${GCOMMON}\n(function(){${script}})();</script>` }) });
+
+  // Lista
+  rd("/vieraskyna/", "Vieraskynä", "Lukijoiden kirjoituksia politiikasta ja yhteiskunnasta. Kuka tahansa voi kirjoittaa oman vieraskynänsä.",
+`<h1>Vieraskynä</h1><p>Lukijoiden omia kirjoituksia politiikasta ja yhteiskunnasta. Kuka tahansa kirjautunut voi julkaista oman kirjoituksensa. Näkemykset ovat kirjoittajien omia, eivät Eduskuntaseurannan.</p>
+<p><a class="btn" href="/vieraskyna/kirjoita/">Kirjoita vieraskynä</a></p><div id="gl"><p class="note">Ladataan...</p></div><p class="note">${GNOTE}</p>`,
+`ES.rest("GET","kirjoitukset?select=id,otsikko,luotu,teksti,profiilit(nayttonimi,nimimerkki)&order=luotu.desc&limit=30").then(function(r){
+ var b=$("gl");b.textContent="";
+ if(!r.ok){b.appendChild(el("p","note","Kirjoituksia ei voitu ladata."));return}
+ if(!r.data.length){b.appendChild(el("p","","Ei vielä kirjoituksia. Ole ensimmäinen."));return}
+ r.data.forEach(function(k){var a=el("a","card");a.href="/vieraskyna/lue/?k="+k.id;a.appendChild(el("div","",k.otsikko)).style.fontWeight="bold";
+  a.appendChild(el("div","meta",fin(k.luotu)+" · "+(k.profiilit?k.profiilit.nayttonimi:"Käyttäjä")));
+  a.appendChild(el("div","meta",k.teksti.replace(/\\s+/g," ").slice(0,160)+"..."));b.appendChild(a)})});`);
+
+  // Kirjoitus / muokkaus
+  rd("/vieraskyna/kirjoita/", "Kirjoita vieraskynä", "Julkaise oma vieraskynäkirjoituksesi.",
+`<p class="meta"><a href="/vieraskyna/">← Vieraskynä</a></p><h1 id="gh">Kirjoita vieraskynä</h1>
+<div id="gl"><p class="note">Ladataan...</p></div>
+<div id="gf" class="af" style="display:none"><form id="gfo">
+<label for="ot">Otsikko</label><input id="ot" required minlength="3" maxlength="140">
+<label for="te">Teksti (vähintään 300 merkkiä). Tyhjä rivi aloittaa uuden kappaleen. Rivi, joka alkaa merkeillä ## , on väliotsikko.</label><textarea id="te" required minlength="300" maxlength="20000"></textarea>
+<button type="submit">Julkaise</button></form></div><p id="gm"></p>
+<p class="note">Kirjoitus julkaistaan heti ilman ennakkotarkastusta. Kirjoittaja vastaa tekstistään. ${GNOTE}</p>`,
+`var id=new URLSearchParams(location.search).get("k"),cur=null;
+ES.session().then(function(s){cur=s;var b=$("gl");b.textContent="";
+ if(!s){var p=el("p");var a=el("a","","Kirjaudu sisään");a.href="/kirjaudu/";p.appendChild(a);p.appendChild(document.createTextNode(" kirjoittaaksesi vieraskynän."));b.appendChild(p);return}
+ ES.rest("GET","profiilit?select=id&id=eq."+s.uid,s.token).then(function(r){
+  if(!(r.ok&&r.data&&r.data.length)){var p=el("p");var a=el("a","","Luo ensin profiili");a.href="/kirjaudu/";p.appendChild(a);p.appendChild(document.createTextNode(" (nimimerkki ja näytettävä nimi)."));b.appendChild(p);return}
+  $("gf").style.display="block";
+  if(id){$("gh").textContent="Muokkaa kirjoitusta";ES.rest("GET","kirjoitukset?select=otsikko,teksti,profiili_id&id=eq."+id,s.token).then(function(q){if(q.ok&&q.data&&q.data[0]&&q.data[0].profiili_id===s.uid){$("ot").value=q.data[0].otsikko;$("te").value=q.data[0].teksti}else{$("gf").style.display="none";msg("Kirjoitusta ei löytynyt tai et voi muokata sitä.",1)}})}})});
+$("gfo").addEventListener("submit",function(e){e.preventDefault();if(!cur)return;msg("Tallennetaan...");
+ var row={otsikko:$("ot").value.trim(),teksti:$("te").value.trim()};
+ var q=id?ES.rest("PATCH","kirjoitukset?id=eq."+id,cur.token,row,{Prefer:"return=representation"}):ES.rest("POST","kirjoitukset",cur.token,Object.assign({profiili_id:cur.uid},row),{Prefer:"return=representation"});
+ q.then(function(r){if(!r.ok){msg(r.data&&r.data.message&&r.data.message.indexOf("vuorokaudessa")>-1?"Liian monta kirjoitusta vuorokaudessa. Yritä huomenna.":"Tallennus epäonnistui. Tarkista otsikko ja pituus.",1);return}
+  var k=r.data&&r.data[0];location.href="/vieraskyna/lue/?k="+(k?k.id:id)})});`);
+
+  // Lukunäkymä (kommentit liitetään automaattisesti sivun loppuun)
+  rd("/vieraskyna/lue/", "Vieraskynä", "Vieraskynäkirjoitus.",
+`<p class="meta"><a href="/vieraskyna/">← Vieraskynä</a></p><div id="gl"><p class="note">Ladataan...</p></div><p id="gm"></p>`,
+`var id=new URLSearchParams(location.search).get("k");
+function render(k,cur){var b=$("gl");b.textContent="";
+ document.title=k.otsikko+" | Eduskuntaseuranta";
+ b.appendChild(el("h1","",k.otsikko));
+ var m=el("p","meta",fin(k.luotu)+" · ");m.appendChild(who(k));b.appendChild(m);
+ var n=el("div","ai","Vieraskynä. Näkemykset ovat kirjoittajan omia, eivät Eduskuntaseurannan. Kirjoitusta ei ole tarkistettu ennen julkaisua.");n.style.cssText="background:#2a2417;border-color:#b8860b";b.appendChild(n);
+ var t=el("div","gt");paras(t,k.teksti);b.appendChild(t);
+ var ac=el("div");
+ var r=el("button","gx","Ilmianna");r.type="button";r.onclick=function(){if(!cur){msg("Kirjaudu sisään ilmiantaaksesi kirjoituksen.",1);return}if(!confirm("Ilmiannetaanko kirjoitus lainvastaisena?"))return;
+  ES.rest("POST","kirjoitus_ilmiannot",cur.token,{kirjoitus_id:k.id,ilmoittaja:cur.uid},{Prefer:"return=minimal"}).then(function(x){var dup=!x.ok&&x.data&&x.data.code==="23505";msg(x.ok?"Kiitos ilmiannosta.":(dup?"Olet jo ilmiantanut tämän kirjoituksen.":"Ilmianto epäonnistui."),!x.ok&&!dup)})};ac.appendChild(r);
+ if(cur&&cur.uid===k.profiili_id){var e=el("a","gx","Muokkaa");e.href="/vieraskyna/kirjoita/?k="+k.id;ac.appendChild(e);
+  var d=el("button","gx","Poista");d.type="button";d.onclick=function(){if(!confirm("Poistetaanko kirjoitus pysyvästi?"))return;ES.rest("DELETE","kirjoitukset?id=eq."+k.id,cur.token).then(function(){location.href="/vieraskyna/"})};ac.appendChild(d)}
+ b.appendChild(ac)}
+if(!id){$("gl").textContent="Kirjoitusta ei löytynyt."}else ES.session().then(function(s){
+ ES.rest("GET","kirjoitukset?select=id,otsikko,teksti,luotu,profiili_id,profiilit(nayttonimi,nimimerkki)&id=eq."+id,s&&s.token).then(function(r){
+  if(!r.ok||!r.data||!r.data[0]){$("gl").textContent="Kirjoitusta ei löytynyt tai se on poistettu.";return}
+  render(r.data[0],s)})});`);
+
+  // Käyttäjäsivu
+  rd("/kayttaja/", "Kirjoittaja", "Vieraskynäkirjoittajan profiili.",
+`<p class="meta"><a href="/vieraskyna/">← Vieraskynä</a></p><div id="gl"><p class="note">Ladataan...</p></div>`,
+`var n=new URLSearchParams(location.search).get("n");
+if(!n){$("gl").textContent="Kirjoittajaa ei löytynyt."}else
+ES.rest("GET","profiilit?select=id,nimimerkki,nayttonimi,kuvaus,luotu&nimimerkki=eq."+encodeURIComponent(n.toLowerCase())).then(function(r){
+ var b=$("gl");b.textContent="";
+ if(!r.ok||!r.data||!r.data[0]){b.textContent="Kirjoittajaa ei löytynyt.";return}
+ var p=r.data[0];document.title=p.nayttonimi+" | Eduskuntaseuranta";
+ b.appendChild(el("h1","",p.nayttonimi));b.appendChild(el("p","meta","@"+p.nimimerkki+" · liittynyt "+fin(p.luotu)));
+ if(p.kuvaus)b.appendChild(el("p","",p.kuvaus));
+ b.appendChild(el("h2","","Vieraskynät"));
+ ES.rest("GET","kirjoitukset?select=id,otsikko,luotu&profiili_id=eq."+p.id+"&order=luotu.desc").then(function(q){
+  if(!q.ok||!q.data.length){b.appendChild(el("p","note","Ei vielä kirjoituksia."));return}
+  q.data.forEach(function(k){var a=el("a","card");a.href="/vieraskyna/lue/?k="+k.id;a.appendChild(el("div","",k.otsikko));a.appendChild(el("div","meta",fin(k.luotu)));b.appendChild(a)})})});`);
+  return pages;
 }

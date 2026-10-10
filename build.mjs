@@ -2,7 +2,7 @@
 // Ajetaan GitHub Actionsissa (ks. .github/workflows/build.yml). Tulos kirjoitetaan kansioon dist/.
 import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
 import { loadNews, newsPage, blogPages } from "./extras.mjs";
-import { authPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
+import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -595,10 +595,11 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("Uutiset ohitettu:", e.message); }
   try {
     for (const pg of authPages({ shell, esc, SB, KEY })) put(pg.path, pg.html);
+    for (const pg of guestPages({ shell, esc, SB, KEY })) put(pg.path, pg.html);
   } catch (e) { console.log("Kirjautuminen ohitettu:", e.message); }
   try {
     const b = blogPages({ shell, esc, SITE, SB, KEY, dateFi });
-    for (const pg of b.pages) put(pg.path, pg.html);
+    for (const pg of b.pages) if (pg.path !== "/vieraskyna/" && pg.path !== "/vieraskyna/kirjoita/") put(pg.path, pg.html);
     blogRss = b.rss;
   } catch (e) { console.log("Blogi ohitettu:", e.message); }
 
