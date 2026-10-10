@@ -27,14 +27,14 @@ export function authPages({ shell, esc, SB, KEY }) {
 var sb=supabase.createClient(${JSON.stringify(SB)},${JSON.stringify(KEY)});
 var $=function(i){return document.getElementById(i)},am=$("am");
 function msg(t,e){am.textContent=t;am.className=e?"err":""}
-var cur=null;
+var cur=null,have=false;
 function show(s){
  cur=s;
  $("lo").style.display=s?"none":"block";$("li").style.display=s?"block":"none";
  if(!s){try{localStorage.removeItem("es_nick")}catch(e){}return}
  $("who").textContent=s.user.email;
  sb.from("profiilit").select("*").eq("id",s.user.id).maybeSingle().then(function(r){
-  var p=r.data;if(p){$("nm").value=p.nimimerkki;$("dn").value=p.nayttonimi;$("ku").value=p.kuvaus||"";try{localStorage.setItem("es_nick",p.nayttonimi)}catch(e){}}
+  var p=r.data;have=!!p;if(p){$("nm").value=p.nimimerkki;$("dn").value=p.nayttonimi;$("ku").value=p.kuvaus||"";try{localStorage.setItem("es_nick",p.nayttonimi)}catch(e){}}
   else msg("Valitse nimimerkki ja näytettävä nimi, niin profiilisi on valmis.")
  });
 }
@@ -44,10 +44,12 @@ $("lf").addEventListener("submit",function(e){e.preventDefault();var b=e.target.
 $("nm").addEventListener("input",function(){this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,"")});
 $("pf").addEventListener("submit",function(e){e.preventDefault();if(!cur){msg("Kirjaudu ensin sisään.",1);return}msg("Tallennetaan...");
  var t=setTimeout(function(){msg("Tallennus kestää liian kauan. Lataa sivu uudelleen ja yritä uudelleen.",1)},15000);
- sb.from("profiilit").upsert({id:cur.user.id,nimimerkki:$("nm").value.trim().toLowerCase(),nayttonimi:$("dn").value.trim(),kuvaus:$("ku").value.trim()||null}).then(function(r){
+ var row={nimimerkki:$("nm").value.trim().toLowerCase(),nayttonimi:$("dn").value.trim(),kuvaus:$("ku").value.trim()||null};
+ var q=have?sb.from("profiilit").update(row).eq("id",cur.user.id):sb.from("profiilit").insert(Object.assign({id:cur.user.id},row));
+ q.then(function(r){
   clearTimeout(t);
   if(r.error){msg(r.error.code==="23505"?"Nimimerkki on jo käytössä. Valitse toinen.":"Tallennus epäonnistui: "+r.error.message,1)}
-  else{try{localStorage.setItem("es_nick",$("dn").value.trim())}catch(e){}msg("Profiili tallennettu.")}})});
+  else{have=true;try{localStorage.setItem("es_nick",$("dn").value.trim())}catch(e){}msg("Profiili tallennettu.")}})});
 $("out").onclick=function(){sb.auth.signOut().then(function(){show(null);msg("Kirjauduit ulos.")})};
 sb.auth.getSession().then(function(x){show(x.data.session)});
 sb.auth.onAuthStateChange(function(ev,s){if(ev==="SIGNED_IN")setTimeout(function(){show(s)},0)});
