@@ -24,7 +24,7 @@ export function authPages({ shell, esc, SB, KEY }) {
 <p class="note">Kirjautuminen tallentaa sähköpostiosoitteesi ja profiilitietosi Supabase-palveluun (EU). Voit pyytää tietojesi poistamista osoitteella miika@eduskuntaseuranta.fi.</p>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>(function(){
-var sb=supabase.createClient(${JSON.stringify(SB)},${JSON.stringify(KEY)});
+var sb=supabase.createClient(${JSON.stringify(SB)},${JSON.stringify(KEY)},{auth:{lock:function(n,t,f){return f()}}});
 var $=function(i){return document.getElementById(i)},am=$("am");
 function msg(t,e){am.textContent=t;am.className=e?"err":""}
 var cur=null,have=false;
@@ -64,17 +64,17 @@ export function commentsWanted(path) {
 
 export function commentsBlock({ path, SB, KEY }) {
   const css = `<style>#kom{margin-top:32px;border-top:1px solid #2a2a2a;padding-top:8px}.kc{background:#1b1b1b;border-radius:12px;padding:12px 14px;margin:10px 0}.kc .kh{font-size:13px;color:#999;margin-bottom:4px}.kc .kt{white-space:pre-wrap;overflow-wrap:anywhere}.kc button{background:none;color:#999;padding:2px 0;margin-right:14px;font-size:13px;border-radius:0}#kf textarea{width:100%;box-sizing:border-box;font:inherit;color:#fff;background:#1b1b1b;border:1px solid #333;border-radius:10px;padding:10px;min-height:90px}#kf button{margin-top:8px;background:#2a5db0}#km{margin:8px 0;color:#9ad}#km.err{color:#f99}</style>`;
-  const html = `${css}<section id="kom"><h2>Keskustelu</h2><div id="kl"><p class="note">Ladataan kommentteja...</p></div>
-<div id="kf"></div><p id="km"></p>
+  const html = `${css}<section id="kom"><h2>Keskustelu</h2>
+<div id="kf"></div><p id="km"></p><div id="kl"><p class="note">Ladataan kommentteja...</p></div>
 <p class="note">Kommentit julkaistaan heti, eikä niitä tarkisteta etukäteen. Kommentoija vastaa itse kirjoituksestaan. Jos kommentti rikkoo lakia (esimerkiksi uhkailu, kunnianloukkaus tai vihapuhe), paina Ilmianna. Kun kolme lukijaa on ilmiantanut kommentin, se piilotetaan automaattisesti, ja poistan selvästi laittoman sisällön viipymättä. Voit myös kirjoittaa osoitteeseen miika@eduskuntaseuranta.fi.</p></section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>(function(){
-var PATH=${JSON.stringify(path)},sb=supabase.createClient(${JSON.stringify(SB)},${JSON.stringify(KEY)});
+var PATH=${JSON.stringify(path)},sb=supabase.createClient(${JSON.stringify(SB)},${JSON.stringify(KEY)},{auth:{lock:function(n,t,f){return f()}}});
 var $=function(i){return document.getElementById(i)},km=$("km"),cur=null,hasProf=false;
 function msg(t,e){km.textContent=t;km.className=e?"err":""}
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x)e.textContent=x;return e}
 function list(){
- sb.from("kommentit").select("id,teksti,luotu,profiili_id,profiilit(nayttonimi)").eq("sivu",PATH).order("luotu",{ascending:true}).then(function(r){
+ fetch(${JSON.stringify(SB)}+"/rest/v1/kommentit?select=id,teksti,luotu,profiili_id,profiilit(nayttonimi)&sivu=eq."+encodeURIComponent(PATH)+"&order=luotu.asc",{headers:{apikey:${JSON.stringify(KEY)},Authorization:"Bearer "+${JSON.stringify(KEY)}}}).then(function(x){return x.json().then(function(d){return {data:x.ok?d:null,error:x.ok?null:d}})}).then(function(r){
   var box=$("kl");box.textContent="";
   if(r.error){box.appendChild(el("p","note","Kommentteja ei voitu ladata."));return}
   if(!r.data.length){box.appendChild(el("p","note","Ei vielä kommentteja. Kirjoita ensimmäinen."));return}
@@ -101,7 +101,7 @@ function form(){
   sb.from("kommentit").insert({sivu:PATH,profiili_id:cur.user.id,teksti:t}).then(function(r){
    b.disabled=false;if(r.error){msg(r.error.message.indexOf("tunnissa")>-1?"Liian monta kommenttia tunnissa. Yritä myöhemmin.":"Lähetys epäonnistui.",1)}else{ta.value="";msg("");list()}})};
  f.appendChild(ta);f.appendChild(b)}
-list();
+list();form();
 sb.auth.getSession().then(function(x){cur=x.data.session;
  if(!cur){form();return}
  sb.from("profiilit").select("id").eq("id",cur.user.id).maybeSingle().then(function(r){hasProf=!!r.data;form();list()})});
