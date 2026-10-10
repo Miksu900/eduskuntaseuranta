@@ -27,7 +27,9 @@ export function authPages({ shell, esc, SB, KEY }) {
 var sb=supabase.createClient(${JSON.stringify(SB)},${JSON.stringify(KEY)});
 var $=function(i){return document.getElementById(i)},am=$("am");
 function msg(t,e){am.textContent=t;am.className=e?"err":""}
+var cur=null;
 function show(s){
+ cur=s;
  $("lo").style.display=s?"none":"block";$("li").style.display=s?"block":"none";
  if(!s){try{localStorage.removeItem("es_nick")}catch(e){}return}
  $("who").textContent=s.user.email;
@@ -39,14 +41,16 @@ function show(s){
 $("lf").addEventListener("submit",function(e){e.preventDefault();var b=e.target.querySelector("button");b.disabled=true;msg("Lähetetään...");
  sb.auth.signInWithOtp({email:$("em").value.trim(),options:{emailRedirectTo:location.origin+"/kirjaudu/"}}).then(function(r){
   b.disabled=false;if(r.error){msg("Lähetys epäonnistui: "+r.error.message,1)}else msg("Linkki lähetetty. Avaa sähköpostisi ja paina linkkiä.")})});
-$("pf").addEventListener("submit",function(e){e.preventDefault();msg("Tallennetaan...");
- sb.auth.getSession().then(function(x){var s=x.data.session;if(!s)return;
-  sb.from("profiilit").upsert({id:s.user.id,nimimerkki:$("nm").value.trim().toLowerCase(),nayttonimi:$("dn").value.trim(),kuvaus:$("ku").value.trim()||null}).then(function(r){
-   if(r.error){msg(r.error.code==="23505"?"Nimimerkki on jo käytössä. Valitse toinen.":"Tallennus epäonnistui: "+r.error.message,1)}
-   else{try{localStorage.setItem("es_nick",$("dn").value.trim())}catch(e){}msg("Profiili tallennettu.")}})})});
+$("nm").addEventListener("input",function(){this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,"")});
+$("pf").addEventListener("submit",function(e){e.preventDefault();if(!cur){msg("Kirjaudu ensin sisään.",1);return}msg("Tallennetaan...");
+ var t=setTimeout(function(){msg("Tallennus kestää liian kauan. Lataa sivu uudelleen ja yritä uudelleen.",1)},15000);
+ sb.from("profiilit").upsert({id:cur.user.id,nimimerkki:$("nm").value.trim().toLowerCase(),nayttonimi:$("dn").value.trim(),kuvaus:$("ku").value.trim()||null}).then(function(r){
+  clearTimeout(t);
+  if(r.error){msg(r.error.code==="23505"?"Nimimerkki on jo käytössä. Valitse toinen.":"Tallennus epäonnistui: "+r.error.message,1)}
+  else{try{localStorage.setItem("es_nick",$("dn").value.trim())}catch(e){}msg("Profiili tallennettu.")}})});
 $("out").onclick=function(){sb.auth.signOut().then(function(){show(null);msg("Kirjauduit ulos.")})};
 sb.auth.getSession().then(function(x){show(x.data.session)});
-sb.auth.onAuthStateChange(function(ev,s){if(ev==="SIGNED_IN")show(s)});
+sb.auth.onAuthStateChange(function(ev,s){if(ev==="SIGNED_IN")setTimeout(function(){show(s)},0)});
 })();</script>`;
   return [{ path: "/kirjaudu/", html: shell({ title: "Kirjaudu | Eduskuntaseuranta", desc: "Kirjaudu sähköpostilinkillä ja luo oma profiili.", path: "/kirjaudu/", head: css, body }) }];
 }
