@@ -640,8 +640,6 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     const hd = await loadHilma(process.env.HILMA_API_KEY);
     if (hd) {
       for (const pg of hankinnatPages({ shell, esc, dateFi, data: hd })) put(pg.path, pg.html);
-      await mkdir(OUT + "/data", { recursive: true });
-      await writeFile(OUT + "/data/hilma-esimerkki.json", JSON.stringify(hd.sample || [], null, 1));
     }
   } catch (e) { console.log("Hankinnat ohitettu:", e.message); }
 
@@ -650,8 +648,6 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     const kd = await loadKunnat();
     if (kd) {
       for (const pg of kunnatPages({ shell, esc, data: kd })) put(pg.path, pg.html);
-      await mkdir(OUT + "/data", { recursive: true });
-      await writeFile(OUT + "/data/kunnat-tarkistus.json", JSON.stringify(kd.debug || {}, null, 1));
     }
   } catch (e) { console.log("Kunnat ohitettu:", e.message); }
 

@@ -53,8 +53,9 @@ export async function loadKunnat() {
     const d = await getJson(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, response: { format: "json-stat2" } }) });
     const ids = d.id, sizes = d.size;
     const dimOf = k => d.dimension[k];
-    const areaId = ids.find(k => /alue|kunta|area/i.test(k));
-    const timeId = ids.find(k => /vuosi|year|aika/i.test(k));
+    const areaId = ids.find(k => /alue|kunta|area/i.test(k)) || ids[0];
+    const timeCode = (meta.variables.find(v => v.time) || {}).code;
+    const timeId = ids.find(k => k === timeCode) || ids.find(k => /vuosi|year|aika|time|period/i.test(k));
     const infoIds = ids.filter(k => k !== areaId && k !== timeId);
     if (!areaId) throw new Error("aluedimensiota ei löytynyt");
     const strides = []; let s = 1; for (let i = ids.length - 1; i >= 0; i--) { strides[i] = s; s *= sizes[i]; }
