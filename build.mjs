@@ -5,6 +5,7 @@ import { loadNews, newsPage, blogPages } from "./extras.mjs";
 import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
 import { followBlock, followPages } from "./seuranta.mjs";
 import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
+import { loadKunnat, kunnatPages } from "./kunnat.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -143,7 +144,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/hankinnat/", "Julkiset hankinnat"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -151,7 +152,11 @@ const headerHtml = (bare = false) => `<header class="top"><a class="brand" href=
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
-const footerHtml = () => `<footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>`;
+const footerHtml = (path = "") => /^\/hankinnat\//.test(path)
+  ? `<footer>Lähde: Hilma-hankintapalvelu (Hansel Oy), avoin rajapinta. Ilmoitusten tiedot ovat sellaisenaan hankkijoiden ilmoittamia. Päivitetty ${dateFi(new Date())}.</footer>`
+  : /^\/kunnat\//.test(path)
+    ? `<footer>Lähde: Tilastokeskus, Kuntien avainluvut. Luvut ovat tilaston virallisia lukuja sellaisenaan. Päivitetty ${dateFi(new Date())}.</footer>`
+    : `<footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty ${dateFi(new Date())}.</footer>`;
 function shell({ title, desc, path, body, head = "" }) {
   const url = SITE + path;
   return `<!DOCTYPE html><html lang="fi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -162,7 +167,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <style>${CSS}</style>${head}</head><body>
 ${headerHtml()}
 <main>${commentsWanted(path) ? (body.includes("<!--KOM-->") ? body.replace("<!--KOM-->", () => commentsBlock({ path, SB, KEY })) : body + commentsBlock({ path, SB, KEY })) : body}</main>
-${footerHtml()}
+${footerHtml(path)}
 ${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
 }
 
@@ -639,6 +644,12 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       await writeFile(OUT + "/data/hilma-esimerkki.json", JSON.stringify(hd.sample || [], null, 1));
     }
   } catch (e) { console.log("Hankinnat ohitettu:", e.message); }
+
+  // --- Kunnat (Tilastokeskus) ---
+  try {
+    const kd = await loadKunnat();
+    if (kd) for (const pg of kunnatPages({ shell, esc, data: kd })) put(pg.path, pg.html);
+  } catch (e) { console.log("Kunnat ohitettu:", e.message); }
 
   // --- Kirjoitus levylle ---
   await pool(jobs, 16, async j => { const dir = OUT + j.path; await mkdir(dir, { recursive: true }); await writeFile(dir + "index.html", j.html); });
