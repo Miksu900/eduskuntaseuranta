@@ -140,6 +140,23 @@ export function euPages({ shell, esc, dateFi, data }) {
   const D = data.votes, L = data.lobby;
 
   if (D) {
+    const widget = (mep) => `${filt("eq", mep >= 0 ? "Hae tämän mepin ääniä aiheen mukaan, esim. climate" : "Hae äänestystä otsikosta, esim. climate")}<div id="er"></div><script>(function(){var MEP=${mep},D=null,q=document.getElementById("eq"),o=document.getElementById("er");
+function e(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fd(s){var m=s.split("-");return(+m[2])+"."+(+m[1])+"."+m[0]}
+var P={"+":"Puolesta","-":"Vastaan","0":"Pidättyi","x":"Ei äänestänyt"},R={ADOPTED:"Hyväksytty",REJECTED:"Hylätty"};
+function card(x){var m=D.m,s=x[8];
+if(MEP>=0){return"<a class='card' href='https://howtheyvote.eu/votes/"+x[0]+"' rel='noopener'><b>"+e(x[2])+"</b><br><span class='meta'>"+fd(x[1])+(x[3]?" · "+(R[x[3]]||e(x[3])):"")+" · <b>"+P[s.charAt(MEP)]+"</b></span></a>"}
+var g={"+":[],"-":[],"0":[],"x":[]};for(var i=0;i<m.length;i++){var c=s.charAt(i);if(g[c])g[c].push(m[i][1])}
+var h="<div class='card'><b>"+e(x[2])+"</b><br><span class='meta'>"+fd(x[1])+(x[3]?" · "+(R[x[3]]||e(x[3])):"")+" · EU yhteensä: "+x[4]+" puolesta, "+x[5]+" vastaan, "+x[6]+" pidättyi</span>";
+["+","-","0","x"].forEach(function(k){if(g[k].length)h+="<br><span class='meta'><b>"+P[k]+":</b> "+e(g[k].join(", "))+"</span>"});
+return h+"<br><a class='meta' href='https://howtheyvote.eu/votes/"+x[0]+"' rel='noopener'>Katso koko äänestys</a></div>"}
+function show(){var t=q.value.toLowerCase().trim();
+if(MEP>=0&&!t){o.innerHTML="";return}
+var r=D.v.filter(function(x){return(MEP<0||x[8].charAt(MEP)!==".")&&(!t||x[2].toLowerCase().indexOf(t)>-1)});
+o.innerHTML="<p class='meta'>"+r.length+" äänestystä"+(r.length>40?", näytetään 40 uusinta":"")+"</p>"+r.slice(0,40).map(card).join("")}
+function load(cb){if(D)return cb();fetch("/data/eu-haku.json").then(function(r){return r.json()}).then(function(j){D=j;cb()})}
+q.oninput=function(){load(show)};
+if(MEP<0){o.textContent="Ladataan…";load(show)}})()</script>`;
     const cnt = (m, i) => { const c = { "+": 0, "-": 0, "0": 0, x: 0 }; for (const v of D.votes) { const ch = v.pos[i]; if (c[ch] !== undefined) c[ch]++; } return c; };
     D.meps.forEach((m, i) => { m.c = cnt(m, i); m.n = m.c["+"] + m.c["-"] + m.c["0"] + m.c.x; });
     const L4 = { "+": "Puolesta", "-": "Vastaan", "0": "Pidättyi", x: "Ei äänestänyt" };
@@ -154,30 +171,19 @@ export function euPages({ shell, esc, dateFi, data }) {
         path,
         body: `<h1>${esc(m.name)}</h1><p class="meta">${[m.party, m.group, m.current ? "Nykyinen meppi" : "Entinen meppi"].filter(Boolean).map(esc).join(" · ")}</p>
 <table class="t"><tbody><tr><td>Äänestyksiä yhteensä</td><td><b>${nf.format(m.n)}</b></td></tr><tr><td>Puolesta</td><td><b>${nf.format(m.c["+"])}</b> (${pct("+")} %)</td></tr><tr><td>Vastaan</td><td><b>${nf.format(m.c["-"])}</b> (${pct("-")} %)</td></tr><tr><td>Pidättyi</td><td><b>${nf.format(m.c["0"])}</b> (${pct("0")} %)</td></tr><tr><td>Ei äänestänyt</td><td><b>${nf.format(m.c.x)}</b> (${pct("x")} %)</td></tr></tbody></table>
-<h2>Viimeisimmät äänestykset</h2><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table></div><p><a href="/eu/aanestykset/">Hae kaikista EU-äänestyksistä</a></p>${SRC_V}<p><a href="/eu/">EU</a></p>`,
+<h2>Hae tämän mepin ääniä</h2>${widget(i)}<h2>Viimeisimmät äänestykset</h2><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table></div><p><a href="/eu/aanestykset/">Hae kaikista EU-äänestyksistä</a></p>${SRC_V}<p><a href="/eu/">EU</a></p>`,
       }) });
     }
     const mcard = m => `<a class="card" href="/eu/mepit/${m.id}/"><b>${esc(m.name)}</b><br><span class="meta">${[m.party, m.group].filter(Boolean).map(esc).join(" · ")} · ${nf.format(m.n)} äänestystä</span></a>`;
     const act = D.meps.filter(m => m.n);
     files.push({ path: "/data/eu-haku.json", content: JSON.stringify({ m: D.meps.map(m => [m.id, m.name, m.party]), v: D.votes.map(v => [v.id, v.date, v.title, v.result, v.f, v.a, v.ab, v.n, v.pos]) }) });
-    const JS = `<script>(function(){var D=null,q=document.getElementById("eq"),o=document.getElementById("er");
-function e(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function fd(s){var m=s.split("-");return(+m[2])+"."+(+m[1])+"."+m[0]}
-var P={"+":"Puolesta","-":"Vastaan","0":"Pidättyi","x":"Ei äänestänyt"},R={ADOPTED:"Hyväksytty",REJECTED:"Hylätty"};
-function card(x){var m=D.m,s=x[8],g={"+":[],"-":[],"0":[],"x":[]};for(var i=0;i<m.length;i++){var c=s.charAt(i);if(g[c])g[c].push(m[i][1])}
-var h="<div class='card'><b>"+e(x[2])+"</b><br><span class='meta'>"+fd(x[1])+(x[3]?" · "+(R[x[3]]||e(x[3])):"")+" · EU yhteensä: "+x[4]+" puolesta, "+x[5]+" vastaan, "+x[6]+" pidättyi</span>";
-["+","-","0","x"].forEach(function(k){if(g[k].length)h+="<br><span class='meta'><b>"+P[k]+":</b> "+e(g[k].join(", "))+"</span>"});
-return h+"<br><a class='meta' href='https://howtheyvote.eu/votes/"+x[0]+"' rel='noopener'>Katso koko äänestys</a></div>"}
-function show(){var t=q.value.toLowerCase().trim(),r=D.v.filter(function(x){return!t||x[2].toLowerCase().indexOf(t)>-1});
-o.innerHTML="<p class='meta'>"+r.length+" äänestystä"+(r.length>40?", näytetään 40 uusinta":"")+"</p>"+r.slice(0,40).map(card).join("")}
-q.oninput=function(){if(D)return show();fetch("/data/eu-haku.json").then(function(r){return r.json()}).then(function(j){D=j;show()})};
-o.textContent="Ladataan…";fetch("/data/eu-haku.json").then(function(r){return r.json()}).then(function(j){D=j;show()})})()</script>`;
     pages.push({ path: "/eu/aanestykset/", html: shell({
       title: "EU-parlamentin äänestykset: miten suomalaiset mepit äänestivät | Eduskuntaseuranta",
       desc: "Hae Euroopan parlamentin täysistuntoäänestyksiä ja katso, miten suomalaiset mepit äänestivät.",
       path: "/eu/aanestykset/",
-      body: `<h1>EU-parlamentin äänestykset</h1><p>Hae aiheen mukaan ja katso, miten jokainen suomalainen meppi äänesti.</p>${filt("eq", "Hae äänestystä otsikosta, esim. climate")}<div id="er"></div>${JS}${SRC_V}<p><a href="/eu/">EU</a></p>`,
+      body: `<h1>EU-parlamentin äänestykset</h1><p>Hae aiheen mukaan ja katso, miten jokainen suomalainen meppi äänesti.</p>${widget(-1)}${SRC_V}<p><a href="/eu/">EU</a></p>`,
     }) });
+    pages.hubWidget = widget(-1);
     pages.mepList = `<h2>Suomalaiset mepit</h2>${act.filter(m => m.current).map(mcard).join("")}${act.some(m => !m.current) ? `<h2>Entiset mepit</h2>${act.filter(m => !m.current).map(mcard).join("")}` : ""}<p><a class="btn" href="/eu/aanestykset/">Hae EU-äänestyksiä</a></p>`;
   }
 
@@ -205,7 +211,7 @@ o.textContent="Ladataan…";fetch("/data/eu-haku.json").then(function(r){return 
     title: "EU: äänestykset ja lobbaus | Eduskuntaseuranta",
     desc: "Suomalaisten meppien äänet Euroopan parlamentissa ja suomalaiset EU-lobbarit yhdessä paikassa.",
     path: "/eu/",
-    body: `<h1>EU</h1><p>Mitä Brysselissä päätetään, miten suomalaiset mepit äänestävät ja ketkä yrittävät vaikuttaa päätöksiin?</p>${pages.mepList || ""}${L ? `<h2>EU-lobbaus</h2><p>${nf.format(L.length)} suomalaista organisaatiota EU:n avoimuusrekisterissä.</p><p><a class="btn" href="/eu/lobbaus/">Katso suomalaiset EU-lobbarit</a></p>` : ""}<p class="meta">EU:n rahavirrat (koheesio- ja elpymisrahat) lisätään seuraavaksi.</p>`,
+    body: `<h1>EU</h1><p>Mitä Brysselissä päätetään, miten suomalaiset mepit äänestävät ja ketkä yrittävät vaikuttaa päätöksiin?</p>${D ? `<h2>Hae EU-äänestyksiä</h2><p>Katso, miten jokainen suomalainen meppi äänesti.</p>${pages.hubWidget}` : ""}${pages.mepList || ""}${L ? `<h2>EU-lobbaus</h2><p>${nf.format(L.length)} suomalaista organisaatiota EU:n avoimuusrekisterissä.</p><p><a class="btn" href="/eu/lobbaus/">Katso suomalaiset EU-lobbarit</a></p>` : ""}<p class="meta">EU:n rahavirrat (koheesio- ja elpymisrahat) lisätään seuraavaksi.</p>`,
   }) });
   pages.files = files;
   console.log(`EU: sivuja ${pages.length}`);
