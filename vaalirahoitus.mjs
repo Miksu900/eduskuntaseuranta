@@ -123,15 +123,15 @@ export async function loadVaalirahoitus(mps) {
 const nf = new Intl.NumberFormat("fi-FI", { maximumFractionDigits: 0 });
 const eur = v => (v == null ? "–" : nf.format(v) + " €");
 const eurRow = v => (v == null ? '<span class="meta">ei eritelty</span>' : "<b>" + nf.format(v) + " €</b>");
-const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot ovat Valtiontalouden tarkastusviraston vaali- ja puoluerahoitusvalvonnan julkisista ehdokasilmoituksista, eduskuntavaalit 2023. Ehdokas ilmoittaa itse vaalikampanjansa kulut ja rahoituksen. Luvut ovat ilmoituksista sellaisenaan. Rahoituksen jako on ilmoittajan oma jaottelu. Tukijoiden nimet näytetään, kun tuki on vähintään 1 500 euroa. Lain mukaan nämä tiedot ovat julkisia. Pienemmistä tuista ilmoitetaan vain summa. Ilmoituksessa voi olla myös tukiryhmän rahoitusta. Luku ei kerro, onko rahoitus ollut sopivaa tai vaikuttiko se päätöksiin.</div>`;
+const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot ovat Valtiontalouden tarkastusviraston vaali- ja puoluerahoitusvalvonnan julkisista ehdokasilmoituksista, eduskuntavaalit 2023. Ehdokas ilmoittaa itse vaalikampanjansa kulut ja rahoituksen. Luvut ovat ilmoituksista sellaisenaan. Rahoituksen jako on ilmoittajan oma jaottelu. Tukijoiden nimet näytetään sellaisina kuin ehdokas on ne ilmoittanut. Nimi on pakko ilmoittaa vähintään 1 500 euron tuesta, ja pienemmästä tuesta se ilmoitetaan tukijan suostumuksella. Ilmoituksessa voi olla myös tukiryhmän rahoitusta. Luku ei kerro, onko rahoitus ollut sopivaa tai vaikuttiko se päätöksiin.</div>`;
 
 const donorHtml = r => {
   const d = r.donors || { yrit: [], yks: [] };
   const li = (n, v, y) => `<tr><td>${esc0(n)}${y ? ` <span class="meta">${esc0(y)}</span>` : ""}</td><td style="text-align:right;white-space:nowrap"><b>${nf.format(v)} €</b></td></tr>`;
   const tbl = rows => `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table></div>`;
   let h = "";
-  if (d.yrit.length) h += `<details open><summary><b>Yritykset ja yhteisöt, joiden tuki oli vähintään 1 500 € (${d.yrit.length})</b></summary>${tbl(d.yrit.slice().sort((a, b) => b.v - a.v).map(x => li(x.n, x.v, x.y)).join(""))}</details>`;
-  if (d.yks.length) h += `<details><summary><b>Yksityishenkilöt, joiden tuki oli vähintään 1 500 € (${d.yks.length})</b></summary>${tbl(d.yks.slice().sort((a, b) => b.v - a.v).map(x => li(x.n, x.v, "")).join(""))}<p class="meta">Nimet ovat lain mukaan julkisia. Kotikuntia ei näytetä tässä.</p></details>`;
+  if (d.yrit.length) h += `<details open><summary><b>Yritykset ja yhteisöt, jotka on ilmoitettu nimellä (${d.yrit.length})</b></summary>${tbl(d.yrit.slice().sort((a, b) => b.v - a.v).map(x => li(x.n, x.v, x.y)).join(""))}</details>`;
+  if (d.yks.length) h += `<details><summary><b>Yksityishenkilöt, jotka on ilmoitettu nimellä (${d.yks.length})</b></summary>${tbl(d.yks.slice().sort((a, b) => b.v - a.v).map(x => li(x.n, x.v, "")).join(""))}<p class="meta">Nimi on pakko ilmoittaa vähintään 1 500 euron tuesta. Pienemmästä tuesta nimi ilmoitetaan tukijan suostumuksella. Kotikuntia ei näytetä tässä.</p></details>`;
   return h;
 };
 const esc0 = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -167,7 +167,7 @@ export function vaalirahoitusPages({ shell, esc, data }) {
 <p class="meta">${rows.length} kansanedustajaa. Ilmoitetut kulut yhteensä ${eur(sum("kulut"))}, yritysten tuki yhteensä ${eur(sum("yritykset"))}, yksityisten tuki yhteensä ${eur(sum("yksityiset"))}.</p>
 <h2>Suurimmat ilmoitetut kulut</h2>${topCost.map(card).join("")}
 <h2>Eniten yritysten tukea</h2>${topCorp.map(card).join("")}
-${byTotal.length ? `<h2>Yritykset, jotka tukivat eniten</h2><p class="meta">Kansanedustajien ilmoittamat vähintään 1 500 euron tuet yhteensä.</p>${byTotal.map(compCard).join("")}<h2>Yritykset, jotka tukivat useinta edustajaa</h2>${byCount.map(compCard).join("")}` : ""}
+${byTotal.length ? `<h2>Yritykset, jotka tukivat eniten</h2><p class="meta">Kansanedustajien nimellä ilmoitetut yritystuet yhteensä.</p>${byTotal.map(compCard).join("")}<h2>Yritykset, jotka tukivat useinta edustajaa</h2>${byCount.map(compCard).join("")}` : ""}
 <h2>Kaikki kansanedustajat</h2>${filter}${sorted.map(card).join("")}`,
     }),
   });
