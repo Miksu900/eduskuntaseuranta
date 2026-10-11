@@ -8,7 +8,7 @@ import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
 import { loadKunnat, kunnatPages, loadMaakunnat } from "./kunnat.mjs";
 import { loadLobbaus, lobbausPages } from "./lobbaus.mjs";
 import { loadVaalirahoitus, vaalirahoitusPages } from "./vaalirahoitus.mjs";
-import { loadFinlex, finlexPages } from "./finlex.mjs";
+import { loadFinlex, loadFinlexArchive, finlexPages } from "./finlex.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -147,7 +147,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Uudet lait"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Lait ja asetukset"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -686,8 +686,12 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
 
   // --- Finlex (uudet lait) ---
   try {
-    const fd = await loadFinlex();
-    if (fd) for (const pg of finlexPages({ shell, esc, dateFi, data: fd })) put(pg.path, pg.html);
+    const fd = loadFinlexArchive() || await loadFinlex();
+    if (fd) {
+      const fp = finlexPages({ shell, esc, dateFi, data: fd });
+      for (const pg of fp) put(pg.path, pg.html);
+      for (const f of fp.files || []) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
+    }
   } catch (e) { console.log("Finlex ohitettu:", e.message); }
 
   // --- Kunnat (Tilastokeskus) ---
