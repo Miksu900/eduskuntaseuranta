@@ -12,41 +12,33 @@ jobs:
         run: |
           set +e
           UA="Mozilla/5.0"
-          echo "=== 1 HowTheyVote tiedostot"
-          curl -sS -m 30 -A "$UA" -o /tmp/rel.json "https://api.github.com/repos/HowTheyVote/data/releases/latest"
-          python3 - <<'PY'
-          import json
-          d=json.load(open('/tmp/rel.json'))
-          print(d.get('tag_name'))
-          for a in d.get('assets',[]): print(a['name'],a['size'])
-          PY
-          echo "=== 2 Avoimuusrekisteri XML"
-          curl -sS -m 120 -L -A "$UA" -o /tmp/tr.xml -w "%{http_code} %{size_download}\n" "https://transparency-register.europa.eu/odplastorganisationxml_en"
-          head -c 900 /tmp/tr.xml; echo
-          echo "=== 3 FTS 2023 HEAD"
-          curl -sS -m 30 -L -I -A "$UA" "https://ec.europa.eu/budget/financial-transparency-system/download/2023_FTS_dataset_en.xlsx" | head -n 5
-          echo "=== 4 Koheesio ja elpymisrahasto data.europa.eu:sta"
-          for q in "kohesio" "recovery%20and%20resilience%20facility%20payments"; do
-            curl -sS -m 60 -A "$UA" -o /tmp/s.json "https://data.europa.eu/api/hub/search/search?q=$q&limit=4&filter=dataset"
-            python3 - <<'PY'
-          import json
-          r=json.load(open('/tmp/s.json'))['result']['results']
-          for d in r[:4]:
-              t=d.get('title') or {}
-              print('-',t.get('en') or list(t.values())[:1])
-              for x in (d.get('distributions') or [])[:3]:
-                  u=x.get('download_url') or x.get('access_url')
-                  print('    ',(x.get('format') or {}).get('label'),u)
-          PY
+          echo "=== 1 HowTheyVote sarakkeet"
+          for f in members member_votes votes group_memberships groups national_party_memberships national_parties; do
+            echo "--- $f"
+            curl -sL "https://github.com/HowTheyVote/data/releases/latest/download/$f.csv.gz" | gunzip 2>/dev/null | head -n 3 | cut -c1-400
           done
-          echo "=== 5 VTV koko tietue"
-          curl -sS -m 40 -A "$UA" -o /tmp/r.json "https://www.vtv.fi/wp-json/wp/v2/report/28434"
+          echo "=== 2 Suomalainen lobbariorganisaatio"
+          curl -sS -m 150 -L -A "$UA" -o /tmp/tr.xml "https://transparency-register.europa.eu/odplastorganisationxml_en"
+          python3 - <<'PY'
+          d=open('/tmp/tr.xml',encoding='utf-8').read()
+          i=d.find('>Finland<')
+          s=d.rfind('<interestRepresentative>',0,i)
+          e=d.find('</interestRepresentative>',i)
+          print(d[s:e][:3800])
+          PY
+          echo "=== 3 Koheesio"
+          curl -sS -m 40 -D /tmp/h -o /tmp/c.json "https://cohesiondata.ec.europa.eu/resource/557j-pmg8.json?\$limit=1"
+          grep -i "^access-control" /tmp/h; head -c 1500 /tmp/c.json; echo
+          curl -sS -m 40 "https://cohesiondata.ec.europa.eu/api/catalog/v1?domains=cohesiondata.ec.europa.eu&q=kohesio%20projects&limit=6" | python3 -c "
+          import json,sys
+          for r in json.load(sys.stdin)['results']: print(r['resource']['id'],r['resource']['name'])"
+          echo "=== 4 Eurostat elpymisrahasto"
+          curl -sS -m 60 -o /tmp/e.json "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_rrf_use?format=JSON&lang=EN&geo=IT"
           python3 - <<'PY'
           import json
-          d=json.load(open('/tmp/r.json'))
-          for k,v in d.items():
-              s=json.dumps(v,ensure_ascii=False)
-              print(k,len(s),s[:160])
-          print('--- content')
-          print(d['content']['rendered'][:1200])
+          d=json.load(open('/tmp/e.json'))
+          print(d.get('id'),d.get('size'))
+          for k,v in d['dimension'].items():
+              c=v['category']['label']
+              print(k,len(c),list(c.items())[:6])
           PY
