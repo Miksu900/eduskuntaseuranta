@@ -7,13 +7,17 @@ jobs:
       - name: Vaalirahoitus
         run: |
           B="https://www.vaalirahoitusvalvonta.fi"
-          for p in "/webcomponents/julkinenpalvelu/vaalirahoitustiedot/vaaliraportti.html" "/webcomponents/julkinenpalvelu/vaalirahoitustiedot/vaaliraporttiluonti.html"; do
-            echo "=== $p"
-            curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua]\n" "$B$p" -o c.html
-            tail -c 0 c.html
-            echo "--- osoitteet ja toiminnot"
-            grep -oE '(luovaaliraportti|valitseraportti|haeraportti|lataaraportti|raporttistatus|tilaraportti)[^;]{0,200}' c.html | head -12 | cut -c1-260
-            grep -oE '["'"'"'](/[a-zA-Z0-9_./?=&-]*(\.stx|\.json|\.csv|\.xls|\.xlsx|raportti|report|download|lataa)[a-zA-Z0-9_./?=&-]*)["'"'"']' c.html | sort -u | head -25
-            echo "--- ajax-kutsut"
-            grep -oE '(\$\.(ajax|post|get|getJSON)|fetch|xhr\.open|url:)[^;]{0,200}' c.html | head -15 | cut -c1-260
-          done
+          P="/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023/helsinginvaalipiiri.html"
+          curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua]\n" "$B$P" -o h.html
+          echo "--- linkkien määrä"
+          grep -oE 'href="[^"]*"' h.html | grep -ci 'ilmoitus'
+          echo "--- ensimmäiset ilmoituslinkit"
+          grep -oE '<a[^>]*href="[^"]*"[^>]*>[^<]*Vaalirahoitusilmoitus' h.html | head -4 | cut -c1-300
+          L=$(grep -oE 'href="[^"]*"[^>]*>[^<]*Vaalirahoitusilmoitus' h.html | head -1 | sed -E 's/href="([^"]*)".*/\1/' | sed 's/&amp;/\&/g')
+          echo "--- ensimmäinen: $L"
+          case "$L" in http*) U="$L";; *) U="$B$L";; esac
+          curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" "$U" -o i.out
+          tail -c 0 i.out
+          file i.out
+          echo "--- sisältö (teksti)"
+          sed -e 's/<script[^>]*>[^<]*<\/script>//g' -e 's/<[^>]*>/ /g' i.out | tr -s ' \n\t' | head -c 2500
