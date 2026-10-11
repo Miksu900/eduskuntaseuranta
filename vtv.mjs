@@ -23,9 +23,10 @@ export function parseReport(r, tax) {
   const title = txt(r.title && r.title.rendered);
   if (!title) return null;
   const content = (r.content && r.content.rendered) || "";
+  const good = t => t.length >= 110 && /[.!?]/.test(t.slice(30)) && t.split(" ").length >= 14 && !/^Lataa raportti/i.test(t);
   let summary = txt(r.excerpt && r.excerpt.rendered);
-  if (summary.length < 60) {
-    const ps = [...content.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map(m => txt(m[1])).filter(t => t.length >= 80);
+  if (!good(summary)) {
+    const ps = [...content.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map(m => txt(m[1])).filter(good);
     summary = ps.slice(0, 2).join(" ");
   }
   if (summary.length > 700) summary = summary.slice(0, 700).replace(/\s+\S*$/, "") + "…";
