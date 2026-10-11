@@ -8,17 +8,11 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: VTV
+      - name: EU
         run: |
           set +e
-          g() { echo "=== $1"; curl -sS -m 30 -L -A "Mozilla/5.0" -D /tmp/h -o /tmp/b "$1"; head -n 1 /tmp/h; grep -i "^x-wp-total" /tmp/h; }
-          g "https://www.vtv.fi/wp-json/wp/v2/report?per_page=1"
-          python3 - <<'PY'
-          import json
-          d=json.load(open('/tmp/b'))[0]
-          for k,v in d.items():
-              s=json.dumps(v,ensure_ascii=False)
-              print(k,':',s[:300])
-          PY
-          g "https://www.vtv.fi/wp-json/wp/v2/report?per_page=5&_fields=date,link,title"
-          python3 -c "import json;[print(r['date'][:10],r['title']['rendered'],r['link']) for r in json.load(open('/tmp/b'))]"
+          g() { echo "=== $1"; curl -sS -m 40 -L -A "Mozilla/5.0" -D /tmp/h -o /tmp/b "$1"; head -n 1 /tmp/h; grep -i "^content-type\|^access-control-allow-origin" /tmp/h; wc -c < /tmp/b; head -c 900 /tmp/b; echo; }
+          g "https://api.howtheyvote.eu/api/votes?page_size=2"
+          g "https://api.howtheyvote.eu/api/members?page_size=2"
+          g "https://api.howtheyvote.eu/api/members?country_code=FIN&page_size=2"
+          g "https://data.europarl.europa.eu/api/v2/meps?country-of-representation=FI&format=application%2Fld%2Bjson&limit=2"
