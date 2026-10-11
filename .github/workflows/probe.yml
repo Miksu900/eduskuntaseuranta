@@ -6,9 +6,11 @@ jobs:
     steps:
       - name: Avoimuusrekisteri
         run: |
-          curl -sS -L -m 60 https://public.api.avoimuusrekisteri.fi/swagger-json -o s.json
-          echo "koko: $(wc -c < s.json)"
-          echo "##### POLUT"
-          jq -r '.paths | to_entries[] | .key as $k | .value | to_entries[] | "\(.key|ascii_upcase) \($k)  [\((.value.parameters // []) | map(.name) | join(","))]"' s.json
-          echo "##### SKEEMAT"
-          jq -r '.components.schemas | keys | join(", ")' s.json | head -c 1500
+          B="https://public.api.avoimuusrekisteri.fi"
+          g() { echo "=== $1"; curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua]\n" "$B$1" -o r.json; tail -c 0 r.json; head -c ${2:-700} r.json; echo; echo "[HTTP-koodi yllä oli:]"; }
+          g "/open-data-term/all" 600
+          g "/open-data-register-notification/count/published" 200
+          g "/open-data-reporting/activity-notification/count/latest-term" 200
+          g "/open-data-reporting/targets/latest-term/top-topic-count/5" 900
+          g "/open-data-penalty-payments" 700
+          g "/open-data-activity-notification" 1800
