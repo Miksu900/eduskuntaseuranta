@@ -6,6 +6,7 @@ import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from ".
 import { followBlock, followPages } from "./seuranta.mjs";
 import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
 import { loadKunnat, kunnatPages, loadMaakunnat } from "./kunnat.mjs";
+import { loadLobbaus, lobbausPages } from "./lobbaus.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -144,7 +145,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -152,7 +153,9 @@ const headerHtml = (bare = false) => `<header class="top"><a class="brand" href=
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
-const footerHtml = (path = "") => /^\/hankinnat\//.test(path)
+const footerHtml = (path = "") => /^\/lobbaus\//.test(path)
+  ? `<footer>Lähde: Avoimuusrekisteri (avoimuusrekisteri.fi, Valtiontalouden tarkastusvirasto), avoin rajapinta. Tiedot ovat ilmoittajien omia ilmoituksia sellaisenaan. Päivitetty ${dateFi(new Date())}.</footer>`
+  : /^\/hankinnat\//.test(path)
   ? `<footer>Lähde: Hilma-hankintapalvelu (Hansel Oy), avoin rajapinta. Ilmoitusten tiedot ovat sellaisenaan hankkijoiden ilmoittamia. Päivitetty ${dateFi(new Date())}.</footer>`
   : /^\/kunnat\//.test(path)
     ? `<footer>Lähde: Tilastokeskus, Kuntien avainluvut. Luvut ovat tilaston virallisia lukuja sellaisenaan. Päivitetty ${dateFi(new Date())}.</footer>`
@@ -642,6 +645,14 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       for (const pg of hankinnatPages({ shell, esc, dateFi, data: hd })) put(pg.path, pg.html);
     }
   } catch (e) { console.log("Hankinnat ohitettu:", e.message); }
+
+  // --- Lobbaus (Avoimuusrekisteri) ---
+  try {
+    const ld = await loadLobbaus();
+    if (ld) {
+      for (const pg of lobbausPages({ shell, esc, dateFi, data: ld })) put(pg.path, pg.html);
+    }
+  } catch (e) { console.log("Lobbaus ohitettu:", e.message); }
 
   // --- Kunnat (Tilastokeskus) ---
   try {
