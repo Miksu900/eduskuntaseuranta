@@ -5,7 +5,7 @@ import { loadNews, newsPage, blogPages } from "./extras.mjs";
 import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
 import { followBlock, followPages } from "./seuranta.mjs";
 import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
-import { loadKunnat, kunnatPages } from "./kunnat.mjs";
+import { loadKunnat, kunnatPages, loadMaakunnat } from "./kunnat.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -647,7 +647,10 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   try {
     const kd = await loadKunnat();
     if (kd) {
+      kd.maakunta = await loadMaakunnat();
       for (const pg of kunnatPages({ shell, esc, data: kd })) put(pg.path, pg.html);
+      await mkdir(OUT + "/data", { recursive: true });
+      await writeFile(OUT + "/data/maakunnat-tarkistus.json", JSON.stringify(kd.maakunta.debug, null, 1));
     }
   } catch (e) { console.log("Kunnat ohitettu:", e.message); }
 

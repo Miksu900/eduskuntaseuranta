@@ -90,6 +90,43 @@ export async function loadKunnat() {
   }
 }
 
+// Maakuntajako: Tilastokeskuksen luokituspalvelu (kunta -> maakunta -vastaavuustaulu). Kokeillaan useaa vuotta.
+export async function loadMaakunnat() {
+  const dbg = { tried: [] };
+  const years = ["20260101", "20250101", "20240101"];
+  for (const y of years) {
+    const url = `${process.env.CLASS_BASE || "https://data.stat.fi/api/classifications/v2"}/correspondenceTables/kunta_1_${y}${encodeURIComponent("#")}maakunta_1_${y}/maps?content=data&meta=max&lang=fi`;
+    try {
+      const r = await fetch(url, { headers: { Accept: "application/json" } });
+      const txt = await r.text();
+      dbg.tried.push({ url, status: r.status, head: txt.slice(0, 500) });
+      if (!r.ok) continue;
+      const j = JSON.parse(txt);
+      const map = new Map(); const names = {};
+      const nm = it => { const a = it && (it.classificationItemNames || it.names || it.localizedNames); const f = Array.isArray(a) ? (a.find(x => /fi/i.test(x.lang || x.language || "")) || a[0]) : null; return (f && (f.name || f.value)) || (it && it.name) || ""; };
+      const walk = o => {
+        if (!o || typeof o !== "object") return;
+        if (o.sourceItem && o.targetItem) {
+          const kc = String(o.sourceItem.code || ""), mc = String(o.targetItem.code || "");
+          if (/^\d{3}$/.test(kc) && mc) { map.set(kc, mc); const n = nm(o.targetItem); if (n) names[mc] = n; }
+          return;
+        }
+        for (const v of Array.isArray(o) ? o : Object.values(o)) walk(v);
+      };
+      walk(j);
+      dbg.keys = Array.isArray(j) ? ["(array)"] : Object.keys(j);
+      dbg.found = map.size;
+      if (map.size >= Number(process.env.MK_MIN || 250)) {
+        const out = new Map([...map].map(([k, v]) => [k, names[v] || v]));
+        console.log(`Maakuntajako: ${out.size} kuntaa, vuosi ${y}`);
+        return { byKunta: out, debug: dbg };
+      }
+    } catch (e) { dbg.tried.push({ url, error: e.message }); }
+  }
+  console.log("Maakuntajako ei saatavilla, lista pysyy aakkosjärjestyksessä.");
+  return { byKunta: null, debug: dbg };
+}
+
 const slug = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const nf = new Intl.NumberFormat("fi-FI", { maximumFractionDigits: 2 });
 
@@ -98,6 +135,11 @@ export function kunnatPages({ shell, esc, data }) {
   const cleanName = n => String(n).replace(/^\s*KU\d+\s*/i, "").trim();
   const muni = data.areas.filter(a => !/^(SSS|MK|KOKO)/i.test(a.code) && a.name).map(a => ({ ...a, name: cleanName(a.name) }));
   muni.sort((a, b) => a.name.localeCompare(b.name, "fi"));
+  const bk = data.maakunta && data.maakunta.byKunta;
+  for (const m of muni) m.mk = bk ? (bk.get(String(m.code).replace(/^KU/i, "")) || "") : "";
+  const useMk = bk && muni.filter(m => m.mk).length >= muni.length * 0.9;
+  const groupsMap = new Map(); for (const m of muni) { const g = m.mk || "Muut"; if (!groupsMap.has(g)) groupsMap.set(g, []); groupsMap.get(g).push(m); }
+  const groups = [...groupsMap.entries()].sort((a, b) => (a[0] === "Muut") - (b[0] === "Muut") || a[0].localeCompare(b[0], "fi"));
   const letters = []; for (const m of muni) { const L = m.name[0].toLocaleUpperCase("fi"); if (!letters.length || letters[letters.length - 1][0] !== L) letters.push([L, []]); letters[letters.length - 1][1].push(m); }
   const yr = data.year ? ` Tilastovuosi: ${esc(data.year)}.` : "";
   const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot ovat Tilastokeskuksen Kuntien avainluvut -tilastosta.${yr} Luvut ovat tilaston virallisia lukuja sellaisenaan. Sija kertoo, monentenako kunta on kaikkien kuntien vertailussa suurimmasta pienimpään. Se ei kerro, onko luku hyvä vai huono.</div>`;
@@ -107,7 +149,7 @@ export function kunnatPages({ shell, esc, data }) {
       title: "Kunnat: tilastot ja luvut | Eduskuntaseuranta", desc: "Jokaisen Suomen kunnan avainluvut Tilastokeskuksesta samalla tavalla koottuna: väestö, talous, työllisyys ja muut luvut.", path: "/kunnat/",
       body: `<h1>Kunnat</h1><p>Jokaisen kunnan avainluvut samassa muodossa. Valitse kunta.</p>${NOTE}
 <input id="kf" type="search" placeholder="Hae kuntaa" style="width:100%;padding:12px;font-size:16px;margin:10px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
-<div id="kl">${letters.map(([L, ms]) => `<section data-s><h2 style="margin:22px 0 6px">${esc(L)}</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px">${ms.map(m => `<a data-n="${esc(m.name.toLowerCase())}" href="/kunnat/${slug(m.name)}/" style="padding:6px 0">${esc(m.name)}</a>`).join("")}</div></section>`).join("")}</div>
+<div id="kl">${(useMk ? groups : letters).map(([L, ms]) => `<section data-s><h2 style="margin:22px 0 6px">${esc(L)} <span class="meta" style="font-size:14px;font-weight:400">${ms.length} kuntaa</span></h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px">${ms.map(m => `<a data-n="${esc(m.name.toLowerCase())}" href="/kunnat/${slug(m.name)}/" style="padding:6px 0">${esc(m.name)}</a>`).join("")}</div></section>`).join("")}</div>
 <script>(function(){var f=document.getElementById("kf");f.oninput=function(){var q=f.value.toLowerCase().trim();document.querySelectorAll("#kl section").forEach(function(sec){var n=0;sec.querySelectorAll("a").forEach(function(a){var ok=!q||a.getAttribute("data-n").indexOf(q)>-1;a.style.display=ok?"":"none";if(ok)n++});sec.style.display=n?"":"none"})}})()</script>`,
     }),
   });
@@ -133,7 +175,7 @@ export function kunnatPages({ shell, esc, data }) {
       path: `/kunnat/${s}/`,
       html: shell({
         title: `${m.name}: kunnan tilastot | Eduskuntaseuranta`, desc: `${m.name}: kunnan avainluvut Tilastokeskuksesta, ${data.year ? "tilastovuosi " + data.year + "." : ""}`, path: `/kunnat/${s}/`,
-        body: `<h1>${esc(m.name)}</h1><p class="meta">Kunnan avainluvut${data.year ? ", tilastovuosi " + esc(data.year) : ""}</p>${NOTE}
+        body: `<h1>${esc(m.name)}</h1><p class="meta">${m.mk ? "Maakunta: " + esc(m.mk) + " · " : ""}Kunnan avainluvut${data.year ? ", tilastovuosi " + esc(data.year) : ""}</p>${NOTE}
 ${rows}
 <p><a href="/kunnat/">Kaikki kunnat</a></p>`,
       }),
