@@ -667,7 +667,9 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     const kd = await loadKunnat();
     if (kd) {
       kd.maakunta = await loadMaakunnat();
-      for (const pg of kunnatPages({ shell, esc, data: kd })) put(pg.path, pg.html);
+      const kp = kunnatPages({ shell, esc, data: kd });
+      for (const pg of kp) put(pg.path, pg.html);
+      for (const f of kp.files || []) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
     }
   } catch (e) { console.log("Kunnat ohitettu:", e.message); }
 

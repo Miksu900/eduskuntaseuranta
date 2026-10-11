@@ -147,16 +147,16 @@ export function kunnatPages({ shell, esc, data }) {
     path: "/kunnat/",
     html: shell({
       title: "Kunnat: tilastot ja luvut | Eduskuntaseuranta", desc: "Jokaisen Suomen kunnan avainluvut Tilastokeskuksesta samalla tavalla koottuna: väestö, talous, työllisyys ja muut luvut.", path: "/kunnat/",
-      body: `<h1>Kunnat</h1><p>Jokaisen kunnan avainluvut samassa muodossa. Valitse kunta.</p>${NOTE}
+      body: `<h1>Kunnat</h1><p>Jokaisen kunnan avainluvut samassa muodossa. Valitse kunta tai <a href="/kunnat/vertailu/">vertaa kahta kuntaa</a>.</p>${NOTE}
 <input id="kf" type="search" placeholder="Hae kuntaa" style="width:100%;padding:12px;font-size:16px;margin:10px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
 <div id="kl">${(useMk ? groups : letters).map(([L, ms]) => `<section data-s><h2 style="margin:22px 0 6px">${esc(L)} <span class="meta" style="font-size:14px;font-weight:400">${ms.length} kuntaa</span></h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px">${ms.map(m => `<a data-n="${esc(m.name.toLowerCase())}" href="/kunnat/${slug(m.name)}/" style="padding:6px 0">${esc(m.name)}</a>`).join("")}</div></section>`).join("")}</div>
 <script>(function(){var f=document.getElementById("kf");f.oninput=function(){var q=f.value.toLowerCase().trim();document.querySelectorAll("#kl section").forEach(function(sec){var n=0;sec.querySelectorAll("a").forEach(function(a){var ok=!q||a.getAttribute("data-n").indexOf(q)>-1;a.style.display=ok?"":"none";if(ok)n++});sec.style.display=n?"":"none"})}})()</script>`,
     }),
   });
+  const KEY = [/^väkiluku$/i, /maapinta-ala/i, /väestötiheys/i, /väkiluvun muutos edellisestä/i, /työttömyysaste/i, /työpaikkaomavaraisuus/i, /huoltosuhde/i, /kunnallisvero|veroprosentti/i, /ulkomaan kansalaiset.*%|vieraskielisiä.*%/i, /yli 64-vuotiaita, %|65 vuotta täyttäneet.*%/i, /alle 15-vuotiaita, %/i, /korkea-asteen/i, /tulot|verotettavat/i, /lainakanta|velka/i, /vuosikate/i, /toimintakate/i];
   const seen = new Set();
   for (const m of muni) {
     const s = slug(m.name); if (!s || seen.has(s)) continue; seen.add(s);
-    const KEY = [/^väkiluku$/i, /maapinta-ala/i, /väestötiheys/i, /väkiluvun muutos edellisestä/i, /työttömyysaste/i, /työpaikkaomavaraisuus/i, /huoltosuhde/i, /kunnallisvero|veroprosentti/i, /ulkomaan kansalaiset.*%|vieraskielisiä.*%/i, /yli 64-vuotiaita, %|65 vuotta täyttäneet.*%/i, /alle 15-vuotiaita, %/i, /korkea-asteen/i, /tulot|verotettavat/i, /lainakanta|velka/i, /vuosikate/i, /toimintakate/i];
     const mk = (inf, j) => {
       const v = m.vals[j]; if (v == null) return null;
       const xs = data.rank[j]; let r = "";
@@ -177,9 +177,44 @@ export function kunnatPages({ shell, esc, data }) {
         title: `${m.name}: kunnan tilastot | Eduskuntaseuranta`, desc: `${m.name}: kunnan avainluvut Tilastokeskuksesta, ${data.year ? "tilastovuosi " + data.year + "." : ""}`, path: `/kunnat/${s}/`,
         body: `<h1>${esc(m.name)}</h1><p class="meta">${m.mk ? "Maakunta: " + esc(m.mk) + " · " : ""}Kunnan avainluvut${data.year ? ", tilastovuosi " + esc(data.year) : ""}</p>${NOTE}
 ${rows}
-<p><a href="/kunnat/">Kaikki kunnat</a></p>`,
+<p><a href="/kunnat/vertailu/?a=${s}">Vertaa toiseen kuntaan</a> · <a href="/kunnat/">Kaikki kunnat</a></p>`,
       }),
     });
   }
+  // Vertailusivu: tiedot haetaan erillisestä tiedostosta, jotta sivu pysyy kevyenä.
+  const keyIdx = data.infos.map((inf, j) => (KEY.some(re => re.test(inf.name)) ? j : -1)).filter(j => j >= 0);
+  const comp = { y: data.year || "", i: data.infos.map(x => x.name), key: keyIdx, k: muni.filter(m => slug(m.name)).map(m => ({ s: slug(m.name), n: m.name, m: m.mk || "", v: m.vals.map(v => (typeof v === "number" ? v : null)) })) };
+  pages.files = [{ path: "/data/kunnat-vertailu.json", content: JSON.stringify(comp) }];
+  pages.push({
+    path: "/kunnat/vertailu/",
+    html: shell({
+      title: "Kuntien vertailu | Eduskuntaseuranta", desc: "Vertaa kahta Suomen kuntaa vierekkäin: väestö, talous, työllisyys ja muut Tilastokeskuksen avainluvut.", path: "/kunnat/vertailu/",
+      body: `<h1>Kuntien vertailu</h1><p>Valitse kaksi kuntaa, niin luvut näkyvät vierekkäin. Suurempi luku on lihavoitu. Se ei kerro, kumpi on parempi.</p>${NOTE}
+<datalist id="kn"></datalist>
+<input id="ca" list="kn" placeholder="Ensimmäinen kunta" autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px;font-size:16px;margin:8px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
+<input id="cb" list="kn" placeholder="Toinen kunta" autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px;font-size:16px;margin:8px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
+<label style="display:block;margin:8px 0"><input type="checkbox" id="call"> Näytä kaikki luvut</label>
+<div id="cout"><p class="note">Ladataan kuntien tietoja…</p></div>
+<script>(function(){
+var D=null,A=document.getElementById("ca"),B=document.getElementById("cb"),O=document.getElementById("cout"),ALL=document.getElementById("call");
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function nf(v){return v==null?"–":v.toLocaleString("fi-FI",{maximumFractionDigits:2})}
+function find(q){q=(q||"").toLowerCase().trim();if(!q)return null;for(var i=0;i<D.k.length;i++)if(D.k[i].n.toLowerCase()===q||D.k[i].s===q)return D.k[i];return null}
+function upd(){
+ if(!D)return;var a=find(A.value),b=find(B.value);
+ try{history.replaceState(null,"","?"+(a?"a="+a.s:"")+(a&&b?"&":"")+(b?"b="+b.s:""))}catch(e){}
+ if(!a||!b){O.innerHTML='<p class="note">Valitse molemmat kunnat listasta.</p>';return}
+ var idx=ALL.checked?D.i.map(function(_,j){return j}):D.key,h='<h2>'+esc(a.n)+' ja '+esc(b.n)+'</h2><p class="meta">'+(a.m?esc(a.n)+': '+esc(a.m)+' · ':'')+(b.m?esc(b.n)+': '+esc(b.m)+' · ':'')+'tilastovuosi '+esc(D.y)+'</p><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left">Tieto</th><th style="text-align:right">'+esc(a.n)+'</th><th style="text-align:right">'+esc(b.n)+'</th></tr></thead><tbody>';
+ idx.forEach(function(j){var x=a.v[j],y=b.v[j];if(x==null&&y==null)return;var bx=x!=null&&y!=null&&x>y,by=x!=null&&y!=null&&y>x;h+='<tr><td>'+esc(D.i[j])+'</td><td style="text-align:right;white-space:nowrap">'+(bx?'<b>'+nf(x)+'</b>':nf(x))+'</td><td style="text-align:right;white-space:nowrap">'+(by?'<b>'+nf(y)+'</b>':nf(y))+'</td></tr>'});
+ O.innerHTML=h+'</tbody></table></div><p><a href="/kunnat/'+a.s+'/">'+esc(a.n)+': kaikki luvut</a> · <a href="/kunnat/'+b.s+'/">'+esc(b.n)+': kaikki luvut</a></p>';
+}
+fetch("/data/kunnat-vertailu.json").then(function(r){return r.json()}).then(function(d){
+ D=d;var dl=document.getElementById("kn");dl.innerHTML=d.k.map(function(k){return '<option value="'+esc(k.n)+'">'}).join("");
+ var p=new URLSearchParams(location.search),a=find(p.get("a")),b=find(p.get("b"));if(a)A.value=a.n;if(b)B.value=b.n;upd();
+}).catch(function(){O.innerHTML='<p class="note">Tietojen lataus epäonnistui. Yritä hetken päästä uudelleen.</p>'});
+A.oninput=B.oninput=ALL.onchange=upd;
+})()</script>`,
+    }),
+  });
   return pages;
 }
