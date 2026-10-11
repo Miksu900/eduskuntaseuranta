@@ -56,7 +56,7 @@ function topicText(t) {
   return dash(t.title) || dash(t.contactTopicOther) || dash(pn) || dash(t.contactTopicType) || "";
 }
 
-export function lobbausPages({ shell, esc, dateFi, data }) {
+export function lobbausPages({ shell, esc, dateFi, data, mps = [] }) {
   const { term, notes, tmap } = data;
   let skipped = 0;
   const rows = [];
@@ -81,6 +81,31 @@ export function lobbausPages({ shell, esc, dateFi, data }) {
   }
   console.log(`Lobbaus: sivuja ${rows.length}, ohitettu ${skipped}`);
 
+  // Kansanedustajat: kohteen nimi yhdistetään edustajan sivuun. Epäselvät (kaksi samannimistä) jätetään pois.
+  const idx = new Map();
+  const addKey = (k, v) => { if (!k) return; idx.set(k, idx.has(k) && idx.get(k) !== v ? null : v); };
+  for (const m of mps) {
+    const first = String(m.etunimi || "").trim().split(/\s+/)[0];
+    for (const k of [slug(first + " " + m.sukunimi), slug(m.etunimi + " " + m.sukunimi), slug(m.sukunimi + " " + first), slug(m.sukunimi + " " + m.etunimi)]) addKey(k, m.slug);
+  }
+  const mpNames = new Map(mps.map(m => [m.slug, `${m.etunimi || ""} ${m.sukunimi || ""}`.trim()]));
+  const byMp = new Map();
+  for (const r of rows) for (const t of r.topics) for (const c of (t.contactedTargets || [])) {
+    const tg = tmap.get(c.contactedTargetId);
+    const f = tg && (tg.fi || tg);
+    if (!f || !/kansanedustaja/i.test(String(f.title || "")) || !dash(f.name)) continue;
+    const ms = idx.get(slug(f.name));
+    if (!ms) continue;
+    if (!byMp.has(ms)) byMp.set(ms, new Map());
+    const cm = byMp.get(ms);
+    if (!cm.has(r.slug)) cm.set(r.slug, { name: r.name, slug: r.slug, n: 0, topics: new Set() });
+    const e = cm.get(r.slug);
+    e.n++;
+    const tt = topicText(t);
+    if (tt) e.topics.add(tt);
+  }
+  console.log(`Lobbaus: kansanedustajia joihin yhteydenottoja yhdistetty ${byMp.size}`);
+
   const groupTotals = new Map();
   for (const r of rows) for (const [g, c] of r.groups) groupTotals.set(g, (groupTotals.get(g) || 0) + c);
 
@@ -93,6 +118,8 @@ export function lobbausPages({ shell, esc, dateFi, data }) {
   const topGroups = [...groupTotals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 25);
   const withCost = [...rows].filter(r => r.cost > 0).sort((a, b) => b.cost - a.cost).slice(0, 25);
 
+  const mpTotals = [...byMp.entries()].map(([sl, cm]) => ({ slug: sl, name: mpNames.get(sl) || sl, n: [...cm.values()].reduce((a, e) => a + e.n, 0), cos: cm.size }));
+  const topMps = mpTotals.sort((a, b) => b.n - a.n).slice(0, 25);
   const link = r => `<a class="card" href="/lobbaus/${r.slug}/"><b>${esc(r.name)}</b><br><span class="meta">${nf.format(r.contacts)} yhteydenottoa · ${r.topics.length} aihetta${r.n.mainIndustry ? " · " + esc(r.n.mainIndustry) : ""}</span></a>`;
   const all = [...rows].sort((a, b) => String(a.name).localeCompare(String(b.name), "fi"));
   const pages = [];
@@ -107,6 +134,7 @@ export function lobbausPages({ shell, esc, dateFi, data }) {
 <h2>Eniten ilmoitettuja yhteydenottoja</h2>${topRows.map(link).join("")}
 <h2>Keihin yhteyttä on otettu eniten</h2><p class="meta">Kaikkien ilmoittajien ilmoittamat yhteydenotot yhteensä, organisaation ja yksikön mukaan.</p>
 ${topGroups.length ? topGroups.map(([g, c]) => `<div class="card"><b>${esc(g)}</b><br><span class="meta">${nf.format(c)} yhteydenottoa</span></div>`).join("") : '<p class="note">Kohteiden nimiä ei saatu haettua tällä kertaa.</p>'}
+${topMps.length ? `<h2>Eniten yhteydenottoja saaneet kansanedustajat</h2><p class="meta">Ilmoittajien ilmoittamat yhteydenotot kansanedustajiin yhteensä.</p>${topMps.map(x => `<a class="card" href="/edustaja/${x.slug}/"><b>${esc(x.name)}</b><br><span class="meta">${nf.format(x.n)} yhteydenottoa · ${x.cos} ilmoittajaa</span></a>`).join("")}` : ""}
 ${withCost.length ? `<h2>Suurimmat ilmoitetut vaikuttamistoiminnan kulut</h2><p class="meta">Edellisen vuoden kulut: ulkopuolinen palvelu, markkinointi ja edustus yhteensä. Ilmoittajan oma arvio.</p>${withCost.map(r => `<a class="card" href="/lobbaus/${r.slug}/"><b>${esc(r.name)}</b><br><span class="meta">${nf.format(r.cost)} €</span></a>`).join("")}` : ""}
 <h2>Kaikki ilmoittajat</h2>${FILTER}
 ${all.map(r => `<div data-t="${esc((r.name + " " + r.topics.map(topicText).join(" ")).toLowerCase())}">${link(r)}</div>`).join("")}`,
@@ -143,5 +171,14 @@ ${all.map(r => `<div data-t="${esc((r.name + " " + r.topics.map(topicText).join(
       }),
     });
   }
+  const mpBlocks = new Map();
+  for (const [sl, cm] of byMp) {
+    const list = [...cm.values()].sort((a, b) => b.n - a.n);
+    const shown = list.slice(0, 20);
+    mpBlocks.set(sl, `<h2>Lobbaus: keneltä yhteydenottoja</h2><p class="meta">Avoimuusrekisterin ilmoitukset, ilmoitusjakso ${period}. ${list.length} ilmoittajaa on ilmoittanut ottaneensa yhteyttä tähän edustajaan.</p>
+${shown.map(e => `<a class="card" href="/lobbaus/${e.slug}/"><b>${esc(e.name)}</b><br><span class="meta">${e.n} yhteydenottoa${e.topics.size ? " · " + esc([...e.topics].slice(0, 2).join(" · ").slice(0, 220)) : ""}</span></a>`).join("")}
+<p class="meta">Tiedot ovat ilmoittajien omia ilmoituksia sellaisenaan. Yhteydenotto ei kerro, vaikuttiko se edustajan kantaan. <a href="/lobbaus/">Lisää lobbauksesta</a></p>`);
+  }
+  pages.mpBlocks = mpBlocks;
   return pages;
 }

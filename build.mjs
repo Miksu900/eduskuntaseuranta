@@ -650,7 +650,14 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   try {
     const ld = await loadLobbaus();
     if (ld) {
-      for (const pg of lobbausPages({ shell, esc, dateFi, data: ld })) put(pg.path, pg.html);
+      const lp = lobbausPages({ shell, esc, dateFi, data: ld, mps: mps.map(m => ({ etunimi: m.etunimi, sukunimi: m.sukunimi, slug: mpSlug.get(m.henkilo) })) });
+      for (const pg of lp) put(pg.path, pg.html);
+      for (const [sl, blk] of lp.mpBlocks) {
+        const j = jobs.find(x => x.path === `/edustaja/${sl}/`);
+        if (!j) continue;
+        const i = j.html.lastIndexOf("<footer>");
+        j.html = i > -1 ? j.html.slice(0, i) + blk + j.html.slice(i) : j.html + blk;
+      }
     }
   } catch (e) { console.log("Lobbaus ohitettu:", e.message); }
 
