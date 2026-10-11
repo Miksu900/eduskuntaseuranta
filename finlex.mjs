@@ -7,13 +7,19 @@ const BUDGET_MS = Number(process.env.FINLEX_BUDGET_MS || 4 * 60 * 1000);
 
 const ent = s => String(s).replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)));
 
+let lastErr = "", errN = 0;
 async function getText(url, ms = 40000) {
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 4; i++) {
     try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(ms) });
-      if (!r.ok) throw new Error(String(r.status));
+      const r = await fetch(url, { signal: AbortSignal.timeout(ms), headers: { Accept: "application/xml, application/json" } });
+      if (!r.ok) throw new Error("HTTP " + r.status);
       return await r.text();
-    } catch (e) { if (i === 1) return null; }
+    } catch (e) {
+      lastErr = (e.cause && e.cause.code ? e.cause.code + " " : "") + e.message + " " + url.slice(-40);
+      errN++;
+      if (i === 3) return null;
+      await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+    }
   }
   return null;
 }
@@ -60,6 +66,7 @@ export async function loadFinlex() {
     uniq.sort((a, b) => b.year - a.year || numOf(b) - numOf(a));
     const pick = uniq.slice(0, 320);
     const out = [];
+    let noTitle = 0;
     let i = 0;
     const worker = async () => {
       while (i < pick.length && Date.now() - t0 < BUDGET_MS) {
@@ -68,10 +75,12 @@ export async function loadFinlex() {
         if (!xml) continue;
         const p = parseStatute(xml);
         if (p.title) out.push({ year: r.year, n: r.n, ...p });
+        else { noTitle++; if (noTitle === 1) console.log("Finlex: ei otsikkoa, alku: " + xml.slice(0, 200).replace(/\s+/g, " ")); }
       }
     };
-    await Promise.all(Array.from({ length: 8 }, worker));
+    await Promise.all(Array.from({ length: 4 }, worker));
     out.sort((a, b) => b.year - a.year || (parseInt(b.n, 10) || 0) - (parseInt(a.n, 10) || 0));
+    console.log(`Finlex: virheitä ${errN}, viimeisin: ${lastErr}, ilman otsikkoa ${noTitle}`);
     console.log(`Finlex: säädöksiä luettu ${out.length} (aikaa ${Math.round((Date.now() - t0) / 1000)} s)`);
     if (!out.length) return null;
     return { rows: out };
