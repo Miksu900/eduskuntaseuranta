@@ -11,14 +11,11 @@ jobs:
       - name: EU
         run: |
           set +e
-          g() { echo "=== $1"; rm -f /tmp/b; curl -sS -m 40 -L -A "Mozilla/5.0" -H "Accept: application/ld+json, application/json" -D /tmp/h -o /tmp/b "$1"; head -n 1 /tmp/h; grep -i "^content-type" /tmp/h | head -1; wc -c < /tmp/b; head -c 500 /tmp/b; echo; }
-          g "https://howtheyvote.eu/api/votes?page_size=2"
-          g "https://data.europarl.europa.eu/api/v2/meetings?year=2026&format=application%2Fld%2Bjson&limit=2"
-          g "https://data.europarl.europa.eu/api/v2/meps/2054?format=application%2Fld%2Bjson"
-          g "https://data.europarl.europa.eu/api/v2/documents?year=2026&format=application%2Fld%2Bjson&limit=2"
-          g "https://ec.europa.eu/transparencyregister/public/consultation/statistics.do?action=getLobbyistsXml&fileType=NEW"
-          g "https://ec.europa.eu/budg/fsd/api/v1/beneficiaries?country=FI&limit=2"
-          g "https://api.ted.europa.eu/v3/notices/search"
-          g "https://publications.europa.eu/webapi/rdf/sparql?query=SELECT%201&format=application%2Fjson"
-          g "https://kohesio.ec.europa.eu/api/kohesio/projects?language=en&keywords=renovation&country=IT"
-          g "https://ec.europa.eu/economy_finance/recovery-and-resilience-scoreboard/data/performance.json"
+          g() { echo "=== $1"; rm -f /tmp/b; curl -sS -m 40 -L -A "Mozilla/5.0" -H "Accept: application/json" -D /tmp/h -o /tmp/b "$1"; head -n 1 /tmp/h; wc -c < /tmp/b; head -c "${2:-500}" /tmp/b; echo; }
+          g "https://howtheyvote.eu/api/votes/198051" 1800
+          g "https://howtheyvote.eu/api/members?page_size=2" 600
+          g "https://howtheyvote.eu/api/members/2054" 600
+          g "https://data.europa.eu/api/hub/search/search?q=financial%20transparency%20system&limit=3&filter=dataset" 900
+          g "https://data.europa.eu/api/hub/search/search?q=transparency%20register&limit=3&filter=dataset" 900
+          echo "=== TED POST"
+          curl -sS -m 40 -X POST -H "Content-Type: application/json" -d '{"query":"organisation-country-buyer=FIN","fields":["notice-title"],"limit":2}' "https://api.ted.europa.eu/v3/notices/search" | head -c 700; echo
