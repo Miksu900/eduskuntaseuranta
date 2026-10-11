@@ -8,16 +8,13 @@ jobs:
         run: |
           set +e
           B="https://www.vaalirahoitusvalvonta.fi/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023/02"
-          curl -sS -L -m 30 "$B.html" -o d.html
-          tr '\n\r\t' '   ' < d.html | sed 's/  */ /g' > f.html
-          echo "##### ehdokkaita taulukossa: $(grep -o '<td>[^<]*, [^<]*</td>' f.html | wc -l)"
-          echo "##### puolueet (otsikot)"
-          grep -oE '<h[23][^>]*>[^<]{2,60}' f.html | head -14
-          echo "##### YKSI ILMOITUS 0052"
-          curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua]\n" "$B/0052/vaalirahoitusilmoitus.html" -o i.html
-          tr '\n\r\t' '   ' < i.html | sed -e 's/<script[^>]*>[^<]*<\/script>//g' -e 's/<style[^>]*>[^<]*<\/style>//g' -e 's/<[^>]*>/ /g' -e 's/  */ /g' > t.txt
-          echo "tekstin pituus: $(wc -c < t.txt)"
-          echo "----- sisältö alkaen ehdokkaan tiedoista"
-          grep -oE 'Ehdokkaan.{0,2600}' t.txt | head -1
-          echo "----- jos ei löytynyt, alku"
-          head -c 1800 t.txt
+          curl -sS -L -m 60 "$B/0052/vaalirahoitusilmoitus.html" -o i.html
+          tr '\n\r\t' '   ' < i.html | sed 's/  */ /g' > f.html
+          echo "##### YKSITYISET: taulukon alku"
+          grep -oE 'seuraavilta yksityishenkilöiltä.{0,900}' f.html | head -1
+          echo
+          echo "##### YRITYKSET: taulukon alku"
+          grep -oE 'seuraavilta yrityksiltä.{0,900}' f.html | head -1
+          echo
+          echo "##### kaikki taulukoiden otsikkorivit"
+          grep -oE '<th[^>]*>[^<]{1,60}</th>' f.html | sort | uniq -c | sort -rn | head -20
