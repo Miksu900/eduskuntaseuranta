@@ -40,8 +40,8 @@ export async function loadFinlex() {
     const year = new Date().getFullYear();
     const refs = [];
     for (const y of [year, year - 1]) {
-      for (let page = 1; page <= 12; page++) {
-        const txt = await getText(`${API}/akn/fi/act/statute/list?page=${page}&limit=100&format=json&startYear=${y}&endYear=${y}`);
+      for (let page = 1; page <= 150; page++) {
+        const txt = await getText(`${API}/akn/fi/act/statute/list?page=${page}&limit=10&format=json&startYear=${y}&endYear=${y}`);
         if (!txt) break;
         let arr; try { arr = JSON.parse(txt); } catch { break; }
         if (!Array.isArray(arr) || !arr.length) break;
@@ -49,7 +49,7 @@ export async function loadFinlex() {
           const m = String(x.akn_uri || "").match(/statute\/(\d{4})\/([^/]+)\/fin@/);
           if (m) refs.push({ year: Number(m[1]), n: m[2], url: x.akn_uri });
         }
-        if (arr.length < 100) break;
+        if (arr.length < 10) break;
       }
       console.log(`Finlex: vuosi ${y}, löytyi yhteensä ${refs.length}`);
     }
