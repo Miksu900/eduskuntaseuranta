@@ -8,12 +8,11 @@ jobs:
         run: |
           set +e
           B="https://opendata.finlex.fi/finlex/avoindata/v1"
-          a() { echo "=== A (ilman Accept) $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" "$B$1" -o r.out; head -c 500 r.out; echo; }
-          b() { echo "=== B (Accept json) $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$B$1" -o r.out; head -c 500 r.out; echo; }
-          a "/akn/fi/act/statute/list?page=1&limit=100&format=json&startYear=2025&endYear=2025"
-          b "/akn/fi/act/statute/list?page=1&limit=100&format=json&startYear=2025&endYear=2025"
-          b "/akn/fi/act/statute/list?page=1&limit=100&format=json&startYear=2025"
-          b "/akn/fi/act/statute/list?page=1&limit=100&format=json&endYear=2025"
-          b "/akn/fi/act/statute/list?page=1&limit=100&format=json&langAndVersion=fin@&startYear=2025&endYear=2025"
-          b "/akn/fi/act/statute/list?page=1&limit=100&format=json&langAndVersion=fin@"
-          b "/akn/fi/act/statute/list?page=2&limit=100&format=json"
+          curl -sS -L -m 40 -H "Accept: application/json" "$B/akn/fi/act/statute/list?page=1&limit=3&format=json&startYear=2025&endYear=2025" -o l.json
+          echo "=== lista"; head -c 700 l.json; echo
+          U=$(grep -o 'https[^"]*fin@' l.json | head -1)
+          echo "=== osoite: $U"
+          echo "=== 1 ilman Accept"; curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" "$U" -o x1.out; head -c 600 x1.out; echo
+          echo "=== 2 Accept xml"; curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/xml" "$U" -o x2.out; head -c 600 x2.out; echo
+          echo "=== 3 Accept json"; curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$U" -o x3.out; head -c 600 x3.out; echo
+          echo "=== docTitle"; grep -o '<docTitle[^<]*<' x1.out | head -2
