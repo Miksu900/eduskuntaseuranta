@@ -6,12 +6,11 @@ jobs:
     steps:
       - name: Vaalirahoitus
         run: |
-          mkdir -p w && cd w
-          for u in "https://www.vaalirahoitusvalvonta.fi/fi/index/avoindata.html" "https://www.vaalirahoitusvalvonta.fi/fi/index/vaalirahoitus.html" "https://www.vaalirahoitusvalvonta.fi/" "https://www.vaalirahoitusvalvonta.fi/fi/index/vaalirahoitusilmoitukset.html"; do
-            echo "=== $u"
-            curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua, %{url_effective}]\n" "$u" -o p.html
-            tail -c 0 p.html
-            grep -oiE 'href="[^"]*(csv|xlsx|xls|json|api|avoin|open|data|ilmoitus)[^"]*"' p.html | sort -u | head -40
+          B="https://www.vaalirahoitusvalvonta.fi"
+          for p in "/" "/fi/index/vaalirahoitus.html" "/fi/index/vaalirahoitus/vaalirahoitusilmoitus.html" "/fi/index/vaalirahoitus/vaalirahoitusilmoitus/ilmoitusvelvolliset.html"; do
+            echo "=== $p"
+            curl -sS -L -m 30 "$B$p" -o p.html
+            grep -oE 'href="[^"#]+"' p.html | sed 's/href=//' | grep -viE 'facebook|twitter|linkedin|instagram|youtube|\.css|\.ico|javascript' | sort -u | head -70
           done
-          echo "##### avoindata-sivun teksti"
-          curl -sS -L -m 30 "https://www.vaalirahoitusvalvonta.fi/fi/index/avoindata.html" | sed -e 's/<[^>]*>/ /g' | tr -s ' \n' | head -c 2500
+          echo "##### haku-sanoja"
+          for p in "/" "/fi/index/vaalirahoitus.html"; do curl -sS -L -m 30 "$B$p" | grep -oiE '[^<>"]{0,60}(avoin|csv|excel|rajapint|ilmoitusrekisteri|haku|hae )[^<>"]{0,60}' | sort -u | head -25; done
