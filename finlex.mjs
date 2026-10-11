@@ -8,18 +8,26 @@ const BUDGET_MS = Number(process.env.FINLEX_BUDGET_MS || 4 * 60 * 1000);
 
 const ent = s => String(s).replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)));
 
-let lastErr = "", errN = 0;
+let lastErr = "", errN = 0, cooldownUntil = 0;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 export async function getText(url, ms = 40000) {
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
+    const wait = cooldownUntil - Date.now();
+    if (wait > 0) await sleep(wait);
     try {
       const r = await fetch(url, { signal: AbortSignal.timeout(ms), headers: { Accept: "application/xml, application/json" } });
+      if (r.status === 429 || r.status === 503) {
+        const ra = Number(r.headers.get("retry-after")) || 0;
+        cooldownUntil = Date.now() + Math.min(90000, Math.max(ra * 1000, 12000 * (i + 1)));
+        throw new Error("HTTP " + r.status);
+      }
       if (!r.ok) throw new Error("HTTP " + r.status);
       return await r.text();
     } catch (e) {
       lastErr = (e.cause && e.cause.code ? e.cause.code + " " : "") + e.message + " " + url.slice(-40);
       errN++;
-      if (i === 3) return null;
-      await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+      if (i === 5) return null;
+      await sleep(1500 * (i + 1));
     }
   }
   return null;
@@ -43,19 +51,21 @@ export function kindOf(title) {
 
 export async function listYear(y) {
   const refs = [];
+  let ok = false;
   for (let page = 1; page <= 400; page++) {
     const txt = await getText(`${API}/akn/fi/act/statute/list?page=${page}&limit=10&format=json&startYear=${y}&endYear=${y}`);
     if (!txt) break;
     let arr; try { arr = JSON.parse(txt); } catch { break; }
-    if (!Array.isArray(arr) || !arr.length) break;
+    if (!Array.isArray(arr)) break;
     for (const x of arr) {
       const m = String(x.akn_uri || "").match(/statute\/(\d{4})\/([^/]+)\/fin@/);
       if (m && Number(m[1]) === y) refs.push({ year: y, n: m[2], url: x.akn_uri });
     }
-    if (arr.length < 10) break;
+    if (arr.length < 10) { ok = true; break; }
+    await sleep(120);
   }
   const seen = new Set();
-  return refs.filter(r => (seen.has(r.n) ? false : (seen.add(r.n), true)));
+  return { refs: refs.filter(r => (seen.has(r.n) ? false : (seen.add(r.n), true))), ok };
 }
 
 export const lastErrInfo = () => ({ errN, lastErr });

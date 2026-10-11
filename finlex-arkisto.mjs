@@ -15,21 +15,22 @@ for (let y = nowYear; y >= FIRST && left() > 60000; y--) {
   const file = `${DIR}/${y}.json`;
   let cur = { year: y, complete: false, rows: [] };
   if (existsSync(file)) { try { cur = JSON.parse(readFileSync(file, "utf8")); } catch {} }
-  if (cur.complete && y < nowYear - 1) continue;
-  const refs = await listYear(y);
+  if (cur.complete && cur.v === 2 && y < nowYear - 1) continue;
+  const { refs, ok: listOk } = await listYear(y);
   const have = new Set(cur.rows.map(r => String(r[0])));
   const todo = refs.filter(r => !have.has(String(r.n)));
   console.log(`${y}: listassa ${refs.length}, uusia ${todo.length}, aikaa jäljellä ${Math.round(left() / 60000)} min`);
   let i = 0, fail = 0, saved = 0;
   const save = (complete) => {
     cur.rows.sort((a, b) => (parseInt(b[0], 10) || 0) - (parseInt(a[0], 10) || 0));
-    cur.complete = complete;
+    cur.complete = complete; cur.v = 2;
     writeFileSync(file, JSON.stringify(cur));
   };
   const worker = async () => {
     while (i < todo.length && left() > 30000) {
       const r = todo[i++];
       const xml = await getText(r.url, 60000);
+      await new Promise(rs => setTimeout(rs, 150));
       if (!xml) { fail++; continue; }
       const p = parseStatute(xml);
       if (!p.title) { fail++; continue; }
@@ -38,9 +39,9 @@ for (let y = nowYear; y >= FIRST && left() > 60000; y--) {
       if (++saved % 300 === 0) save(false);
     }
   };
-  await Promise.all(Array.from({ length: 4 }, worker));
+  await Promise.all(Array.from({ length: 3 }, worker));
   const finished = i >= todo.length;
-  save(finished && refs.length > 0 ? true : finished && y < nowYear - 5);
+  save(finished && listOk && fail === 0);
   console.log(`${y}: tallennettu ${cur.rows.length}, virheitä ${fail}${finished ? "" : " (kesken)"}`);
   if (!finished) break;
 }
