@@ -63,7 +63,7 @@ function run(){out.textContent="Haetaan…";var c=sel.value;
 if(!c){q({"$select":"country,count(*) as n,sum(project_eu_budget) as eu","$where":where(""),"$group":"country","$order":"eu DESC","$limit":"60"}).then(function(r){
 var tot=r.reduce(function(a,x){return a+Number(x.eu||0)},0);
 out.innerHTML="<p class='meta'>Hankkeet 2014–2020, EU:n rahoitus maittain.</p><div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='text-align:left'>Maa</th><th style='text-align:right'>Hankkeita</th><th style='text-align:right'>EU-rahoitus €</th></tr></thead><tbody>"+r.map(function(x){return"<tr><td>"+e(fi(x.country))+"</td><td style='text-align:right'>"+n(x.n)+"</td><td style='text-align:right'><b>"+n(x.eu)+"</b></td></tr>"}).join("")+"</tbody></table></div><p class='meta'>Yhteensä "+n(tot)+" €.</p>"}).catch(err)}
-else{Promise.all([q({"$select":"count(*) as n,sum(project_eu_budget) as eu","$where":where(c)}),q({"$select":"operation_unique_identifier,operation_name_english,region,fund_name,category_label,project_eu_budget,operation_start_date","$where":where(c),"$order":"project_eu_budget DESC","$limit":"25"})]).then(function(a){
+else{Promise.all([q({"$select":"count(*) as n,sum(project_eu_budget) as eu","$where":where(c)}),q({"$select":"operation_unique_identifier,operation_name_english,region,fund_name,category_label,project_eu_budget,operation_start_date","$where":where(c)+" AND project_eu_budget > 0","$order":"project_eu_budget DESC","$limit":"25"})]).then(function(a){
 var s=a[0][0]||{},r=a[1];
 var h="<p><b>"+e(fi(c))+"</b>: "+n(s.n)+" hanketta, EU-rahoitus yhteensä <b>"+n(s.eu)+" €</b>.</p>";
 if(!r.length)h+="<p>Ei hankkeita tällä haulla.</p>";
