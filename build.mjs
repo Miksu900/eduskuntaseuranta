@@ -11,6 +11,7 @@ import { loadVaalirahoitus, vaalirahoitusPages } from "./vaalirahoitus.mjs";
 import { loadPrh, yrityksetPages, linkifyHtml, normId } from "./yritykset.mjs";
 import { loadVtv, vtvPages } from "./vtv.mjs";
 import { loadEu, euPages } from "./eu.mjs";
+import { loadRrf, rahatPages } from "./rahat.mjs";
 import { loadFinlex, loadFinlexArchive, finlexPages } from "./finlex.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
@@ -736,6 +737,12 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       for (const f of ep.files || []) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
     }
   } catch (e) { console.log("EU ohitettu:", e.message); }
+
+  // --- EU:n rahavirrat ---
+  try {
+    const rr = await loadRrf();
+    for (const pg of rahatPages({ shell, esc, rrf: rr })) put(pg.path, pg.html);
+  } catch (e) { console.log("Rahat ohitettu:", e.message); }
 
   // --- Finlex (uudet lait) ---
   try {

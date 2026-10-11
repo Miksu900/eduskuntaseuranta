@@ -211,7 +211,7 @@ if(MEP<0){o.textContent="Ladataan…";load(show)}})()</script>`;
     title: "EU: äänestykset ja lobbaus | Eduskuntaseuranta",
     desc: "Suomalaisten meppien äänet Euroopan parlamentissa ja suomalaiset EU-lobbarit yhdessä paikassa.",
     path: "/eu/",
-    body: `<h1>EU</h1><p>Mitä Brysselissä päätetään, miten suomalaiset mepit äänestävät ja ketkä yrittävät vaikuttaa päätöksiin?</p>${D ? `<h2>Hae EU-äänestyksiä</h2><p>Katso, miten jokainen suomalainen meppi äänesti.</p>${pages.hubWidget}` : ""}${pages.mepList || ""}${L ? `<h2>EU-lobbaus</h2><p>${nf.format(L.length)} suomalaista organisaatiota EU:n avoimuusrekisterissä.</p><p><a class="btn" href="/eu/lobbaus/">Katso suomalaiset EU-lobbarit</a></p>` : ""}<p class="meta">EU:n rahavirrat (koheesio- ja elpymisrahat) lisätään seuraavaksi.</p>`,
+    body: `<h1>EU</h1><p>Mitä Brysselissä päätetään, miten suomalaiset mepit äänestävät ja ketkä yrittävät vaikuttaa päätöksiin?</p>${D ? `<h2>Hae EU-äänestyksiä</h2><p>Katso, miten jokainen suomalainen meppi äänesti.</p>${pages.hubWidget}` : ""}${pages.mepList || ""}${L ? `<h2>EU-lobbaus</h2><p>${nf.format(L.length)} suomalaista organisaatiota EU:n avoimuusrekisterissä.</p><p><a class="btn" href="/eu/lobbaus/">Katso suomalaiset EU-lobbarit</a></p>` : ""}<h2>EU:n rahavirrat</h2><p>Mihin EU:n rahaa on mennyt, esimerkiksi asuntojen remontteihin Italiassa ja Espanjassa?</p><p><a class="btn" href="/eu/rahat/">Katso EU:n rahavirrat</a></p>`,
   }) });
   pages.files = files;
   console.log(`EU: sivuja ${pages.length}`);
