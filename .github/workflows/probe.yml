@@ -6,14 +6,14 @@ jobs:
     steps:
       - name: Vaalirahoitus
         run: |
-          echo "##### avoindata.fi: hakutulokset"
-          for q in vaalirahoitus vaalirahoitusilmoitus ehdokkaan%20vaalirahoitus; do
-            echo "=== $q"
-            curl -sS -L -m 30 "https://www.avoindata.fi/data/api/3/action/package_search?q=$q&rows=10" | jq -r '.result.results[]? | "\(.title) | \(.organization.title // "") | \(.name) | resursseja: \(.resources|length)"' 2>&1 | head -12
+          B="https://www.vaalirahoitusvalvonta.fi"
+          for p in "/fi/index/vaalirahoitus/haetietoavaalirahoitusilmoituksista/ilmoituksethenkiloittain.html" "/fi/index/vaalirahoitus/haetietoavaalirahoitusilmoituksista/enitentukeasaaneet.html" "/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023.html"; do
+            echo "=== $p"
+            curl -sS -L -m 30 "$B$p" -o p.html
+            echo "--- lomakkeet ja osoitteet"
+            grep -oiE '(action|data-url|data-action|data-src|src|url|endpoint|href)[=:] *["'"'"'][^"'"'"']*(json|api|haku|hae|search|query|raportti|excel|csv|xls|export|lataa|ilmoitus)[^"'"'"']*["'"'"']' p.html | sort -u | head -25
+            echo "--- fetch/ajax"
+            grep -oiE '(fetch|ajax|xhr\.open|\.post|\.get)\([^)]{0,140}\)' p.html | sort -u | head -10
+            echo "--- lomake"
+            grep -oiE '<(form|input|select)[^>]{0,200}>' p.html | head -12 | cut -c1-220
           done
-          echo "##### VTV raporttisivu"
-          curl -sS -L -m 30 "https://vtv.fi/raportit/vaali-ja-puoluerahoituksen-raportit/" -o v.html
-          ls -la v.html
-          grep -oiE 'href="[^"]*(\.xlsx|\.xls|\.csv|\.pdf|raportit/[^"]*)"' v.html | sort -u | head -30
-          echo "##### VTV teksti"
-          sed -e 's/<[^>]*>/ /g' v.html | tr -s ' \n\t' | grep -iE 'ehdokas|eduskuntavaali|excel|csv|avoin|vaalirahoitusilmoitus' | head -12 | cut -c1-240
