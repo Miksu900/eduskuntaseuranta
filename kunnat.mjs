@@ -60,7 +60,8 @@ export async function loadKunnat() {
     const strides = []; let s = 1; for (let i = ids.length - 1; i >= 0; i--) { strides[i] = s; s *= sizes[i]; }
     const pos = ids.map(k => idxOf(dimOf(k).category));
     const lab = ids.map(k => dimOf(k).category.label || {});
-    const timeLabel = timeId ? Object.values(lab[ids.indexOf(timeId)])[0] : "";
+    const _ti = timeId ? ids.indexOf(timeId) : -1;
+    const timeLabel = _ti >= 0 ? (Object.values(lab[_ti])[0] || Object.keys(pos[_ti])[0] || "") : "";
     const areas = Object.entries(pos[ids.indexOf(areaId)]).map(([code, n]) => ({ code, name: lab[ids.indexOf(areaId)][code] || code, n }));
     const infoDim = infoIds.length ? ids.indexOf(infoIds[0]) : -1;
     const infos = infoDim >= 0 ? Object.entries(pos[infoDim]).map(([code, n]) => ({ code, name: lab[infoDim][code] || code, n })) : [{ code: "x", name: d.label || "Arvo", n: 0 }];
@@ -91,32 +92,43 @@ export function kunnatPages({ shell, esc, data }) {
   const cleanName = n => String(n).replace(/^\s*KU\d+\s*/i, "").trim();
   const muni = data.areas.filter(a => !/^(SSS|MK|KOKO)/i.test(a.code) && a.name).map(a => ({ ...a, name: cleanName(a.name) }));
   muni.sort((a, b) => a.name.localeCompare(b.name, "fi"));
-  const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot ovat Tilastokeskuksen Kuntien avainluvut -tilastosta (${esc(data.title)}), tilastovuosi ${esc(data.year)}. Luvut ovat tilaston virallisia lukuja sellaisenaan. Sivun sijaluku kertoo, monentenako kunta on kaikkien kuntien vertailussa suurimmasta pienimpään. Se ei kerro, onko luku hyvä vai huono.</div>`;
+  const letters = []; for (const m of muni) { const L = m.name[0].toLocaleUpperCase("fi"); if (!letters.length || letters[letters.length - 1][0] !== L) letters.push([L, []]); letters[letters.length - 1][1].push(m); }
+  const yr = data.year ? ` Tilastovuosi: ${esc(data.year)}.` : "";
+  const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot ovat Tilastokeskuksen Kuntien avainluvut -tilastosta.${yr} Luvut ovat tilaston virallisia lukuja sellaisenaan. Sija kertoo, monentenako kunta on kaikkien kuntien vertailussa suurimmasta pienimpään. Se ei kerro, onko luku hyvä vai huono.</div>`;
   pages.push({
     path: "/kunnat/",
     html: shell({
       title: "Kunnat: tilastot ja luvut | Eduskuntaseuranta", desc: "Jokaisen Suomen kunnan avainluvut Tilastokeskuksesta samalla tavalla koottuna: väestö, talous, työllisyys ja muut luvut.", path: "/kunnat/",
       body: `<h1>Kunnat</h1><p>Jokaisen kunnan avainluvut samassa muodossa. Valitse kunta.</p>${NOTE}
 <input id="kf" type="search" placeholder="Hae kuntaa" style="width:100%;padding:12px;font-size:16px;margin:10px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
-<div id="kl">${muni.map(m => `<a class="tag" data-n="${esc(m.name.toLowerCase())}" href="/kunnat/${slug(m.name)}/">${esc(m.name)}</a>`).join(" ")}</div>
-<script>(function(){var f=document.getElementById("kf");f.oninput=function(){var q=f.value.toLowerCase().trim();document.querySelectorAll("#kl a").forEach(function(a){a.style.display=!q||a.getAttribute("data-n").indexOf(q)>-1?"":"none"})}})()</script>`,
+<div id="kl">${letters.map(([L, ms]) => `<section data-s><h2 style="margin:22px 0 6px">${esc(L)}</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px">${ms.map(m => `<a data-n="${esc(m.name.toLowerCase())}" href="/kunnat/${slug(m.name)}/" style="padding:6px 0">${esc(m.name)}</a>`).join("")}</div></section>`).join("")}</div>
+<script>(function(){var f=document.getElementById("kf");f.oninput=function(){var q=f.value.toLowerCase().trim();document.querySelectorAll("#kl section").forEach(function(sec){var n=0;sec.querySelectorAll("a").forEach(function(a){var ok=!q||a.getAttribute("data-n").indexOf(q)>-1;a.style.display=ok?"":"none";if(ok)n++});sec.style.display=n?"":"none"})}})()</script>`,
     }),
   });
   const seen = new Set();
   for (const m of muni) {
     const s = slug(m.name); if (!s || seen.has(s)) continue; seen.add(s);
-    const rows = data.infos.map((inf, j) => {
-      const v = m.vals[j]; if (v == null) return "";
+    const KEY = [/^väkiluku$/i, /maapinta-ala/i, /väestötiheys/i, /väkiluvun muutos edellisestä/i, /työttömyysaste/i, /työpaikkaomavaraisuus/i, /huoltosuhde/i, /kunnallisvero|veroprosentti/i, /ulkomaan kansalaiset.*%|vieraskielisiä.*%/i, /yli 64-vuotiaita, %|65 vuotta täyttäneet.*%/i, /alle 15-vuotiaita, %/i, /korkea-asteen/i, /tulot|verotettavat/i, /lainakanta|velka/i, /vuosikate/i, /toimintakate/i];
+    const mk = (inf, j) => {
+      const v = m.vals[j]; if (v == null) return null;
       const xs = data.rank[j]; let r = "";
       if (typeof v === "number" && xs.length > 20) { const p = xs.findIndex(x => x <= v) + 1; r = `${p}. / ${xs.length}`; }
-      return `<tr><td>${esc(inf.name)}</td><td style="text-align:right;white-space:nowrap"><b>${typeof v === "number" ? nf.format(v) : esc(v)}</b></td><td class="meta" style="text-align:right;white-space:nowrap">${r}</td></tr>`;
-    }).filter(Boolean).join("");
+      return `<tr data-t="${esc(inf.name.toLowerCase())}"><td>${esc(inf.name)}</td><td style="text-align:right;white-space:nowrap"><b>${typeof v === "number" ? nf.format(v) : esc(v)}</b></td><td class="meta" style="text-align:right;white-space:nowrap">${r}</td></tr>`;
+    };
+    const isKey = inf => KEY.some(re => re.test(inf.name));
+    const keyRows = data.infos.map((inf, j) => (isKey(inf) ? mk(inf, j) : null)).filter(Boolean).join("");
+    const allRows = data.infos.map((inf, j) => mk(inf, j)).filter(Boolean).join("");
+    const th = `<thead><tr><th style="text-align:left">Tieto</th><th style="text-align:right">Luku</th><th style="text-align:right">Sija</th></tr></thead>`;
+    const rows = `${keyRows ? `<h2>Tärkeimmät luvut</h2><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">${th}<tbody>${keyRows}</tbody></table></div>` : ""}
+<h2>Kaikki luvut</h2><input id="rf" type="search" placeholder="Hae lukua, esim. työttömyys" style="width:100%;padding:12px;font-size:16px;margin:6px 0 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
+<div style="overflow-x:auto"><table id="rt" style="width:100%;border-collapse:collapse">${th}<tbody>${allRows}</tbody></table></div>
+<script>(function(){var f=document.getElementById("rf");f.oninput=function(){var q=f.value.toLowerCase().trim();document.querySelectorAll("#rt tbody tr").forEach(function(r){r.style.display=!q||r.getAttribute("data-t").indexOf(q)>-1?"":"none"})}})()</script>`;
     pages.push({
       path: `/kunnat/${s}/`,
       html: shell({
-        title: `${m.name}: kunnan tilastot | Eduskuntaseuranta`, desc: `${m.name}: kunnan avainluvut Tilastokeskuksesta, tilastovuosi ${data.year}.`, path: `/kunnat/${s}/`,
-        body: `<h1>${esc(m.name)}</h1><p class="meta">Kunnan avainluvut, tilastovuosi ${esc(data.year)}</p>${NOTE}
-<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left">Tieto</th><th style="text-align:right">Luku</th><th style="text-align:right">Sija</th></tr></thead><tbody>${rows}</tbody></table></div>
+        title: `${m.name}: kunnan tilastot | Eduskuntaseuranta`, desc: `${m.name}: kunnan avainluvut Tilastokeskuksesta, ${data.year ? "tilastovuosi " + data.year + "." : ""}`, path: `/kunnat/${s}/`,
+        body: `<h1>${esc(m.name)}</h1><p class="meta">Kunnan avainluvut${data.year ? ", tilastovuosi " + esc(data.year) : ""}</p>${NOTE}
+${rows}
 <p><a href="/kunnat/">Kaikki kunnat</a></p>`,
       }),
     });
