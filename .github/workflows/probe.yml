@@ -6,18 +6,9 @@ jobs:
     steps:
       - name: Avoimuusrekisteri
         run: |
-          B="https://public.api.avoimuusrekisteri.fi"
-          for p in "/swagger-json" "/swagger-yaml" "/api-json" "/docs-json" "/public-api-json" "/swagger/swagger-json" "/api/docs-json"; do
-            echo "=== $B$p"
-            curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{content_type}]\n" "$B$p" | head -c 500
-            echo
-          done
-          echo "##### etusivun koodista"
-          mkdir -p w && cd w
-          curl -sS -L -m 30 https://www.avoimuusrekisteri.fi/ -o index.html
-          for s in $(grep -o '/_next/static/[^"]*\.js' index.html | sort -u); do
-            curl -sS -L -m 30 "https://www.avoimuusrekisteri.fi$s" -o "f_$(echo $s | tr '/' '_')"
-          done
-          grep -ho 'https\?://[a-zA-Z0-9./_-]*avoimuusrekisteri[a-zA-Z0-9./_-]*' *.html f_* 2>/dev/null | sort -u | head -40
-          echo "--- polkuja"
-          grep -hoE '"/?(public-?api|api)/[a-zA-Z0-9/_{}.-]*"' f_* 2>/dev/null | sort -u | head -60
+          curl -sS -L -m 60 https://public.api.avoimuusrekisteri.fi/swagger-json -o s.json
+          echo "koko: $(wc -c < s.json)"
+          echo "##### POLUT"
+          jq -r '.paths | to_entries[] | .key as $k | .value | to_entries[] | "\(.key|ascii_upcase) \($k)  [\((.value.parameters // []) | map(.name) | join(","))]"' s.json
+          echo "##### SKEEMAT"
+          jq -r '.components.schemas | keys | join(", ")' s.json | head -c 1500
