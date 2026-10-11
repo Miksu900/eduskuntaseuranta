@@ -7,7 +7,14 @@ jobs:
       - name: PRH
         run: |
           set +e
-          g() { echo "=== $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$1" -o r.out; head -c ${2:-1200} r.out; echo; }
-          g "https://avoindata.prh.fi/opendata-ytj-api/v3/companies?businessId=0112038-9" 2500
-          g "https://avoindata.prh.fi/opendata-ytj-api/v3/companies?name=Nokia&maxResults=3" 1200
-          g "https://avoindata.prh.fi/opendata-ytj-api/v3/description?type=companyForms&lang=fi" 500
+          B="https://avoindata.prh.fi/opendata-ytj-api/v3"
+          echo "=== CORS"
+          curl -sS -m 30 -D - -o /dev/null -H "Origin: https://eduskuntaseuranta.fi" "$B/companies?businessId=0112038-9" | grep -i -E "HTTP/|access-control|content-type"
+          echo "=== all_companies (HEAD)"
+          curl -sS -m 30 -I -L "$B/all_companies" | grep -i -E "HTTP/|content-type|content-length|content-disposition|location"
+          echo "=== swagger"
+          curl -sS -m 30 -L "https://avoindata.prh.fi/opendata-ytj-api/v3/api-docs" -o s.json; ls -la s.json
+          jq -r '.paths | keys[]' s.json 2>/dev/null | head -30
+          echo "=== haku rekisteröintipäivällä"
+          curl -sS -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua]\n" "$B/companies?registrationDateStart=2026-10-01&registrationDateEnd=2026-10-05" -o r.out; head -c 400 r.out; echo
+          jq '.totalResults' r.out 2>/dev/null
