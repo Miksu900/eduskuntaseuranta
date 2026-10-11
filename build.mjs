@@ -9,6 +9,7 @@ import { loadKunnat, kunnatPages, loadMaakunnat } from "./kunnat.mjs";
 import { loadLobbaus, lobbausPages } from "./lobbaus.mjs";
 import { loadVaalirahoitus, vaalirahoitusPages } from "./vaalirahoitus.mjs";
 import { loadPrh, yrityksetPages, linkifyHtml, normId } from "./yritykset.mjs";
+import { loadVtv, vtvPages } from "./vtv.mjs";
 import { loadFinlex, loadFinlexArchive, finlexPages } from "./finlex.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
@@ -148,7 +149,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Lait ja asetukset"], ["/yritykset/", "Yritykset"], ["/valtionavustukset/", "Valtionavustukset"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Lait ja asetukset"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/valtionavustukset/", "Valtionavustukset"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -156,7 +157,9 @@ const headerHtml = (bare = false) => `<header class="top"><a class="brand" href=
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
-const footerHtml = (path = "") => /^\/yritys(kset)?\//.test(path)
+const footerHtml = (path = "") => /^\/vtv\//.test(path)
+  ? `<footer>Lähde: Valtiontalouden tarkastusvirasto (vtv.fi), julkaistut raportit. Päivitetty ${dateFi(new Date())}.</footer>`
+  : /^\/yritys(kset)?\//.test(path)
   ? `<footer>Lähteet: Patentti- ja rekisterihallitus, YTJ avoin data (CC BY 4.0); Avoimuusrekisteri ja vaalirahoitusvalvonta (Valtiontalouden tarkastusvirasto). Päivitetty ${dateFi(new Date())}.</footer>`
   : /^\/valtionavustukset\//.test(path)
   ? `<footer>Lähde: Valtiokonttori, Tutkiavustuksia.fi (tutkihallintoa.fi). Tiedot ovat valtionapuviranomaisten ilmoittamia. Päivitetty ${dateFi(new Date())}.</footer>`
@@ -710,6 +713,16 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     path: "/valtionavustukset/",
     body: `<h1>Valtionavustukset</h1><p>Valtionavustukset ovat valtion budjetista myönnettyä rahoitusta, jolla tuetaan yhteiskunnallisesti tarpeellisena pidettyä toimintaa tai hanketta. Avustuksia myöntävät ministeriöt ja noin 30 keskusvirastoa.</p><div class="note"><b>Mistä tiedot löytyvät</b><br>Valtiokonttori julkaisee tiedot haetuista ja myönnetyistä valtionavustuksista Tutkiavustuksia.fi-palvelussa. Siellä voi suodattaa avustuksia myöntäjän, avustuslajin, hakijan tyypin, toimialan ja päätöspäivän mukaan sekä katsoa, kuinka paljon rahaa on myönnetty ja kenelle. Tiedot ovat valtionapuviranomaisten ilmoittamia ja kertyvät palveluun vähitellen, koska viranomaisilla on kolme kuukautta aikaa ilmoittaa päätökset. Tietoja ei voi tällä hetkellä ladata tai hakea koneellisesti, joten emme näytä niitä tällä sivustolla. Linkki vie Valtiokonttorin omaan palveluun.</div><p><a class="btn" href="https://www.tutkiavustuksia.fi/" rel="noopener">Avaa Tutkiavustuksia.fi</a></p><p>Valtion talouden muita tietoja löytyy Valtiokonttorin portaalista <a href="https://avoindata.tutkihallintoa.fi/" rel="noopener">avoindata.tutkihallintoa.fi</a>.</p>`,
   }));
+
+  // --- VTV:n raportit ---
+  try {
+    const vr = await loadVtv();
+    if (vr) {
+      const vp = vtvPages({ shell, esc, dateFi, rows: vr });
+      for (const pg of vp) put(pg.path, pg.html);
+      for (const f of vp.files || []) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
+    }
+  } catch (e) { console.log("VTV ohitettu:", e.message); }
 
   // --- Finlex (uudet lait) ---
   try {
