@@ -8,14 +8,19 @@ jobs:
         run: |
           set +e
           B="https://opendata.finlex.fi/finlex/avoindata/v1"
-          g() { echo "=== $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$B$1" -o r.out; tail -c 0 r.out; head -c ${2:-900} r.out; echo; }
-          g "/akn/fi/act/statute/list?page=1&limit=3&format=json&langAndVersion=fin@" 1200
-          g "/akn/fi/act/statute/list?page=1&limit=3&format=json" 1200
-          g "/akn/fi/act/statute-consolidated/list?page=1&limit=3&format=json" 1200
-          g "/akn/fi/act/statute/list?page=1&limit=3&format=json&typeStatute=laki&startYear=2025" 1200
-          g "/akn/fi/doc/government-proposal/list?page=1&limit=3&format=json" 1200
-          g "/akn/fi/doc/preparatory-work/list?page=1&limit=3&format=json" 600
-          echo "##### swagger"
-          curl -sS -L -m 40 "https://opendata.finlex.fi/finlex/avoindata/swagger-ui/index.html" -o s.html; ls -la s.html
-          curl -sS -L -m 40 "https://opendata.finlex.fi/finlex/avoindata/v3/api-docs" -o api.json; ls -la api.json
-          jq -r '.paths | keys[]' api.json 2>/dev/null | head -50
+          echo "##### LAKI 2025/51: pituus ja alku"
+          curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" "$B/akn/fi/act/statute/2025/51/fin@" -o l.xml
+          tail -c 0 l.xml
+          tr '\n\r\t' '   ' < l.xml | sed 's/  */ /g' > lf.xml
+          head -c 1800 lf.xml
+          echo
+          echo "##### otsikot ja päivämäärät"
+          grep -oE '<(docTitle|docNumber|FRBRdate|docDate|docType|shortTitle|FRBRalias)[^>]*>[^<]{0,200}' lf.xml | head -12
+          echo "##### viittaukset HE"
+          grep -oE '.{0,80}(HE |hallituksen esity|government-proposal).{0,120}' lf.xml | head -5
+          echo "##### HE 2025/3"
+          curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua]\n" "$B/akn/fi/doc/government-proposal/2025/3/fin@" -o h.xml
+          tr '\n\r\t' '   ' < h.xml | sed 's/  */ /g' | head -c 1500
+          echo
+          echo "##### listauksen parametrit"
+          for q in "startYear=2026" "year=2026" "startYear=2026&endYear=2026" "sort=desc" "updatedAfter=2026-09-01"; do echo "-- $q"; curl -sS -L -m 30 "$B/akn/fi/act/statute/list?page=1&limit=2&format=json&$q" | head -c 300; echo; done
