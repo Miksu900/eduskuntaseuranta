@@ -648,7 +648,11 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   // --- Kunnat (Tilastokeskus) ---
   try {
     const kd = await loadKunnat();
-    if (kd) for (const pg of kunnatPages({ shell, esc, data: kd })) put(pg.path, pg.html);
+    if (kd) {
+      for (const pg of kunnatPages({ shell, esc, data: kd })) put(pg.path, pg.html);
+      await mkdir(OUT + "/data", { recursive: true });
+      await writeFile(OUT + "/data/kunnat-tarkistus.json", JSON.stringify(kd.debug || {}, null, 1));
+    }
   } catch (e) { console.log("Kunnat ohitettu:", e.message); }
 
   // --- Kirjoitus levylle ---

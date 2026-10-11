@@ -77,7 +77,12 @@ export async function loadKunnat() {
       return xs;
     });
     console.log(`Kunnat: ${out.length} aluetta, ${infos.length} tietoa, vuosi ${timeLabel}`);
-    return { areas: out, infos, rank, year: timeLabel, title: meta.title || d.label || "" };
+    const debug = {
+      path, label: d.label, source: d.source, updated: d.updated, id: d.id, size: d.size, note: d.note, extension: d.extension,
+      dims: Object.fromEntries(d.id.map(k => [k, { label: d.dimension[k].label, first: Object.entries(d.dimension[k].category.label || {}).slice(0, 3), idx: Object.keys(idxOf(d.dimension[k].category)).slice(0, 3) }])),
+      meta: meta.variables.map(v => ({ code: v.code, text: v.text, time: !!v.time, n: v.values.length, first: v.values.slice(0, 2), last: v.values.slice(-2), lastTexts: (v.valueTexts || []).slice(-2) })),
+    };
+    return { areas: out, infos, rank, year: timeLabel, title: meta.title || d.label || "", debug };
   } catch (e) {
     console.log("Kunnat ohitettu:", e.message);
     return null;
