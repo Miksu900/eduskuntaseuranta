@@ -7,15 +7,17 @@ jobs:
       - name: Vaalirahoitus
         run: |
           set +e
-          B="https://www.vaalirahoitusvalvonta.fi"
-          curl -sS -L -m 30 "$B/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023/02.html" -o d.html
+          B="https://www.vaalirahoitusvalvonta.fi/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023/02"
+          curl -sS -L -m 30 "$B.html" -o d.html
           tr '\n\r\t' '   ' < d.html | sed 's/  */ /g' > f.html
-          echo "##### otsikko: $(grep -oE '<h1[^>]*>[^<]*' f.html | head -1)"
-          echo "##### kaikki a-linkit jotka eivät ole valikossa (ensimmäiset 12 joissa sana ilmoitus tai id)"
-          grep -oE '<a [^>]*>[^<]{0,80}</a>' f.html | grep -iE 'ilmoitus|raportti|pdf|id=' | head -12 | cut -c1-320
-          echo "##### ehdokasrivi"
-          grep -oE '.{0,200}(Vaalirahoitusilmoitus).{0,200}' f.html | head -3
-          echo "##### data- ja onclick-attribuutit"
-          grep -oE '(data-[a-z-]+|onclick)="[^"]{0,120}"' f.html | sort | uniq -c | sort -rn | head -15
-          echo "##### tiedosto- ja ilmoitusosoitteet"
-          grep -oE '"(/[^"]*(ilmoitus|raportti|document|file|pdf|attachment|vaalirahoitusilmoitus)[^"]*)"' f.html | sort -u | head -15
+          echo "##### ehdokkaita taulukossa: $(grep -o '<td>[^<]*, [^<]*</td>' f.html | wc -l)"
+          echo "##### puolueet (otsikot)"
+          grep -oE '<h[23][^>]*>[^<]{2,60}' f.html | head -14
+          echo "##### YKSI ILMOITUS 0052"
+          curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua]\n" "$B/0052/vaalirahoitusilmoitus.html" -o i.html
+          tr '\n\r\t' '   ' < i.html | sed -e 's/<script[^>]*>[^<]*<\/script>//g' -e 's/<style[^>]*>[^<]*<\/style>//g' -e 's/<[^>]*>/ /g' -e 's/  */ /g' > t.txt
+          echo "tekstin pituus: $(wc -c < t.txt)"
+          echo "----- sisältö alkaen ehdokkaan tiedoista"
+          grep -oE 'Ehdokkaan.{0,2600}' t.txt | head -1
+          echo "----- jos ei löytynyt, alku"
+          head -c 1800 t.txt
