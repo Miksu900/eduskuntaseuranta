@@ -1,26 +1,13 @@
 name: Rajapintatesti
-on:
-  workflow_dispatch:
-    inputs:
-      polku:
-        description: "Hilma-polku"
-        default: "/avp/eformnotices/docs/search"
-      runko:
-        description: "POST-runko (JSON)"
-        default: '{"search":"Yleisradio","top":1,"count":true,"orderby":"datePublished desc"}'
+on: workflow_dispatch
 jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Hilma
-        env:
-          HK: ${{ secrets.HILMA_API_KEY }}
-          POLKU: ${{ inputs.polku }}
-          RUNKO: ${{ inputs.runko }}
+      - name: Avoimuusrekisteri
         run: |
-          URL="https://api.hankintailmoitukset.fi$POLKU"
-          echo "=== $URL"
-          echo "$RUNKO"
-          curl -sS -L -m 60 -X POST -H "Ocp-Apim-Subscription-Key: $HK" -H "Content-Type: application/json" -H "Accept: application/json" --data "$RUNKO" "$URL" -o /tmp/vastaus.json -w "[HTTP %{http_code}, %{size_download} tavua]\n"
-          jq -r '."@odata.count" // empty | "Osumia yhteensä: \(.)"' /tmp/vastaus.json || true
-          jq -r '.value[0] // empty | to_entries[] | select(.value != null and .value != "" and .value != []) | "\(.key) = \(.value | tostring | .[0:110])"' /tmp/vastaus.json | head -c 3800 || head -c 1500 /tmp/vastaus.json
+          t() { echo "=== $1"; curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$1" | head -c 700; echo; }
+          B="https://public.api.avoimuusrekisteri.fi"
+          for p in "/" "/swagger" "/swagger/index.html" "/swagger/v1/swagger.json" "/swagger/public/swagger.json" "/public-api/swagger.json" "/public-api/v1/swagger.json" "/public-api/v1/api-docs" "/v3/api-docs" "/api-docs" "/openapi.json" "/public-api/v1/registrations" "/api/v1/registrations" "/v1/registrations"; do t "$B$p"; done
+          t "https://www.avoimuusrekisteri.fi/"
+          t "https://avoimuusrekisteri.fi/public/api"
