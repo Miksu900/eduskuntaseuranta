@@ -4,17 +4,18 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Vaalirahoitus
+      - name: Finlex
         run: |
           set +e
-          B="https://www.vaalirahoitusvalvonta.fi/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023/02"
-          curl -sS -L -m 60 "$B/0052/vaalirahoitusilmoitus.html" -o i.html
-          tr '\n\r\t' '   ' < i.html | sed 's/  */ /g' > f.html
-          echo "##### YKSITYISET: taulukon alku"
-          grep -oE 'seuraavilta yksityishenkilöiltä.{0,900}' f.html | head -1
-          echo
-          echo "##### YRITYKSET: taulukon alku"
-          grep -oE 'seuraavilta yrityksiltä.{0,900}' f.html | head -1
-          echo
-          echo "##### kaikki taulukoiden otsikkorivit"
-          grep -oE '<th[^>]*>[^<]{1,60}</th>' f.html | sort | uniq -c | sort -rn | head -20
+          B="https://opendata.finlex.fi/finlex/avoindata/v1"
+          g() { echo "=== $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$B$1" -o r.out; tail -c 0 r.out; head -c ${2:-900} r.out; echo; }
+          g "/akn/fi/act/statute/list?page=1&limit=3&format=json&langAndVersion=fin@" 1200
+          g "/akn/fi/act/statute/list?page=1&limit=3&format=json" 1200
+          g "/akn/fi/act/statute-consolidated/list?page=1&limit=3&format=json" 1200
+          g "/akn/fi/act/statute/list?page=1&limit=3&format=json&typeStatute=laki&startYear=2025" 1200
+          g "/akn/fi/doc/government-proposal/list?page=1&limit=3&format=json" 1200
+          g "/akn/fi/doc/preparatory-work/list?page=1&limit=3&format=json" 600
+          echo "##### swagger"
+          curl -sS -L -m 40 "https://opendata.finlex.fi/finlex/avoindata/swagger-ui/index.html" -o s.html; ls -la s.html
+          curl -sS -L -m 40 "https://opendata.finlex.fi/finlex/avoindata/v3/api-docs" -o api.json; ls -la api.json
+          jq -r '.paths | keys[]' api.json 2>/dev/null | head -50
