@@ -10,6 +10,7 @@ import { loadLobbaus, lobbausPages } from "./lobbaus.mjs";
 import { loadVaalirahoitus, vaalirahoitusPages } from "./vaalirahoitus.mjs";
 import { loadPrh, yrityksetPages, linkifyHtml, normId } from "./yritykset.mjs";
 import { loadVtv, vtvPages } from "./vtv.mjs";
+import { loadEu, euPages } from "./eu.mjs";
 import { loadFinlex, loadFinlexArchive, finlexPages } from "./finlex.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
@@ -149,7 +150,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Lait ja asetukset"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/valtionavustukset/", "Valtionavustukset"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Lait ja asetukset"], ["/vtv/", "VTV:n raportit"], ["/eu/", "EU"], ["/yritykset/", "Yritykset"], ["/valtionavustukset/", "Valtionavustukset"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -157,7 +158,9 @@ const headerHtml = (bare = false) => `<header class="top"><a class="brand" href=
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
-const footerHtml = (path = "") => /^\/vtv\//.test(path)
+const footerHtml = (path = "") => /^\/eu\//.test(path)
+  ? `<footer>Lähteet: HowTheyVote.eu (Euroopan parlamentin avoin data) ja EU:n avoimuusrekisteri (transparency-register.europa.eu). Päivitetty ${dateFi(new Date())}.</footer>`
+  : /^\/vtv\//.test(path)
   ? `<footer>Lähde: Valtiontalouden tarkastusvirasto (vtv.fi), julkaistut raportit. Päivitetty ${dateFi(new Date())}.</footer>`
   : /^\/yritys(kset)?\//.test(path)
   ? `<footer>Lähteet: Patentti- ja rekisterihallitus, YTJ avoin data (CC BY 4.0); Avoimuusrekisteri ja vaalirahoitusvalvonta (Valtiontalouden tarkastusvirasto). Päivitetty ${dateFi(new Date())}.</footer>`
@@ -723,6 +726,16 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       for (const f of vp.files || []) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
     }
   } catch (e) { console.log("VTV ohitettu:", e.message); }
+
+  // --- EU (meppien äänet, avoimuusrekisteri) ---
+  try {
+    const ed = await loadEu();
+    if (ed) {
+      const ep = euPages({ shell, esc, dateFi, data: ed });
+      for (const pg of ep) put(pg.path, pg.html);
+      for (const f of ep.files || []) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
+    }
+  } catch (e) { console.log("EU ohitettu:", e.message); }
 
   // --- Finlex (uudet lait) ---
   try {
