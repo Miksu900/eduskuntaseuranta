@@ -12,46 +12,41 @@ jobs:
         run: |
           set +e
           UA="Mozilla/5.0"
-          echo "=== 1 HowTheyVote rakenne"
-          curl -sS -m 60 -A "$UA" -o /tmp/v.json "https://howtheyvote.eu/api/votes/198051"
+          echo "=== 1 HowTheyVote tiedostot"
+          curl -sS -m 30 -A "$UA" -o /tmp/rel.json "https://api.github.com/repos/HowTheyVote/data/releases/latest"
           python3 - <<'PY'
           import json
-          d=json.load(open('/tmp/v.json'))
-          print(list(d.keys()))
-          for k in ('member_votes','stats'):
-              v=d.get(k)
-              if isinstance(v,list): print(k,len(v),json.dumps(v[:2],ensure_ascii=False)[:400])
-              elif isinstance(v,dict): print(k,list(v.keys()))
+          d=json.load(open('/tmp/rel.json'))
+          print(d.get('tag_name'))
+          for a in d.get('assets',[]): print(a['name'],a['size'])
           PY
-          echo "=== 2 HowTheyVote data-lataukset"
-          curl -sS -m 30 -A "$UA" "https://api.github.com/repos/HowTheyVote/data/releases/latest" | head -c 600; echo
-          curl -sS -m 30 -A "$UA" -o /dev/null -w "%{http_code}\n" "https://howtheyvote.eu/api/export"
-          echo "=== 3 data.europa.eu: FTS ja avoimuusrekisteri"
-          for q in "financial%20transparency%20system%20commitments" "eu%20transparency%20register"; do
-            curl -sS -m 60 -A "$UA" -o /tmp/s.json "https://data.europa.eu/api/hub/search/search?q=$q&limit=5&filter=dataset"
+          echo "=== 2 Avoimuusrekisteri XML"
+          curl -sS -m 120 -L -A "$UA" -o /tmp/tr.xml -w "%{http_code} %{size_download}\n" "https://transparency-register.europa.eu/odplastorganisationxml_en"
+          head -c 900 /tmp/tr.xml; echo
+          echo "=== 3 FTS 2023 HEAD"
+          curl -sS -m 30 -L -I -A "$UA" "https://ec.europa.eu/budget/financial-transparency-system/download/2023_FTS_dataset_en.xlsx" | head -n 5
+          echo "=== 4 Koheesio ja elpymisrahasto data.europa.eu:sta"
+          for q in "kohesio" "recovery%20and%20resilience%20facility%20payments"; do
+            curl -sS -m 60 -A "$UA" -o /tmp/s.json "https://data.europa.eu/api/hub/search/search?q=$q&limit=4&filter=dataset"
             python3 - <<'PY'
           import json
           r=json.load(open('/tmp/s.json'))['result']['results']
-          for d in r[:5]:
+          for d in r[:4]:
               t=d.get('title') or {}
-              print('-',t.get('en') or t.get('fi') or list(t.values())[:1], d.get('id'))
+              print('-',t.get('en') or list(t.values())[:1])
               for x in (d.get('distributions') or [])[:3]:
-                  print('    ',(x.get('format') or {}).get('label'),(x.get('download_url') or x.get('access_url') or [''])[0] if isinstance(x.get('download_url') or x.get('access_url'),list) else (x.get('download_url') or x.get('access_url')))
+                  u=x.get('download_url') or x.get('access_url')
+                  print('    ',(x.get('format') or {}).get('label'),u)
           PY
           done
-          echo "=== 4 SPARQL"
-          curl -sS -m 40 -A "$UA" "https://publications.europa.eu/webapi/rdf/sparql?query=SELECT%20%3Fs%20WHERE%20%7B%3Fs%20%3Fp%20%3Fo%7D%20LIMIT%201&format=application%2Fsparql-results%2Bjson" | head -c 300; echo
-          echo "=== 5 VTV sisalto"
-          curl -sS -m 40 -A "$UA" -o /tmp/r.json "https://www.vtv.fi/wp-json/wp/v2/report/28434?_fields=content,excerpt,link"
+          echo "=== 5 VTV koko tietue"
+          curl -sS -m 40 -A "$UA" -o /tmp/r.json "https://www.vtv.fi/wp-json/wp/v2/report/28434"
           python3 - <<'PY'
-          import json,re
+          import json
           d=json.load(open('/tmp/r.json'))
-          c=d['content']['rendered']
-          print('pituus',len(c))
-          print('otsikot',re.findall(r'<h[1-4][^>]*>(.*?)</h[1-4]>',c)[:12])
-          print('pdf',re.findall(r'href="([^"]+\.pdf)"',c)[:4])
-          t=re.sub(r'<[^>]+>',' ',c)
-          t=re.sub(r'\s+',' ',t)
-          i=t.find('Lyhyesti')
-          print('teksti',t[i:i+900])
+          for k,v in d.items():
+              s=json.dumps(v,ensure_ascii=False)
+              print(k,len(s),s[:160])
+          print('--- content')
+          print(d['content']['rendered'][:1200])
           PY
