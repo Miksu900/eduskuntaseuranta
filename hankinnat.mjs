@@ -50,7 +50,7 @@ export async function loadHilma(key) {
   return out;
 }
 
-const MAIN = { ContractNotices: "Hankintailmoitus", PriorInformationNotices: "Ennakkoilmoitus", ContractAwardNotices: "Jälki-ilmoitus (sopimus tehty)", ContractModificationNotices: "Sopimusmuutos" };
+const MAIN = { ContractNotices: "Hankintailmoitus", PriorInformationNotices: "Ennakkoilmoitus", ContractAwardNotices: "Jälki-ilmoitus (sopimus tehty)", ContractModificationNotices: "Sopimusmuutos", ProcurementPlan: "Hankintasuunnitelma" };
 const TYPE = { E1: "Markkinakartoitus", E3: "Kansallinen hankintailmoitus", E4: "Kansallinen jälki-ilmoitus" };
 const nf = new Intl.NumberFormat("fi-FI", { maximumFractionDigits: 0 });
 const kind = n => TYPE[n.type] || MAIN[n.mainType] || n.mainType || "Ilmoitus";
@@ -90,7 +90,7 @@ export function hankinnatPages({ shell, esc, dateFi, data }) {
     return `<div class="card" data-t="${esc(text)}"><b>${esc(n.titleFi || "(ei otsikkoa)")}</b><br>
 <span class="meta">${buyerLink}${esc(kind(n))} · julkaistu ${dateFi(n.datePublished)}${n.deadline && /Contract(?!Award)|Prior/.test(n.mainType || "") ? " · määräaika " + dateFi(n.deadline) : ""}</span>
 ${win ? `<br><span class="meta">Valittu toimittaja: ${esc(win)}</span>` : ""}${amt ? `<br><span class="meta">${amt.label}: ${nf.format(amt.v)} €</span>` : ""}
-<br><span class="meta">${ted}Ilmoitusnumero ${esc(n.noticeNumber || n.noticeId || "")}</span></div>`;
+<br><span class="meta">${ted}${n.noticeNumber || n.noticeId ? "Ilmoitusnumero " + esc(n.noticeNumber || n.noticeId) : ""}</span></div>`;
   };
   const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot tulevat Hilma-hankintapalvelusta (hankintailmoitukset.fi, Hansel Oy) sen avoimen rajapinnan kautta. Ilmoitus kertoo, mitä hankitaan, kuka hankkii ja mihin mennessä tarjoukset on jätettävä. Jälki-ilmoituksessa kerrotaan valittu toimittaja ja arvo. Ilmoituksen arvo on sopimuksen arvo, puitejärjestelyn enimmäisarvo tai arvio ilmoitushetkellä. Se ei ole lopullinen maksettu summa. Puitejärjestelyssä enimmäisarvo on yläraja, jota ei ole pakko käyttää. Kaikista hankinnoista ei tehdä ilmoitusta, esimerkiksi pienimmät jäävät kynnysarvon alle.</div>`;
   const FILTER = `<input id="hf" type="search" placeholder="Hae otsikosta, hankkijasta tai toimittajasta" style="width:100%;padding:12px;font-size:16px;margin:10px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
@@ -113,12 +113,11 @@ ${FILTER}
     }),
   });
   for (const [s, b] of [...bySlug.entries()].sort((a, c) => c[1].items.length - a[1].items.length).slice(0, 250)) {
-    const total = b.items.reduce((t, n) => t + (Number(n.noticeResultTotalAmount) > 0 ? Number(n.noticeResultTotalAmount) : 0), 0);
     pages.push({
       path: `/hankinnat/${s}/`,
       html: shell({
         title: `${b.name}: hankinnat | Eduskuntaseuranta`, desc: `${b.name} hankintailmoitukset Hilmassa: mitä hankitaan ja kenelle sopimus on tehty.`, path: `/hankinnat/${s}/`,
-        body: `<h1>${esc(b.name)}: hankinnat</h1><p class="meta">${b.ytunnus ? "Y-tunnus " + esc(b.ytunnus) + " · " : ""}${b.items.length} ilmoitusta aineistossa${total > 0 ? " · ilmoitettujen sopimusarvojen summa " + nf.format(total) + " €" : ""}</p>${NOTE}${FILTER}${b.items.map(n => card(n, false)).join("")}<p><a href="/hankinnat/">Kaikki hankinnat</a></p>`,
+        body: `<h1>${esc(b.name)}: hankinnat</h1><p class="meta">${b.ytunnus ? "Y-tunnus " + esc(b.ytunnus) + " · " : ""}${b.items.length} ilmoitusta aineistossa</p>${NOTE}${FILTER}${b.items.map(n => card(n, false)).join("")}<p><a href="/hankinnat/">Kaikki hankinnat</a></p>`,
       }),
     });
   }
