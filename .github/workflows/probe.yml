@@ -4,17 +4,13 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: PRH
+      - name: VTV
         run: |
           set +e
-          B="https://avoindata.prh.fi/opendata-ytj-api/v3"
-          echo "=== CORS"
-          curl -sS -m 30 -D - -o /dev/null -H "Origin: https://eduskuntaseuranta.fi" "$B/companies?businessId=0112038-9" | grep -i -E "HTTP/|access-control|content-type"
-          echo "=== all_companies (HEAD)"
-          curl -sS -m 30 -I -L "$B/all_companies" | grep -i -E "HTTP/|content-type|content-length|content-disposition|location"
-          echo "=== swagger"
-          curl -sS -m 30 -L "https://avoindata.prh.fi/opendata-ytj-api/v3/api-docs" -o s.json; ls -la s.json
-          jq -r '.paths | keys[]' s.json 2>/dev/null | head -30
-          echo "=== haku rekisteröintipäivällä"
-          curl -sS -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua]\n" "$B/companies?registrationDateStart=2026-10-01&registrationDateEnd=2026-10-05" -o r.out; head -c 400 r.out; echo
-          jq '.totalResults' r.out 2>/dev/null
+          for u in "https://www.vtv.fi/wp-json/wp/v2/types" "https://www.vtv.fi/wp-json/wp/v2/posts?per_page=3&_fields=id,date,link,title,type" "https://www.vtv.fi/feed/" "https://www.vtv.fi/wp-sitemap.xml" "https://www.vtv.fi/tarkastukset/"; do
+            echo "=== $u"
+            curl -sS -m 30 -L -A "Mozilla/5.0" -D /tmp/h -o /tmp/b "$u"
+            head -n 1 /tmp/h; grep -i "^content-type\|^access-control" /tmp/h
+            wc -c < /tmp/b
+            head -c 700 /tmp/b; echo
+          done
