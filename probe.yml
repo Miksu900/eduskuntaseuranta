@@ -1,0 +1,18 @@
+name: Rajapintatesti
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Testaa avoimet rajapinnat
+        run: |
+          t() { echo "=== $1"; curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$1" | head -c 700; echo; }
+          t "https://public.api.avoimuusrekisteri.fi/swagger/v1/swagger.json"
+          t "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_avainluvut/uusin/"
+          t "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_avainluvut/uusin/kuntien_avainluvut_ml.px"
+          t "https://opendata.finlex.fi/finlex/avoindata/v1/akn/fi/act/statute-consolidated/list?page=1&limit=2&format=json"
+          t "https://avoindata.tutkihallintoa.fi/"
+          t "https://tulokset.vaalit.fi/"
+          t "https://www.vaalirahoitusvalvonta.fi/fi/index/avoindata.html"
+          t "https://howtheyvote.eu/api/votes?page_size=1"
+          t "https://avoindata.prh.fi/opendata-ytj-api/v3/companies?name=Yleisradio&maxResults=1"
