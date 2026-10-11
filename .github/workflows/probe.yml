@@ -4,17 +4,14 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Avoimuusrekisteri
+      - name: Vaalirahoitus
         run: |
-          B="https://public.api.avoimuusrekisteri.fi"
-          echo "##### JAKSOT"
-          curl -sS -m 60 "$B/open-data-term/all" | jq -r '.[] | select(.status!="draft") | "id \(.id): \(.reportingStartDate[:10]) - \(.reportingEndDate[:10]) \(.status)"'
-          echo "##### ILMOITUKSET jakso 5"
-          curl -sS -m 120 -w "\n[HTTP %{http_code}, %{size_download} tavua]\n" "$B/open-data-activity-notification/term/5" -o t5.json
-          tail -n 0 t5.json
-          jq -r 'type, (if type=="array" then length else (keys|join(",")) end)' t5.json
-          echo "##### ENSIMMÄINEN (lyhennetty)"
-          jq -c 'if type=="array" then .[0] else (.[keys[0]]|if type=="array" then .[0] else . end) end' t5.json | head -c 2500
-          echo
-          echo "##### KENTTIEN NIMET"
-          jq -r 'if type=="array" then .[0] else (.[keys[0]]|if type=="array" then .[0] else . end) end | paths(scalars) | map(tostring) | join(".")' t5.json | sed 's/\.[0-9]*\././g' | sort -u | head -80
+          mkdir -p w && cd w
+          for u in "https://www.vaalirahoitusvalvonta.fi/fi/index/avoindata.html" "https://www.vaalirahoitusvalvonta.fi/fi/index/vaalirahoitus.html" "https://www.vaalirahoitusvalvonta.fi/" "https://www.vaalirahoitusvalvonta.fi/fi/index/vaalirahoitusilmoitukset.html"; do
+            echo "=== $u"
+            curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua, %{url_effective}]\n" "$u" -o p.html
+            tail -c 0 p.html
+            grep -oiE 'href="[^"]*(csv|xlsx|xls|json|api|avoin|open|data|ilmoitus)[^"]*"' p.html | sort -u | head -40
+          done
+          echo "##### avoindata-sivun teksti"
+          curl -sS -L -m 30 "https://www.vaalirahoitusvalvonta.fi/fi/index/avoindata.html" | sed -e 's/<[^>]*>/ /g' | tr -s ' \n' | head -c 2500
