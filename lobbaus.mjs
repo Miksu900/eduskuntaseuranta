@@ -183,5 +183,6 @@ ${list.slice(0, 5).map(card).join("")}${rest.length ? `<details><summary><b>Näy
 <p class="meta">Avoimuusrekisterin ilmoitukset, ilmoittajien omia tietoja sellaisenaan. Yhteydenotto ei kerro, vaikuttiko se edustajan kantaan. <a href="/lobbaus/">Lisää lobbauksesta</a></p>`);
   }
   pages.mpBlocks = mpBlocks;
+  pages.companyRows = rows.filter(r => r.n.companyId).map(r => ({ id: r.n.companyId, name: r.name, slug: r.slug, contacts: r.contacts, topics: r.topics.length }));
   return pages;
 }
