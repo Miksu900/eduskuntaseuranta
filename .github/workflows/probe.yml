@@ -11,34 +11,31 @@ jobs:
       - name: EU
         run: |
           set +e
-          UA="Mozilla/5.0"
-          echo "=== 1 HowTheyVote sarakkeet"
-          for f in members member_votes votes group_memberships groups national_party_memberships national_parties; do
-            echo "--- $f"
-            curl -sL "https://github.com/HowTheyVote/data/releases/latest/download/$f.csv.gz" | gunzip 2>/dev/null | head -n 3 | cut -c1-400
-          done
-          echo "=== 2 Suomalainen lobbariorganisaatio"
-          curl -sS -m 150 -L -A "$UA" -o /tmp/tr.xml "https://transparency-register.europa.eu/odplastorganisationxml_en"
-          python3 - <<'PY'
-          d=open('/tmp/tr.xml',encoding='utf-8').read()
-          i=d.find('>Finland<')
-          s=d.rfind('<interestRepresentative>',0,i)
-          e=d.find('</interestRepresentative>',i)
-          print(d[s:e][:3800])
-          PY
-          echo "=== 3 Koheesio"
-          curl -sS -m 40 -D /tmp/h -o /tmp/c.json "https://cohesiondata.ec.europa.eu/resource/557j-pmg8.json?\$limit=1"
-          grep -i "^access-control" /tmp/h; head -c 1500 /tmp/c.json; echo
-          curl -sS -m 40 "https://cohesiondata.ec.europa.eu/api/catalog/v1?domains=cohesiondata.ec.europa.eu&q=kohesio%20projects&limit=6" | python3 -c "
+          D="https://cohesiondata.ec.europa.eu"
+          echo "=== 1 Sarakkeet 557j-pmg8"
+          curl -sS -m 40 "$D/api/views/557j-pmg8.json" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          print([ (c['fieldName'],c['dataTypeName']) for c in d['columns']])"
+          echo "=== 2 Maiden summat (cast)"
+          curl -sS -m 60 -G "$D/resource/557j-pmg8.json" --data-urlencode 'tmp=1' --data-urlencode '$select=country,count(*) as n,sum(project_eu_budget::number) as eu' --data-urlencode '$group=country' --data-urlencode '$limit=40' | head -c 1800; echo
+          echo "=== 3 Italia remontit isoimmat"
+          curl -sS -m 60 -G "$D/resource/557j-pmg8.json" --data-urlencode "\$where=country='Italy' AND upper(category_label) like '%HOUSING%'" --data-urlencode '$select=operation_name_english,project_eu_budget,region,category_label' --data-urlencode '$order=project_eu_budget::number DESC' --data-urlencode '$limit=3' | head -c 1200; echo
+          echo "=== 4 Italia asuminen yhteensä"
+          curl -sS -m 60 -G "$D/resource/557j-pmg8.json" --data-urlencode "\$where=country='Italy' AND upper(category_label) like '%HOUSING%'" --data-urlencode '$select=category_label,count(*) as n,sum(project_eu_budget::number) as eu' --data-urlencode '$group=category_label' | head -c 1200; echo
+          echo "=== 5 Muut koheesiodatat"
+          for q in "2021-2027 projects" "Kohesio 2021-2027" "cohesion open data projects 2021"; do
+            curl -sS -m 40 -G "$D/api/catalog/v1" --data-urlencode "domains=cohesiondata.ec.europa.eu" --data-urlencode "q=$q" --data-urlencode "limit=6" | python3 -c "
           import json,sys
           for r in json.load(sys.stdin)['results']: print(r['resource']['id'],r['resource']['name'])"
-          echo "=== 4 Eurostat elpymisrahasto"
-          curl -sS -m 60 -o /tmp/e.json "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_rrf_use?format=JSON&lang=EN&geo=IT"
+          done
+          echo "=== 6 Eurostat elpymisrahasto kaikki maat"
+          curl -sS -m 90 -o /tmp/e.json "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_rrf_fa?format=JSON&lang=EN"
           python3 - <<'PY'
           import json
           d=json.load(open('/tmp/e.json'))
-          print(d.get('id'),d.get('size'))
+          print(d['id'],d['size'])
           for k,v in d['dimension'].items():
-              c=v['category']['label']
-              print(k,len(c),list(c.items())[:6])
+              c=v['category']['label']; print(k,len(c),list(c.items())[:5])
+          print(list(d['value'].items())[:5])
           PY
