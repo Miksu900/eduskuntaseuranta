@@ -6,8 +6,14 @@ jobs:
     steps:
       - name: Avoimuusrekisteri
         run: |
-          t() { echo "=== $1"; curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$1" | head -c 700; echo; }
           B="https://public.api.avoimuusrekisteri.fi"
-          for p in "/" "/swagger" "/swagger/index.html" "/swagger/v1/swagger.json" "/swagger/public/swagger.json" "/public-api/swagger.json" "/public-api/v1/swagger.json" "/public-api/v1/api-docs" "/v3/api-docs" "/api-docs" "/openapi.json" "/public-api/v1/registrations" "/api/v1/registrations" "/v1/registrations"; do t "$B$p"; done
-          t "https://www.avoimuusrekisteri.fi/"
-          t "https://avoimuusrekisteri.fi/public/api"
+          for p in "/swagger/swagger-initializer.js" "/swagger-initializer.js"; do
+            echo "=== $B$p"
+            curl -sS -L -m 30 -w "\n[HTTP %{http_code}]\n" "$B$p" | head -c 1500
+            echo
+          done
+          for p in "/swagger/doc.json" "/swagger/swagger.json" "/swagger/v1/swagger.json" "/swagger.json" "/docs/json" "/documentation/json" "/json" "/swagger/json" "/api/swagger.json" "/openapi/v1.json"; do
+            echo "=== $B$p"
+            curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{content_type}]\n" -H "Accept: application/json" "$B$p" | head -c 400
+            echo
+          done
