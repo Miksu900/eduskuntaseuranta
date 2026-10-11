@@ -7,6 +7,7 @@ import { followBlock, followPages } from "./seuranta.mjs";
 import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
 import { loadKunnat, kunnatPages, loadMaakunnat } from "./kunnat.mjs";
 import { loadLobbaus, lobbausPages } from "./lobbaus.mjs";
+import { loadVaalirahoitus, vaalirahoitusPages } from "./vaalirahoitus.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -145,7 +146,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -153,7 +154,9 @@ const headerHtml = (bare = false) => `<header class="top"><a class="brand" href=
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
-const footerHtml = (path = "") => /^\/lobbaus\//.test(path)
+const footerHtml = (path = "") => /^\/vaalirahoitus\//.test(path)
+  ? `<footer>Lähde: Valtiontalouden tarkastusvirasto, vaali- ja puoluerahoitusvalvonta (vaalirahoitusvalvonta.fi), ehdokkaiden julkiset ilmoitukset. Luvut ovat ehdokkaiden omia ilmoituksia sellaisenaan. Päivitetty ${dateFi(new Date())}.</footer>`
+  : /^\/lobbaus\//.test(path)
   ? `<footer>Lähde: Avoimuusrekisteri (avoimuusrekisteri.fi, Valtiontalouden tarkastusvirasto), avoin rajapinta. Tiedot ovat ilmoittajien omia ilmoituksia sellaisenaan. Päivitetty ${dateFi(new Date())}.</footer>`
   : /^\/hankinnat\//.test(path)
   ? `<footer>Lähde: Hilma-hankintapalvelu (Hansel Oy), avoin rajapinta. Ilmoitusten tiedot ovat sellaisenaan hankkijoiden ilmoittamia. Päivitetty ${dateFi(new Date())}.</footer>`
@@ -661,6 +664,22 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       }
     }
   } catch (e) { console.log("Lobbaus ohitettu:", e.message); }
+
+  // --- Vaalirahoitus (Vaalirahoitusvalvonta) ---
+  try {
+    const vd = await loadVaalirahoitus(mps.map(m => ({ etunimi: m.etunimi, sukunimi: m.sukunimi, slug: mpSlug.get(m.henkilo), name: full(m), party: pname(m.puolue) })));
+    if (vd) {
+      const vp = vaalirahoitusPages({ shell, esc, data: vd });
+      for (const pg of vp) put(pg.path, pg.html);
+      for (const [sl, blk] of vp.blocks) {
+        const j = jobs.find(x => x.path === `/edustaja/${sl}/`);
+        if (!j) continue;
+        const k = j.html.indexOf('<h2 id="lobbaus">');
+        const i = k > -1 ? k : j.html.indexOf("<h2>Äänestykset</h2>");
+        if (i > -1) j.html = j.html.slice(0, i) + blk + j.html.slice(i);
+      }
+    }
+  } catch (e) { console.log("Vaalirahoitus ohitettu:", e.message); }
 
   // --- Kunnat (Tilastokeskus) ---
   try {
