@@ -12,9 +12,13 @@ jobs:
         run: |
           set +e
           g() { echo "=== $1"; curl -sS -m 30 -L -A "Mozilla/5.0" -D /tmp/h -o /tmp/b "$1"; head -n 1 /tmp/h; grep -i "^x-wp-total" /tmp/h; }
-          g "https://www.vtv.fi/wp-json/wp/v2/types"
-          python3 -c "import json;d=json.load(open('/tmp/b'));print({k:v['rest_base'] for k,v in d.items()})"
-          g "https://www.vtv.fi/wp-json/wp/v2/categories?per_page=100&_fields=id,name,slug,count,parent"
-          python3 -c "import json;[print(c['id'],c['slug'],c['count'],c['parent']) for c in json.load(open('/tmp/b'))]"
-          g "https://www.vtv.fi/wp-json/wp/v2/posts?per_page=1&search=tarkastuskertomus&_fields=id,link,categories"
-          head -c 400 /tmp/b; echo
+          g "https://www.vtv.fi/wp-json/wp/v2/report?per_page=1"
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/b'))[0]
+          for k,v in d.items():
+              s=json.dumps(v,ensure_ascii=False)
+              print(k,':',s[:300])
+          PY
+          g "https://www.vtv.fi/wp-json/wp/v2/report?per_page=5&_fields=date,link,title"
+          python3 -c "import json;[print(r['date'][:10],r['title']['rendered'],r['link']) for r in json.load(open('/tmp/b'))]"
