@@ -174,10 +174,13 @@ ${all.map(r => `<div data-t="${esc((r.name + " " + r.topics.map(topicText).join(
   const mpBlocks = new Map();
   for (const [sl, cm] of byMp) {
     const list = [...cm.values()].sort((a, b) => b.n - a.n);
-    const shown = list.slice(0, 20);
-    mpBlocks.set(sl, `<h2>Lobbaus: keneltä yhteydenottoja</h2><p class="meta">Avoimuusrekisterin ilmoitukset, ilmoitusjakso ${period}. ${list.length} ilmoittajaa on ilmoittanut ottaneensa yhteyttä tähän edustajaan.</p>
-${shown.map(e => `<a class="card" href="/lobbaus/${e.slug}/"><b>${esc(e.name)}</b><br><span class="meta">${e.n} yhteydenottoa${e.topics.size ? " · " + esc([...e.topics].slice(0, 2).join(" · ").slice(0, 220)) : ""}</span></a>`).join("")}
-<p class="meta">Tiedot ovat ilmoittajien omia ilmoituksia sellaisenaan. Yhteydenotto ei kerro, vaikuttiko se edustajan kantaan. <a href="/lobbaus/">Lisää lobbauksesta</a></p>`);
+    const total = list.reduce((a, e) => a + e.n, 0);
+    const card = e => `<a class="card" href="/lobbaus/${e.slug}/"><b>${esc(e.name)}</b><br><span class="meta">${e.n} yhteydenottoa${e.topics.size ? " · " + esc([...e.topics].slice(0, 2).join(" · ").slice(0, 200)) : ""}</span></a>`;
+    const rest = list.slice(5, 60);
+    mpBlocks.set(sl, `<h2 id="lobbaus">Lobbaus: ketkä ovat ottaneet yhteyttä</h2>
+<p><b>${list.length}</b> ilmoittajaa on ilmoittanut ottaneensa yhteyttä tähän edustajaan, yhteensä <b>${total}</b> kertaa (jakso ${period}).</p>
+${list.slice(0, 5).map(card).join("")}${rest.length ? `<details><summary><b>Näytä lisää (${list.length - 5})</b></summary>${rest.map(card).join("")}</details>` : ""}
+<p class="meta">Avoimuusrekisterin ilmoitukset, ilmoittajien omia tietoja sellaisenaan. Yhteydenotto ei kerro, vaikuttiko se edustajan kantaan. <a href="/lobbaus/">Lisää lobbauksesta</a></p>`);
   }
   pages.mpBlocks = mpBlocks;
   return pages;

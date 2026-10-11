@@ -655,8 +655,9 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       for (const [sl, blk] of lp.mpBlocks) {
         const j = jobs.find(x => x.path === `/edustaja/${sl}/`);
         if (!j) continue;
-        const i = j.html.lastIndexOf("<footer>");
-        j.html = i > -1 ? j.html.slice(0, i) + blk + j.html.slice(i) : j.html + blk;
+        const mark = "<h2>Äänestykset</h2>";
+        const i = j.html.indexOf(mark);
+        if (i > -1) j.html = j.html.slice(0, i) + blk + j.html.slice(i);
       }
     }
   } catch (e) { console.log("Lobbaus ohitettu:", e.message); }
