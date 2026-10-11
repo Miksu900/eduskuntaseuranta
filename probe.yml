@@ -4,10 +4,18 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Avoimuusrekisteri
+      - name: Finlex
         run: |
-          t() { echo "=== $1"; curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$1" | head -c 700; echo; }
-          B="https://public.api.avoimuusrekisteri.fi"
-          for p in "/" "/swagger" "/swagger/index.html" "/swagger/v1/swagger.json" "/swagger/public/swagger.json" "/public-api/swagger.json" "/public-api/v1/swagger.json" "/public-api/v1/api-docs" "/v3/api-docs" "/api-docs" "/openapi.json" "/public-api/v1/registrations" "/api/v1/registrations" "/v1/registrations"; do t "$B$p"; done
-          t "https://www.avoimuusrekisteri.fi/"
-          t "https://avoimuusrekisteri.fi/public/api"
+          set +e
+          B="https://opendata.finlex.fi/finlex/avoindata/v1"
+          g() { echo "=== $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$B$1" -o r.out; tail -c 0 r.out; head -c ${2:-900} r.out; echo; }
+          g "/akn/fi/act/statute/list?page=1&limit=3&format=json&langAndVersion=fin@" 1200
+          g "/akn/fi/act/statute/list?page=1&limit=3&format=json" 1200
+          g "/akn/fi/act/statute-consolidated/list?page=1&limit=3&format=json" 1200
+          g "/akn/fi/act/statute/list?page=1&limit=3&format=json&typeStatute=laki&startYear=2025" 1200
+          g "/akn/fi/doc/government-proposal/list?page=1&limit=3&format=json" 1200
+          g "/akn/fi/doc/preparatory-work/list?page=1&limit=3&format=json" 600
+          echo "##### swagger"
+          curl -sS -L -m 40 "https://opendata.finlex.fi/finlex/avoindata/swagger-ui/index.html" -o s.html; ls -la s.html
+          curl -sS -L -m 40 "https://opendata.finlex.fi/finlex/avoindata/v3/api-docs" -o api.json; ls -la api.json
+          jq -r '.paths | keys[]' api.json 2>/dev/null | head -50
