@@ -170,7 +170,7 @@ const SEARCH = (have) => `<h2>Hae kaikista Suomen yrityksistä</h2>
 <div id="pr" aria-live="polite"></div>
 <script>(function(){
 var API="https://avoindata.prh.fi/opendata-ytj-api/v3/companies",HAVE=${JSON.stringify([...have])};
-var L={businessId:"Y-tunnus",names:"Nimet",companyForms:"Yhtiömuoto",mainBusinessLine:"Päätoimiala",website:"Kotisivu",companySituations:"Tilanne",addresses:"Osoitteet",registeredEntries:"Rekisterimerkinnät",tradeRegisterStatus:"Kaupparekisterin tila",status:"Tila",registrationDate:"Rekisteröity",endDate:"Päättynyt",lastModified:"Viimeksi muutettu",type:"Tyyppi",name:"Nimi",value:"Arvo",street:"Katu",postCode:"Postinumero",postOffices:"Postitoimipaikka",city:"Kaupunki",country:"Maa",description:"Kuvaus",descriptions:"Kuvaukset",url:"Osoite",registrationDate2:"Rekisteröity",employerRegisters:"Työnantajarekisteri",auxiliaryNames:"Aputoiminimet",companyReorganisations:"Yrityssaneeraukset",liquidations:"Selvitystilat",businessInformation:"Perustiedot",contactDetails:"Yhteystiedot",phone:"Puhelin",email:"Sähköposti"};
+var L={euId:"EU-tunniste",businessId:"Y-tunnus",names:"Nimet",companyForms:"Yhtiömuoto",mainBusinessLine:"Päätoimiala",website:"Kotisivu",companySituations:"Tilanne",addresses:"Osoitteet",registeredEntries:"Rekisterimerkinnät",tradeRegisterStatus:"Kaupparekisterin tila",status:"Tila",registrationDate:"Rekisteröity",endDate:"Päättynyt",lastModified:"Viimeksi muutettu",type:"Tyyppi",name:"Nimi",value:"Arvo",street:"Katu",postCode:"Postinumero",postOffices:"Postitoimipaikka",city:"Kaupunki",country:"Maa",description:"Kuvaus",descriptions:"Kuvaukset",url:"Osoite",registrationDate2:"Rekisteröity",employerRegisters:"Työnantajarekisteri",auxiliaryNames:"Aputoiminimet",companyReorganisations:"Yrityssaneeraukset",liquidations:"Selvitystilat",businessInformation:"Perustiedot",contactDetails:"Yhteystiedot",phone:"Puhelin",email:"Sähköposti"};
 var LANG={1:"fi",2:"sv",3:"en"};
 function e(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function fd(s){var m=/^(\\d{4})-(\\d\\d)-(\\d\\d)/.exec(s);return m?(+m[3])+"."+(+m[2])+"."+m[1]:s}
@@ -181,10 +181,23 @@ function rv(v){
  if(v==null||v==="")return"";
  if(typeof v!=="object")return /^\\d{4}-\\d\\d-\\d\\d/.test(v)?e(fd(v)):e(v);
  if(isDesc(v))return e(pick(v));
- if(Array.isArray(v)){if(!v.length)return"";return"<ul style='margin:0;padding-left:18px'>"+v.map(function(x){return"<li>"+rv(x)+"</li>"}).join("")+"</ul>"}
- var o="<table class='t'><tbody>";
- Object.keys(v).forEach(function(k){var x=rv(v[k]);if(x)o+="<tr><td>"+e(lab(k))+"</td><td>"+x+"</td></tr>"});
- return o+"</tbody></table>";
+ if(Array.isArray(v)){var it=v.map(rv).filter(Boolean);if(!it.length)return"";if(it.length==1)return it[0];return"<ul style='margin:4px 0;padding-left:18px'>"+it.map(function(x){return"<li style='margin:4px 0'>"+x+"</li>"}).join("")+"</ul>"}
+ var ks=Object.keys(v).filter(function(k){return k!=="source"&&k!=="languageCode"});
+ if("value" in v){var ex=ks.filter(function(k){return k!=="value"}).map(function(k){var x=rv(v[k]);return x?e(lab(k))+": "+x:""}).filter(Boolean);return rv(v.value)+(ex.length?" <span class='meta'>("+ex.join(", ")+")</span>":"")}
+ if("name" in v){var ex2=ks.filter(function(k){return k!=="name"}).map(function(k){var x=rv(v[k]);return x?e(lab(k))+": "+x:""}).filter(Boolean);return"<b>"+e(v.name)+"</b>"+(ex2.length?" <span class='meta'>("+ex2.join(", ")+")</span>":"")}
+ var o="";
+ ks.forEach(function(k){var x=rv(v[k]);if(x)o+="<div style='margin:6px 0'><span class='meta'>"+e(lab(k))+"</span><div style='padding-left:10px'>"+x+"</div></div>"});
+ return o;
+}
+function summ(c){
+ var r=[];
+ r.push(["Y-tunnus",e(id(c))]);
+ if(form(c))r.push(["Yhtiömuoto",e(form(c))]);
+ if(c.businessId&&c.businessId.registrationDate)r.push(["Rekisteröity",e(fd(c.businessId.registrationDate))]);
+ var m=c.mainBusinessLine;if(m&&isDesc(m.descriptions))r.push(["Päätoimiala",e(pick(m.descriptions))+(m.type?" <span class='meta'>"+e(m.type)+"</span>":"")]);
+ if(c.website&&c.website.url){var w=String(c.website.url);if(!/^https?:/.test(w))w="http://"+w;r.push(["Kotisivu","<a href='"+e(w)+"' rel='noopener nofollow'>"+e(w.replace(/^https?:\\/\\//,""))+"</a>"])}
+ var sit=rv(c.companySituations);if(sit)r.push(["Tilanne",sit]);
+ return"<table class='t'><tbody>"+r.map(function(x){return"<tr><td>"+x[0]+"</td><td><b>"+x[1]+"</b></td></tr>"}).join("")+"</tbody></table>";
 }
 function sole(c){var f=(c.companyForms||[]).map(function(x){return isDesc(x.descriptions)?pick(x.descriptions):""}).join(" ");return /elinkeinonharjoittaja|toiminimi/i.test(f)}
 function nm(c){var n=(c.names||[]).filter(function(x){return x.type==="1"&&!x.endDate})[0]||(c.names||[])[0];return n?n.name:"(nimetön)"}
@@ -197,7 +210,7 @@ function card(c){
  s.innerHTML="<b>"+e(nm(c))+"</b> <span class='meta'>"+e(i)+(form(c)?" · "+e(form(c)):"")+"</span>";
  d.appendChild(s);
  var b=document.createElement("div");b.style.cssText="margin-top:8px;overflow-x:auto";
- var h=rv(c);
+ var h=summ(c)+"<details style='margin-top:10px'><summary style='cursor:pointer'><b>Kaikki rekisterin kentät</b></summary><div style='margin-top:8px'>"+rv(c)+"</div></details>";
  if(x)h="<p><a href='/yritys/"+e(i)+"/'><b>Katso lobbaus- ja vaalirahoitustiedot tälle yritykselle</b></a></p>"+h;
  b.innerHTML=h;d.appendChild(b);return d;
 }
