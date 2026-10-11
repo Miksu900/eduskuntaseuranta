@@ -4,15 +4,18 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Finlex
+      - name: Valtionavustukset
         run: |
           set +e
-          B="https://opendata.finlex.fi/finlex/avoindata/v1"
-          curl -sS -L -m 40 -H "Accept: application/json" "$B/akn/fi/act/statute/list?page=1&limit=3&format=json&startYear=2025&endYear=2025" -o l.json
-          echo "=== lista"; head -c 700 l.json; echo
-          U=$(grep -o 'https[^"]*fin@' l.json | head -1)
-          echo "=== osoite: $U"
-          echo "=== 1 ilman Accept"; curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" "$U" -o x1.out; head -c 600 x1.out; echo
-          echo "=== 2 Accept xml"; curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/xml" "$U" -o x2.out; head -c 600 x2.out; echo
-          echo "=== 3 Accept json"; curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$U" -o x3.out; head -c 600 x3.out; echo
-          echo "=== docTitle"; grep -o '<docTitle[^<]*<' x1.out | head -2
+          g() { echo "=== $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" "$1" -o r.out; head -c ${2:-500} r.out; echo; }
+          g "https://avoindata.tutkihallintoa.fi/info" 1500
+          g "https://avoindata.tutkihallintoa.fi/apis" 800
+          echo "##### skriptit"
+          curl -sS -L -m 40 "https://avoindata.tutkihallintoa.fi/" -o a.html; grep -o 'src="[^"]*\.js"' a.html | head -5
+          curl -sS -L -m 40 "https://www.tutkiavustuksia.fi/" -o t.html; grep -o 'src="[^"]*\.js"' t.html | head -5
+          S=$(grep -o 'src="[^"]*main[^"]*\.js"' t.html | head -1 | sed 's/src="//;s/"//')
+          echo "main: $S"
+          case "$S" in http*) U="$S";; /*) U="https://www.tutkiavustuksia.fi$S";; *) U="https://www.tutkiavustuksia.fi/$S";; esac
+          curl -sS -L -m 60 "$U" -o m.js; ls -la m.js
+          grep -o 'https\?://[a-zA-Z0-9./_-]*api[a-zA-Z0-9./_-]*' m.js | sort -u | head -20
+          grep -o '"/api/[a-zA-Z0-9/_-]*' m.js | sort -u | head -20
