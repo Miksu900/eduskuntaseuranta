@@ -8,6 +8,7 @@ import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
 import { loadKunnat, kunnatPages, loadMaakunnat } from "./kunnat.mjs";
 import { loadLobbaus, lobbausPages } from "./lobbaus.mjs";
 import { loadVaalirahoitus, vaalirahoitusPages } from "./vaalirahoitus.mjs";
+import { loadFinlex, finlexPages } from "./finlex.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -146,7 +147,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Uudet lait"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -154,7 +155,9 @@ const headerHtml = (bare = false) => `<header class="top"><a class="brand" href=
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
-const footerHtml = (path = "") => /^\/vaalirahoitus\//.test(path)
+const footerHtml = (path = "") => /^\/lait\//.test(path)
+  ? `<footer>Lähde: Oikeusministeriö, Finlex-oikeustietopalvelun avoin data (finlex.fi), lisenssi CC BY 4.0. Otsikot ja päivämäärät ovat Finlexin tietoja sellaisenaan. Päivitetty ${dateFi(new Date())}.</footer>`
+  : /^\/vaalirahoitus\//.test(path)
   ? `<footer>Lähde: Valtiontalouden tarkastusvirasto, vaali- ja puoluerahoitusvalvonta (vaalirahoitusvalvonta.fi), ehdokkaiden julkiset ilmoitukset. Luvut ovat ehdokkaiden omia ilmoituksia sellaisenaan. Päivitetty ${dateFi(new Date())}.</footer>`
   : /^\/lobbaus\//.test(path)
   ? `<footer>Lähde: Avoimuusrekisteri (avoimuusrekisteri.fi, Valtiontalouden tarkastusvirasto), avoin rajapinta. Tiedot ovat ilmoittajien omia ilmoituksia sellaisenaan. Päivitetty ${dateFi(new Date())}.</footer>`
@@ -680,6 +683,12 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       }
     }
   } catch (e) { console.log("Vaalirahoitus ohitettu:", e.message); }
+
+  // --- Finlex (uudet lait) ---
+  try {
+    const fd = await loadFinlex();
+    if (fd) for (const pg of finlexPages({ shell, esc, dateFi, data: fd })) put(pg.path, pg.html);
+  } catch (e) { console.log("Finlex ohitettu:", e.message); }
 
   // --- Kunnat (Tilastokeskus) ---
   try {
