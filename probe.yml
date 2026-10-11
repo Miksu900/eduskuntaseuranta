@@ -4,20 +4,10 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Testaa avoimet rajapinnat
+      - name: Avoimuusrekisteri
         run: |
-          t() { echo "=== $1"; curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$1" | head -c 600; echo; }
-          t "https://public.api.avoimuusrekisteri.fi/swagger/v1/swagger.json"
-          t "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_avainluvut/uusin/"
-          t "https://opendata.finlex.fi/finlex/avoindata/v1/akn/fi/act/statute-consolidated/list?page=1&limit=2&format=json"
-          t "https://avoindata.tutkihallintoa.fi/"
-          t "https://www.vaalirahoitusvalvonta.fi/fi/index/avoindata.html"
-          t "https://howtheyvote.eu/api/votes?page_size=1"
-          t "https://avoindata.prh.fi/opendata-ytj-api/v3/companies?name=Yleisradio&maxResults=1"
-      - name: Testaa Hilma
-        env:
-          HK: ${{ secrets.HILMA_API_KEY }}
-        run: |
-          h() { echo "=== $1"; curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{content_type}]\n" -H "Ocp-Apim-Subscription-Key: $HK" -H "Accept: application/json" "$1" | head -c 600; echo; }
-          B="https://hns-hilma-prod-apim.azure-api.net"
-          for p in "" "/avp" "/avp/v1" "/avp-read" "/avp/notices" "/avp/v1/notices" "/avp/api/v1/notices" "/notices" "/api/v1/notices" "/avp/api/v1/notice/search"; do h "$B$p"; done
+          t() { echo "=== $1"; curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$1" | head -c 700; echo; }
+          B="https://public.api.avoimuusrekisteri.fi"
+          for p in "/" "/swagger" "/swagger/index.html" "/swagger/v1/swagger.json" "/swagger/public/swagger.json" "/public-api/swagger.json" "/public-api/v1/swagger.json" "/public-api/v1/api-docs" "/v3/api-docs" "/api-docs" "/openapi.json" "/public-api/v1/registrations" "/api/v1/registrations" "/v1/registrations"; do t "$B$p"; done
+          t "https://www.avoimuusrekisteri.fi/"
+          t "https://avoimuusrekisteri.fi/public/api"
