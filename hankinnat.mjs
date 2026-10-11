@@ -19,13 +19,19 @@ async function search(key, body) {
 export async function loadHilma(key) {
   if (!key) { console.log("Hankinnat ohitettu: HILMA_API_KEY puuttuu."); return null; }
   const out = { recent: [], awards: [], yle: [], count: null };
-  const run = async (nimi, body, keep) => {
+  const run = async (nimi, body, keep, pages = 1) => {
+    const rows = []; let count = null;
     try {
-      const d = await search(key, body);
-      const rows = (d.value || []).filter(keep || (() => true));
-      console.log(`Hilma ${nimi}: ${rows.length} ilmoitusta` + (d["@odata.count"] != null ? ` (osumia ${d["@odata.count"]})` : ""));
-      return { rows, count: d["@odata.count"] ?? null };
-    } catch (e) { console.log(`Hilma ${nimi} epäonnistui: ${e.message}`); return { rows: [], count: null }; }
+      for (let i = 0; i < pages; i++) {
+        const d = await search(key, { ...body, skip: i * 300 });
+        count = d["@odata.count"] ?? count;
+        rows.push(...(d.value || []));
+        if ((d.value || []).length < 300) break;
+      }
+    } catch (e) { console.log(`Hilma ${nimi} epäonnistui: ${e.message}`); }
+    const kept = rows.filter(keep || (() => true));
+    console.log(`Hilma ${nimi}: ${kept.length} ilmoitusta` + (count != null ? ` (osumia ${count})` : ""));
+    return { rows: kept, count };
   };
   const base = { top: 300, count: true, orderby: "datePublished desc" };
   const a = await run("uusimmat", { ...base, search: "*", filter: "isCancelled eq false" });
@@ -33,12 +39,13 @@ export async function loadHilma(key) {
   let b = await run("jälki-ilmoitukset", { ...base, search: "*", filter: "isCancelled eq false and mainType eq 'ContractAwardNotices'" });
   if (!b.rows.length) b = await run("jälki-ilmoitukset (varahaku)", { ...base, search: "*" }, n => /Award/i.test(n.mainType || "") || n.type === "E4");
   out.awards = b.rows;
-  const c = await run("Yle", { ...base, search: "Yleisradio" }, n => /yleisradio/i.test(n.organisationNameFi || "") || n.organisationNationalRegistrationNumber === YLE_YTUNNUS);
+  const c = await run("Yle", { ...base, search: "Yleisradio" }, n => /yleisradio/i.test(n.organisationNameFi || "") || n.organisationNationalRegistrationNumber === YLE_YTUNNUS, 4);
   out.yle = c.rows;
   const first = out.awards[0] || out.recent[0];
   if (first) console.log("Hilma kentät (esimerkki): " + Object.keys(first).filter(k => first[k] != null && first[k] !== "").join(", "));
   const winnerKeys = first ? Object.keys(first).filter(k => /winner|contractor|supplier|tenderer|awardee/i.test(k)) : [];
   if (winnerKeys.length) console.log("Voittajakentät: " + winnerKeys.join(", "));
+  out.sample = out.yle.filter(n => /Viestinnän konsultointi/i.test(n.titleFi || ""));
   if (!out.recent.length && !out.awards.length && !out.yle.length) return null;
   return out;
 }

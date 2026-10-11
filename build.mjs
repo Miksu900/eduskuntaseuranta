@@ -633,7 +633,11 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   // --- Julkiset hankinnat (Hilma) ---
   try {
     const hd = await loadHilma(process.env.HILMA_API_KEY);
-    if (hd) for (const pg of hankinnatPages({ shell, esc, dateFi, data: hd })) put(pg.path, pg.html);
+    if (hd) {
+      for (const pg of hankinnatPages({ shell, esc, dateFi, data: hd })) put(pg.path, pg.html);
+      await mkdir(OUT + "/data", { recursive: true });
+      await writeFile(OUT + "/data/hilma-esimerkki.json", JSON.stringify(hd.sample || [], null, 1));
+    }
   } catch (e) { console.log("Hankinnat ohitettu:", e.message); }
 
   // --- Kirjoitus levylle ---
