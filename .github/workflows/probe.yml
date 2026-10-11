@@ -7,10 +7,14 @@ jobs:
       - name: Avoimuusrekisteri
         run: |
           B="https://public.api.avoimuusrekisteri.fi"
-          g() { echo "=== $1"; curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua]\n" "$B$1" -o r.json; tail -c 0 r.json; head -c ${2:-700} r.json; echo; echo "[HTTP-koodi yllä oli:]"; }
-          g "/open-data-term/all" 600
-          g "/open-data-register-notification/count/published" 200
-          g "/open-data-reporting/activity-notification/count/latest-term" 200
-          g "/open-data-reporting/targets/latest-term/top-topic-count/5" 900
-          g "/open-data-penalty-payments" 700
-          g "/open-data-activity-notification" 1800
+          echo "##### JAKSOT"
+          curl -sS -m 60 "$B/open-data-term/all" | jq -r '.[] | select(.status!="draft") | "id \(.id): \(.reportingStartDate[:10]) - \(.reportingEndDate[:10]) \(.status)"'
+          echo "##### ILMOITUKSET jakso 5"
+          curl -sS -m 120 -w "\n[HTTP %{http_code}, %{size_download} tavua]\n" "$B/open-data-activity-notification/term/5" -o t5.json
+          tail -n 0 t5.json
+          jq -r 'type, (if type=="array" then length else (keys|join(",")) end)' t5.json
+          echo "##### ENSIMMÄINEN (lyhennetty)"
+          jq -c 'if type=="array" then .[0] else (.[keys[0]]|if type=="array" then .[0] else . end) end' t5.json | head -c 2500
+          echo
+          echo "##### KENTTIEN NIMET"
+          jq -r 'if type=="array" then .[0] else (.[keys[0]]|if type=="array" then .[0] else . end) end | paths(scalars) | map(tostring) | join(".")' t5.json | sed 's/\.[0-9]*\././g' | sort -u | head -80
