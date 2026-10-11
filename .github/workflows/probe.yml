@@ -4,18 +4,10 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Valtionavustukset
+      - name: PRH
         run: |
           set +e
-          g() { echo "=== $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" "$1" -o r.out; head -c ${2:-500} r.out; echo; }
-          g "https://avoindata.tutkihallintoa.fi/info" 1500
-          g "https://avoindata.tutkihallintoa.fi/apis" 800
-          echo "##### skriptit"
-          curl -sS -L -m 40 "https://avoindata.tutkihallintoa.fi/" -o a.html; grep -o 'src="[^"]*\.js"' a.html | head -5
-          curl -sS -L -m 40 "https://www.tutkiavustuksia.fi/" -o t.html; grep -o 'src="[^"]*\.js"' t.html | head -5
-          S=$(grep -o 'src="[^"]*main[^"]*\.js"' t.html | head -1 | sed 's/src="//;s/"//')
-          echo "main: $S"
-          case "$S" in http*) U="$S";; /*) U="https://www.tutkiavustuksia.fi$S";; *) U="https://www.tutkiavustuksia.fi/$S";; esac
-          curl -sS -L -m 60 "$U" -o m.js; ls -la m.js
-          grep -o 'https\?://[a-zA-Z0-9./_-]*api[a-zA-Z0-9./_-]*' m.js | sort -u | head -20
-          grep -o '"/api/[a-zA-Z0-9/_-]*' m.js | sort -u | head -20
+          g() { echo "=== $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$1" -o r.out; head -c ${2:-1200} r.out; echo; }
+          g "https://avoindata.prh.fi/opendata-ytj-api/v3/companies?businessId=0112038-9" 2500
+          g "https://avoindata.prh.fi/opendata-ytj-api/v3/companies?name=Nokia&maxResults=3" 1200
+          g "https://avoindata.prh.fi/opendata-ytj-api/v3/description?type=companyForms&lang=fi" 500
