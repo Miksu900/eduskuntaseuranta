@@ -6,13 +6,14 @@ jobs:
     steps:
       - name: Vaalirahoitus
         run: |
-          B="https://www.vaalirahoitusvalvonta.fi"
-          for p in "/fi/index/vaalirahoitus/haetietoavaalirahoitusilmoituksista/ilmoituksethenkiloittain.html" "/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023.html" "/fi/index/vaalirahoitus/ilmoituksetvaaleittain/kuntavaalit2025.html"; do
-            echo "=== $p"
-            curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua]\n" "$B$p" -o p.html
-            tail -c 0 p.html
-            echo "--- tiedosto- ja hakulinkit"
-            grep -oiE 'href="[^"]*(\.csv|\.xlsx|\.xls|\.json|\.zip|\.pdf|haku|rekisteri|api|ilmoitus)[^"]*"' p.html | sort -u | head -30
-            echo "--- teksti"
-            sed -e 's/<script[^>]*>.*<\/script>//g' -e 's/<[^>]*>/ /g' p.html | tr -s ' \n\t' | grep -iE 'ilmoitus|tieto|hae|haku|ehdokas|taulukko|lataa|csv|excel' | head -15 | cut -c1-240
+          echo "##### avoindata.fi: hakutulokset"
+          for q in vaalirahoitus vaalirahoitusilmoitus ehdokkaan%20vaalirahoitus; do
+            echo "=== $q"
+            curl -sS -L -m 30 "https://www.avoindata.fi/data/api/3/action/package_search?q=$q&rows=10" | jq -r '.result.results[]? | "\(.title) | \(.organization.title // "") | \(.name) | resursseja: \(.resources|length)"' 2>&1 | head -12
           done
+          echo "##### VTV raporttisivu"
+          curl -sS -L -m 30 "https://vtv.fi/raportit/vaali-ja-puoluerahoituksen-raportit/" -o v.html
+          ls -la v.html
+          grep -oiE 'href="[^"]*(\.xlsx|\.xls|\.csv|\.pdf|raportit/[^"]*)"' v.html | sort -u | head -30
+          echo "##### VTV teksti"
+          sed -e 's/<[^>]*>/ /g' v.html | tr -s ' \n\t' | grep -iE 'ehdokas|eduskuntavaali|excel|csv|avoin|vaalirahoitusilmoitus' | head -12 | cut -c1-240
