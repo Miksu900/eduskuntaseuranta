@@ -8,15 +8,14 @@ jobs:
         run: |
           set +e
           B="https://www.vaalirahoitusvalvonta.fi"
-          curl -sS -L -m 30 "$B/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023.html" -o l.html
-          echo "##### vaalipiirilinkit"
-          grep -oE 'href="[^"]*eduskuntavaalit2023/[^"]*"' l.html | sort -u | head -15
-          D=$(grep -oE 'href="[^"]*eduskuntavaalit2023/[^"]*"' l.html | grep -i helsin | head -1 | sed -E 's/href="([^"]*)"/\1/')
-          [ -z "$D" ] && D=$(grep -oE 'href="[^"]*eduskuntavaalit2023/[^"]*"' l.html | head -1 | sed -E 's/href="([^"]*)"/\1/')
-          echo "##### valittu: $D"
-          curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua]\n" "$B$D" -o d.html
-          echo "##### ilmoituslinkkejä yhteensä: $(grep -oiE 'href="[^"]*"[^>]*>[^<]*Vaalirahoitusilmoitus' d.html | wc -l)"
-          echo "##### ensimmäiset 5 linkkiä"
-          grep -oiE 'href="[^"]*"[^>]*>[^<]*Vaalirahoitusilmoitus' d.html | head -5 | cut -c1-260
-          echo "##### ensimmäinen ehdokas ympäristöineen"
-          grep -n -i 'Castr' d.html | head -2 | cut -c1-700
+          curl -sS -L -m 30 "$B/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023/02.html" -o d.html
+          tr '\n\r\t' '   ' < d.html | sed 's/  */ /g' > f.html
+          echo "##### otsikko: $(grep -oE '<h1[^>]*>[^<]*' f.html | head -1)"
+          echo "##### kaikki a-linkit jotka eivät ole valikossa (ensimmäiset 12 joissa sana ilmoitus tai id)"
+          grep -oE '<a [^>]*>[^<]{0,80}</a>' f.html | grep -iE 'ilmoitus|raportti|pdf|id=' | head -12 | cut -c1-320
+          echo "##### ehdokasrivi"
+          grep -oE '.{0,200}(Vaalirahoitusilmoitus).{0,200}' f.html | head -3
+          echo "##### data- ja onclick-attribuutit"
+          grep -oE '(data-[a-z-]+|onclick)="[^"]{0,120}"' f.html | sort | uniq -c | sort -rn | head -15
+          echo "##### tiedosto- ja ilmoitusosoitteet"
+          grep -oE '"(/[^"]*(ilmoitus|raportti|document|file|pdf|attachment|vaalirahoitusilmoitus)[^"]*)"' f.html | sort -u | head -15
