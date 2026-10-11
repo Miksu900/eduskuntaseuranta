@@ -4,7 +4,10 @@ on:
     inputs:
       polku:
         description: "Hilma-polku"
-        default: "/avp/eformnotices/docs?search=Yleisradio&$top=1"
+        default: "/avp/eformnotices/docs/search"
+      runko:
+        description: "POST-runko (JSON)"
+        default: '{"search":"Yleisradio","top":1,"count":true,"orderby":"datePublished desc"}'
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -13,8 +16,11 @@ jobs:
         env:
           HK: ${{ secrets.HILMA_API_KEY }}
           POLKU: ${{ inputs.polku }}
+          RUNKO: ${{ inputs.runko }}
         run: |
           URL="https://api.hankintailmoitukset.fi$POLKU"
           echo "=== $URL"
-          curl -sS -L -m 60 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Ocp-Apim-Subscription-Key: $HK" -H "Accept: application/json" "$URL" | head -c 3500
-          echo
+          echo "$RUNKO"
+          curl -sS -L -m 60 -X POST -H "Ocp-Apim-Subscription-Key: $HK" -H "Content-Type: application/json" -H "Accept: application/json" --data "$RUNKO" "$URL" -o /tmp/vastaus.json -w "[HTTP %{http_code}, %{size_download} tavua]\n"
+          jq -r '."@odata.count" // empty | "Osumia yhteensä: \(.)"' /tmp/vastaus.json || true
+          jq -r '.value[0] // empty | to_entries[] | select(.value != null and .value != "" and .value != []) | "\(.key) = \(.value | tostring | .[0:110])"' /tmp/vastaus.json | head -c 3800 || head -c 1500 /tmp/vastaus.json
