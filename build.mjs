@@ -649,8 +649,6 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     if (kd) {
       kd.maakunta = await loadMaakunnat();
       for (const pg of kunnatPages({ shell, esc, data: kd })) put(pg.path, pg.html);
-      await mkdir(OUT + "/data", { recursive: true });
-      await writeFile(OUT + "/data/maakunnat-tarkistus.json", JSON.stringify(kd.maakunta.debug, null, 1));
     }
   } catch (e) { console.log("Kunnat ohitettu:", e.message); }
 
