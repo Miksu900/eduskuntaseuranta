@@ -7,13 +7,13 @@ jobs:
       - name: Vaalirahoitus
         run: |
           B="https://www.vaalirahoitusvalvonta.fi"
-          for p in "/fi/index/vaalirahoitus/haetietoavaalirahoitusilmoituksista/ilmoituksethenkiloittain.html" "/fi/index/vaalirahoitus/haetietoavaalirahoitusilmoituksista/enitentukeasaaneet.html" "/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023.html"; do
+          for p in "/webcomponents/julkinenpalvelu/vaalirahoitustiedot/vaaliraportti.html" "/webcomponents/julkinenpalvelu/vaalirahoitustiedot/vaaliraporttiluonti.html"; do
             echo "=== $p"
-            curl -sS -L -m 30 "$B$p" -o p.html
-            echo "--- lomakkeet ja osoitteet"
-            grep -oiE '(action|data-url|data-action|data-src|src|url|endpoint|href)[=:] *["'"'"'][^"'"'"']*(json|api|haku|hae|search|query|raportti|excel|csv|xls|export|lataa|ilmoitus)[^"'"'"']*["'"'"']' p.html | sort -u | head -25
-            echo "--- fetch/ajax"
-            grep -oiE '(fetch|ajax|xhr\.open|\.post|\.get)\([^)]{0,140}\)' p.html | sort -u | head -10
-            echo "--- lomake"
-            grep -oiE '<(form|input|select)[^>]{0,200}>' p.html | head -12 | cut -c1-220
+            curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua]\n" "$B$p" -o c.html
+            tail -c 0 c.html
+            echo "--- osoitteet ja toiminnot"
+            grep -oE '(luovaaliraportti|valitseraportti|haeraportti|lataaraportti|raporttistatus|tilaraportti)[^;]{0,200}' c.html | head -12 | cut -c1-260
+            grep -oE '["'"'"'](/[a-zA-Z0-9_./?=&-]*(\.stx|\.json|\.csv|\.xls|\.xlsx|raportti|report|download|lataa)[a-zA-Z0-9_./?=&-]*)["'"'"']' c.html | sort -u | head -25
+            echo "--- ajax-kutsut"
+            grep -oE '(\$\.(ajax|post|get|getJSON)|fetch|xhr\.open|url:)[^;]{0,200}' c.html | head -15 | cut -c1-260
           done
