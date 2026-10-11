@@ -100,6 +100,7 @@ export async function loadVaalirahoitus(mps) {
 
 const nf = new Intl.NumberFormat("fi-FI", { maximumFractionDigits: 0 });
 const eur = v => (v == null ? "–" : nf.format(v) + " €");
+const eurRow = v => (v == null ? '<span class="meta">ei eritelty</span>' : "<b>" + nf.format(v) + " €</b>");
 const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot ovat Valtiontalouden tarkastusviraston vaali- ja puoluerahoitusvalvonnan julkisista ehdokasilmoituksista, eduskuntavaalit 2023. Ehdokas ilmoittaa itse vaalikampanjansa kulut ja rahoituksen. Luvut ovat ilmoituksista sellaisenaan. Rahoituksen jako on ilmoittajan oma jaottelu. Sivusto näyttää vain summat. Yksityisten tukijoiden nimiä ei kerätä tänne. Ilmoituksessa voi olla myös tukiryhmän rahoitusta. Luku ei kerro, onko rahoitus ollut sopivaa tai vaikuttiko se päätöksiin.</div>`;
 
 export function vaalirahoitusPages({ shell, esc, data }) {
@@ -132,14 +133,14 @@ export function vaalirahoitusPages({ shell, esc, data }) {
     blocks.set(r.slug, `<h2 id="vaalirahoitus">Vaalirahoitus 2023</h2>
 <p>Ilmoitetut kampanjan kulut <b>${eur(r.kulut)}</b>${share != null ? `. Rahoituksesta ${share} % tuli yrityksiltä` : ""}.</p>
 <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><tbody>
-<tr><td>Omat varat</td><td style="text-align:right"><b>${eur(r.omat)}</b></td></tr>
-<tr><td>Lainat</td><td style="text-align:right"><b>${eur(r.lainat)}</b></td></tr>
-<tr><td>Yksityishenkilöiden tuki</td><td style="text-align:right"><b>${eur(r.yksityiset)}</b></td></tr>
-<tr><td>Yritysten tuki</td><td style="text-align:right"><b>${eur(r.yritykset)}</b></td></tr>
-<tr><td>Puolueen tuki</td><td style="text-align:right"><b>${eur(r.puolue)}</b></td></tr>
-<tr><td>Puolueyhdistysten tuki</td><td style="text-align:right"><b>${eur(r.puolueyhd)}</b></td></tr>
-<tr><td>Muiden tahojen tuki</td><td style="text-align:right"><b>${eur(r.muut)}</b></td></tr>
-<tr><td>Rahoitus yhteensä</td><td style="text-align:right"><b>${eur(r.rahoitus)}</b></td></tr></tbody></table></div>
+<tr><td>Omat varat</td><td style="text-align:right">${eurRow(r.omat)}</td></tr>
+<tr><td>Lainat</td><td style="text-align:right">${eurRow(r.lainat)}</td></tr>
+<tr><td>Yksityishenkilöiden tuki</td><td style="text-align:right">${eurRow(r.yksityiset)}</td></tr>
+<tr><td>Yritysten tuki</td><td style="text-align:right">${eurRow(r.yritykset)}</td></tr>
+<tr><td>Puolueen tuki</td><td style="text-align:right">${eurRow(r.puolue)}</td></tr>
+<tr><td>Puolueyhdistysten tuki</td><td style="text-align:right">${eurRow(r.puolueyhd)}</td></tr>
+<tr><td>Muiden tahojen tuki</td><td style="text-align:right">${eurRow(r.muut)}</td></tr>
+<tr><td>Rahoitus yhteensä</td><td style="text-align:right">${eurRow(r.rahoitus)}</td></tr></tbody></table></div>
 <p class="meta">Ehdokkaan oma ilmoitus ${esc(String(data.year))} vaaleista. <a href="${esc(r.url)}" rel="noopener">Katso alkuperäinen ilmoitus</a> · <a href="/vaalirahoitus/">Kaikki kansanedustajat</a></p>`);
   }
   pages.blocks = blocks;
