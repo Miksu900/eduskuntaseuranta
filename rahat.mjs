@@ -58,7 +58,7 @@ function e(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"
 function n(v){return new Intl.NumberFormat("fi-FI",{maximumFractionDigits:0}).format(Number(v)||0)}
 function fi(c){return FI[c]||c}
 function q(p){var u=API+"?"+Object.keys(p).map(function(k){return encodeURIComponent(k)+"="+encodeURIComponent(p[k])}).join("&");return fetch(u).then(function(r){if(!r.ok)throw new Error("Palvelu vastasi "+r.status);return r.json()})}
-function where(c){var w=[NOPERS];if(c)w.push("country='"+c.replace(/'/g,"''")+"'");if(TH[th.value])w.push(TH[th.value]);var k=kw.value.trim().replace(/'/g,"''");if(k)w.push("upper(operation_name_english) like '%"+k.toUpperCase()+"%'");return w.join(" AND ")}
+function where(c){var w=[NOPERS];if(c)w.push("country='"+c.replace(/'/g,"''")+"'");else w.push("country not like '%|%'");if(TH[th.value])w.push(TH[th.value]);var k=kw.value.trim().replace(/'/g,"''");if(k)w.push("upper(operation_name_english) like '%"+k.toUpperCase()+"%'");return w.join(" AND ")}
 function run(){out.textContent="Haetaan…";var c=sel.value;
 if(!c){q({"$select":"country,count(*) as n,sum(project_eu_budget) as eu","$where":where(""),"$group":"country","$order":"eu DESC","$limit":"60"}).then(function(r){
 var tot=r.reduce(function(a,x){return a+Number(x.eu||0)},0);
@@ -72,12 +72,12 @@ out.innerHTML=h}).catch(err)}}
 function err(x){out.textContent="Haku epäonnistui: "+x.message+". Yritä hetken päästä uudelleen."}
 document.getElementById("kf").onsubmit=function(ev){ev.preventDefault();run()};
 sel.onchange=th.onchange=run;
-q({"$select":"country,count(*) as n","$group":"country","$order":"country","$limit":"60"}).then(function(r){
+q({"$select":"country,count(*) as n","$where":"country not like '%|%'","$group":"country","$order":"country","$limit":"60"}).then(function(r){
 sel.innerHTML="<option value=''>Kaikki maat (vertailu)</option>"+r.map(function(x){return"<option value='"+e(x.country)+"'>"+e(fi(x.country))+"</option>"}).join("");run()}).catch(err)
 })()</script>`;
   const SEL = "width:100%;box-sizing:border-box;padding:12px;font-size:16px;margin:6px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)";
   const body = `<h1>EU:n rahavirrat</h1><p>Mihin EU:n rahaa on mennyt? Valitse maa ja aihe ja katso, kuinka paljon EU-rahoitusta hankkeisiin on osoitettu ja mitkä ovat suurimmat.</p>
-<div class="note"><b>Mistä tiedot ovat</b><br>Koheesiorahat: Euroopan komission koheesiodata (cohesiondata.ec.europa.eu), ohjelmakausi 2014–2020, hankekohtaiset tiedot jäsenmaiden ilmoittamina. Kauden 2021–2027 hanketiedot eivät ole vielä mukana. Elpymisrahasto: Eurostat. Summat ovat EU:n osuutta hankkeen budjetista. Yksityishenkilöiden tukia ei näytetä.</div>
+<div class="note"><b>Mistä tiedot ovat</b><br>Koheesiorahat: Euroopan komission koheesiodata (cohesiondata.ec.europa.eu), ohjelmakausi 2014–2020, hankekohtaiset tiedot jäsenmaiden ilmoittamina. Kauden 2021–2027 hanketiedot eivät ole vielä mukana. Elpymisrahasto: Eurostat. Summat ovat EU:n osuutta hankkeen budjetista. Maiden välisiä yhteishankkeita (Interreg) ei ole mukana maakohtaisissa luvuissa. Yksityishenkilöiden tukia ei näytetä.</div>
 <h2>Koheesiorahat</h2><p class="meta">Aluekehitys- ja sosiaalirahasto sekä koheesiorahasto, esimerkiksi asuntojen ja rakennusten korjaukset, energiatehokkuus ja infrastruktuuri.</p>
 <form id="kf"><select id="kc" style="${SEL}"><option value="">Ladataan…</option></select>
 <select id="kt" style="${SEL}"><option value="all">Kaikki aiheet</option><option value="hous" selected>Asuminen (asuntojen rakentaminen ja korjaus)</option><option value="ren">Asuntojen energiaremontit</option><option value="pub">Julkisten rakennusten energiaremontit</option><option value="energy">Energiatehokkuus (kaikki)</option></select>
