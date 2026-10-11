@@ -57,8 +57,20 @@ const kind = n => TYPE[n.type] || MAIN[n.mainType] || n.mainType || "Ilmoitus";
 const slug = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function winnerOf(n) {
-  for (const k of Object.keys(n)) if (/winner|contractor|supplier|awardee/i.test(k) && typeof n[k] === "string" && n[k].trim() && !/id$|number$|address$|nuts|type$/i.test(k)) return n[k];
+  const w = n.winnerOrganisations;
+  if (typeof w === "string" && w.trim()) return w.split("//").map(x => x.trim()).filter(Boolean).join("; ");
   return "";
+}
+// Summa ilmoituksesta: tehty sopimus, puitejärjestelyn enimmäisarvo, puitejärjestelyn arvio tai hankinnan arvioitu arvo.
+function amountOf(n) {
+  const c = [
+    ["noticeResultTotalAmount", "Sopimuksen arvo ilmoituksen mukaan"],
+    ["overallMaximumFrameworkContractsAmount", "Puitejärjestelyn enimmäisarvo (arvio, ei sitoumus)"],
+    ["overallApproximateFrameworkContractsAmount", "Puitejärjestelyn arvioitu arvo"],
+    ["estimatedValue", "Hankinnan arvioitu arvo"],
+  ];
+  for (const [k, label] of c) { const v = Number(n[k]); if (v > 0) return { v, label, actual: k === "noticeResultTotalAmount" }; }
+  return null;
 }
 
 export function hankinnatPages({ shell, esc, dateFi, data }) {
@@ -70,17 +82,17 @@ export function hankinnatPages({ shell, esc, dateFi, data }) {
   for (const n of list) { const s = slug(buyer(n)); if (!s) continue; if (!bySlug.has(s)) bySlug.set(s, { name: buyer(n), ytunnus: n.organisationNationalRegistrationNumber || "", items: [] }); bySlug.get(s).items.push(n); }
 
   const card = (n, showBuyer = true) => {
-    const amt = Number(n.noticeResultTotalAmount);
+    const amt = amountOf(n);
     const win = winnerOf(n);
     const ted = n.tedPublicationId ? `<a href="https://ted.europa.eu/fi/notice/-/detail/${esc(n.tedPublicationId)}" rel="noopener">Katso TED:ssä</a> · ` : "";
     const buyerLink = showBuyer ? `<a href="/hankinnat/${slug(buyer(n))}/">${esc(buyer(n))}</a> · ` : "";
     const text = `${n.titleFi || ""} ${buyer(n)} ${win} ${n.cpvCodes || ""}`.toLowerCase();
     return `<div class="card" data-t="${esc(text)}"><b>${esc(n.titleFi || "(ei otsikkoa)")}</b><br>
 <span class="meta">${buyerLink}${esc(kind(n))} · julkaistu ${dateFi(n.datePublished)}${n.deadline && /Contract(?!Award)|Prior/.test(n.mainType || "") ? " · määräaika " + dateFi(n.deadline) : ""}</span>
-${win ? `<br><span class="meta">Valittu toimittaja: ${esc(win)}</span>` : ""}${amt > 0 ? `<br><span class="meta">Arvo ilmoituksen mukaan: ${nf.format(amt)} €</span>` : ""}
+${win ? `<br><span class="meta">Valittu toimittaja: ${esc(win)}</span>` : ""}${amt ? `<br><span class="meta">${amt.label}: ${nf.format(amt.v)} €</span>` : ""}
 <br><span class="meta">${ted}Ilmoitusnumero ${esc(n.noticeNumber || n.noticeId || "")}</span></div>`;
   };
-  const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot tulevat Hilma-hankintapalvelusta (hankintailmoitukset.fi, Hansel Oy) sen avoimen rajapinnan kautta. Ilmoitus kertoo, mitä hankitaan, kuka hankkii ja mihin mennessä tarjoukset on jätettävä. Jälki-ilmoituksessa kerrotaan valittu toimittaja ja arvo. Ilmoituksen arvo on arvio tai sopimuksen arvo ilmoitushetkellä, ei välttämättä lopullinen maksettu summa. Kaikista hankinnoista ei tehdä ilmoitusta, esimerkiksi pienimmät jäävät kynnysarvon alle.</div>`;
+  const NOTE = `<div class="note"><b>Mistä tiedot ovat</b><br>Tiedot tulevat Hilma-hankintapalvelusta (hankintailmoitukset.fi, Hansel Oy) sen avoimen rajapinnan kautta. Ilmoitus kertoo, mitä hankitaan, kuka hankkii ja mihin mennessä tarjoukset on jätettävä. Jälki-ilmoituksessa kerrotaan valittu toimittaja ja arvo. Ilmoituksen arvo on sopimuksen arvo, puitejärjestelyn enimmäisarvo tai arvio ilmoitushetkellä. Se ei ole lopullinen maksettu summa. Puitejärjestelyssä enimmäisarvo on yläraja, jota ei ole pakko käyttää. Kaikista hankinnoista ei tehdä ilmoitusta, esimerkiksi pienimmät jäävät kynnysarvon alle.</div>`;
   const FILTER = `<input id="hf" type="search" placeholder="Hae otsikosta, hankkijasta tai toimittajasta" style="width:100%;padding:12px;font-size:16px;margin:10px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
 <script>(function(){var f=document.getElementById("hf");f.oninput=function(){var q=f.value.toLowerCase().trim();document.querySelectorAll(".card[data-t]").forEach(function(c){c.style.display=!q||c.getAttribute("data-t").indexOf(q)>-1?"":"none"})}})()</script>`;
 
@@ -101,12 +113,12 @@ ${FILTER}
     }),
   });
   for (const [s, b] of [...bySlug.entries()].sort((a, c) => c[1].items.length - a[1].items.length).slice(0, 250)) {
-    const total = b.items.reduce((t, n) => t + (Number(n.noticeResultTotalAmount) > 0 && (/Award/i.test(n.mainType || "") || n.type === "E4") ? Number(n.noticeResultTotalAmount) : 0), 0);
+    const total = b.items.reduce((t, n) => t + (Number(n.noticeResultTotalAmount) > 0 ? Number(n.noticeResultTotalAmount) : 0), 0);
     pages.push({
       path: `/hankinnat/${s}/`,
       html: shell({
         title: `${b.name}: hankinnat | Eduskuntaseuranta`, desc: `${b.name} hankintailmoitukset Hilmassa: mitä hankitaan ja kenelle sopimus on tehty.`, path: `/hankinnat/${s}/`,
-        body: `<h1>${esc(b.name)}: hankinnat</h1><p class="meta">${b.ytunnus ? "Y-tunnus " + esc(b.ytunnus) + " · " : ""}${b.items.length} ilmoitusta aineistossa${total > 0 ? " · jälki-ilmoitusten arvot yhteensä " + nf.format(total) + " €" : ""}</p>${NOTE}${FILTER}${b.items.map(n => card(n, false)).join("")}<p><a href="/hankinnat/">Kaikki hankinnat</a></p>`,
+        body: `<h1>${esc(b.name)}: hankinnat</h1><p class="meta">${b.ytunnus ? "Y-tunnus " + esc(b.ytunnus) + " · " : ""}${b.items.length} ilmoitusta aineistossa${total > 0 ? " · ilmoitettujen sopimusarvojen summa " + nf.format(total) + " €" : ""}</p>${NOTE}${FILTER}${b.items.map(n => card(n, false)).join("")}<p><a href="/hankinnat/">Kaikki hankinnat</a></p>`,
       }),
     });
   }
