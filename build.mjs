@@ -4,6 +4,7 @@ import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
 import { loadNews, newsPage, blogPages } from "./extras.mjs";
 import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
 import { followBlock, followPages } from "./seuranta.mjs";
+import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
 
@@ -142,7 +143,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/hankinnat/", "Julkiset hankinnat"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -628,6 +629,12 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     for (const pg of b.pages) if (pg.path !== "/vieraskyna/" && pg.path !== "/vieraskyna/kirjoita/") put(pg.path, pg.html);
     blogRss = b.rss;
   } catch (e) { console.log("Blogi ohitettu:", e.message); }
+
+  // --- Julkiset hankinnat (Hilma) ---
+  try {
+    const hd = await loadHilma(process.env.HILMA_API_KEY);
+    if (hd) for (const pg of hankinnatPages({ shell, esc, dateFi, data: hd })) put(pg.path, pg.html);
+  } catch (e) { console.log("Hankinnat ohitettu:", e.message); }
 
   // --- Kirjoitus levylle ---
   await pool(jobs, 16, async j => { const dir = OUT + j.path; await mkdir(dir, { recursive: true }); await writeFile(dir + "index.html", j.html); });
