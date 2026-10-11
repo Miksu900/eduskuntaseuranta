@@ -3,8 +3,8 @@ on:
   workflow_dispatch:
     inputs:
       polku:
-        description: "Hilma-polku, esim. /avp/eformnotices"
-        default: "/avp/eformnotices"
+        description: "Hilma-polku"
+        default: "/avp/eformnotices/docs?search=Yleisradio&$top=1"
 jobs:
   probe:
     runs-on: ubuntu-latest
