@@ -6,18 +6,24 @@ jobs:
     steps:
       - name: Vaalirahoitus
         run: |
+          set +e
           B="https://www.vaalirahoitusvalvonta.fi"
           P="/fi/index/vaalirahoitus/ilmoituksetvaaleittain/eduskuntavaalit2023/helsinginvaalipiiri.html"
           curl -sS -L -m 30 -w "[HTTP %{http_code}, %{size_download} tavua]\n" "$B$P" -o h.html
-          echo "--- linkkien määrä"
-          grep -oE 'href="[^"]*"' h.html | grep -ci 'ilmoitus'
-          echo "--- ensimmäiset ilmoituslinkit"
-          grep -oE '<a[^>]*href="[^"]*"[^>]*>[^<]*Vaalirahoitusilmoitus' h.html | head -4 | cut -c1-300
+          echo "--- kaikki linkit joissa sana ilmoitus (max 8)"
+          grep -oE 'href="[^"]*[iI]lmoitus[^"]*"' h.html | head -8
+          echo "--- ensimmäinen ehdokasrivi"
+          grep -n -i 'Castr' h.html | head -3 | cut -c1-500
+          echo "--- ensimmäisen ilmoituksen linkki"
           L=$(grep -oE 'href="[^"]*"[^>]*>[^<]*Vaalirahoitusilmoitus' h.html | head -1 | sed -E 's/href="([^"]*)".*/\1/' | sed 's/&amp;/\&/g')
-          echo "--- ensimmäinen: $L"
+          echo "L=[$L]"
+          if [ -z "$L" ]; then
+            L=$(grep -oE 'href="[^"]*"' h.html | grep -iE 'ilmoitus|raportti|pdf' | head -1 | sed -E 's/href="([^"]*)"/\1/' | sed 's/&amp;/\&/g')
+            echo "varalinkki L=[$L]"
+          fi
           case "$L" in http*) U="$L";; *) U="$B$L";; esac
           curl -sS -L -m 30 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" "$U" -o i.out
-          tail -c 0 i.out
           file i.out
           echo "--- sisältö (teksti)"
           sed -e 's/<script[^>]*>[^<]*<\/script>//g' -e 's/<[^>]*>/ /g' i.out | tr -s ' \n\t' | head -c 2500
+          exit 0
