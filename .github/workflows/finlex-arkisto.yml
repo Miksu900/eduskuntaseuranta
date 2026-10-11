@@ -1,0 +1,34 @@
+name: Finlex-arkisto
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "40 2 * * 1"
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: finlex-arkisto
+  cancel-in-progress: false
+jobs:
+  lataa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Lataa säädökset
+        run: node finlex-arkisto.mjs
+      - name: Tallenna arkisto
+        if: always()
+        run: |
+          git config user.name "finlex-arkisto"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/finlex
+          if git diff --cached --quiet; then echo "Ei muutoksia"; else git commit -m "Finlex-arkisto päivitetty" && git pull --rebase origin main && git push; fi
+      - name: Käynnistä sivuston rakennus
+        if: always()
+        run: gh workflow run build.yml
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
