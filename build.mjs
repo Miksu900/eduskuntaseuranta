@@ -1,5 +1,6 @@
 // build.mjs – rakentaa Eduskuntaseuranta-sivuston staattiset sivut Supabasen datasta.
 // Ajetaan GitHub Actionsissa (ks. .github/workflows/build.yml). Tulos kirjoitetaan kansioon dist/.
+import "./fetchcache.mjs";
 import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
 import { loadNews, newsPage, blogPages } from "./extras.mjs";
 import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
@@ -269,6 +270,7 @@ async function main() {
   const put = (path, html) => { urls.push(path); jobs.push({ path, html }); };
 
   // --- Edustajasivut ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Edustajasivut');
   for (const m of mps) {
     const nm = full(m), s = mpSlug.get(m.henkilo);
     const allv = byMp.get(m.henkilo) || [];
@@ -288,6 +290,7 @@ ${shareBtns}${followBlock({ tyyppi: "edustaja", kohde: m.henkilo, nimi: nm, osoi
   }
 
   // --- Äänestyssivut ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Äänestyssivut');
   const hint = x => (/mietintö/i.test(x) ? " (valiokunnan ehdotus eduskunnalle)" : "");
   const meaningBox = v => {
     const mn = voteMeaning(v);
@@ -321,6 +324,7 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
   }
 
   // --- Puoluesivut ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Puoluesivut');
   const groups = new Map();
   for (const m of mps) { const k = slug(m.puolue) || "muut"; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(m); }
   for (const [k, ms] of groups) {
@@ -336,6 +340,7 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
     body: `<h1>Puolueet</h1><p class="meta">Valitse eduskuntaryhmä nähdäksesi sen edustajat ja äänestystunnusluvut.</p>${[...groups.entries()].sort((a, b) => b[1].length - a[1].length).map(([k, ms]) => `<a class="card" href="/puolue/${k}/"><div><b>${esc(pname(ms[0].puolue))}</b></div><div class="meta">${ms.length} edustajaa</div></a>`).join("")}` }));
 
   // --- Hakemistosivut (jotta hakukoneet löytävät kaiken) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Hakemistosivut (jotta hakukoneet löytävät kaiken)');
   const sorted = mps.slice().sort((a, b) => String(a.sukunimi).localeCompare(String(b.sukunimi), "fi"));
   put("/edustajat/", shell({ title: "Kaikki kansanedustajat – äänestykset ja läsnäolo | Eduskuntaseuranta", desc: "Kaikkien kansanedustajien äänestykset, läsnäolo ja ryhmästä poikkeavat äänet.", path: "/edustajat/",
     body: `<h1>Kansanedustajat</h1><p class="meta">${mps.length} edustajaa. Hae nimellä <a href="/">etusivulta</a> tai valitse alta.</p>${sorted.map(m => `<a class="card" href="/edustaja/${mpSlug.get(m.henkilo)}/"><div>${esc(`${m.sukunimi || ""}, ${m.etunimi || ""}`)}</div><div class="meta">${esc(pname(m.puolue))} · läsnä ${lasna(m)} % · poikkeaa ryhmästä ${eri(m)} %</div></a>`).join("")}` }));
@@ -344,6 +349,7 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
 
 
   // --- Aiheet ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Aiheet');
   {
     const groupsT = new Map(TOPICS.map(t => [t.name, []]));
     for (const v of loaded) groupsT.get(topicOf(v).name).push(v);
@@ -361,6 +367,7 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
   }
 
   // --- Oma kansanedustaja: vaalipiirit ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Oma kansanedustaja: vaalipiirit');
   const vps = new Map();
   for (const m of mps) if (m.vaalipiiri) { const k = vpName(m.vaalipiiri); if (!vps.has(k)) vps.set(k, []); vps.get(k).push(m); }
   if (vps.size) {
@@ -375,6 +382,7 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
   }
 
   // --- Viikkokatsaus: koneellisesti laskettu yhteenveto ja tulkinta ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Viikkokatsaus: koneellisesti laskettu yhteenveto ja tulkinta');
   const GOV = new Set(["kok", "ps", "rkp", "kd"]); // hallituspuolueet (tarkista, jos hallitus vaihtuu)
   const hDate = d => new Date(d).toLocaleDateString("sv-SE", { timeZone: "Europe/Helsinki" });
   const isoWeek = ds => { const [y, m, d] = ds.split("-").map(Number); const t = new Date(Date.UTC(y, m - 1, d)); t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7) + 3); const wy = t.getUTCFullYear(); const j = new Date(Date.UTC(wy, 0, 4)); return { year: wy, week: 1 + Math.round(((t - j) / 86400000 - 3 + ((j.getUTCDay() + 6) % 7)) / 7) }; };
@@ -477,6 +485,7 @@ ${topAbs.length ? `<h2>Eniten poissaoloja</h2><p class="meta">Poissaolo ei kerro
 
 
   // --- Budjetti, Valtioneuvosto, Kysy ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Budjetti, Valtioneuvosto, Kysy');
   {
     const srcLink = k => `<a href="${SRC[k].url}" rel="noopener">${esc(SRC[k].label)}</a>`;
     const tbl = (rows, h = ["Asia", "Luku", "Huomio"]) => `<div class="tw"><table><tr>${h.map(x => `<th>${x}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map((c, i) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</table></div>`;
@@ -527,10 +536,12 @@ a.innerHTML=h}).catch(function(){b.disabled=false;a.textContent="Haku ei onnistu
   put("/tilaa/", shell({ title: "Tilaa viikkokatsaus sähköpostiin | Eduskuntaseuranta", desc: "Tilaa eduskunnan viikon äänestykset ja tulkinta ilmaiseksi sähköpostiisi.", path: "/tilaa/", head: SUB_HEAD, body: `<h1>Tilaa viikkokatsaus</h1><p>Kerran viikossa sähköpostiisi: mitä eduskunnassa äänestettiin, miten puolueet jakautuivat ja mitä tuloksista voi päätellä. Lisäksi viikon politiikasta omia kantoja. Luvut ovat puolueettomia, kannat omiani. Ilmainen.</p>${SUB_FORM}${SUB_JS}<p class="note">Tilaus tallentaa vain sähköpostiosoitteesi viikkokatsauksen lähettämistä varten. Jokaisessa viestissä on peruutuslinkki. Osoitetta ei luovuteta eteenpäin. Viestit lähetetään Brevo-palvelun kautta (EU).</p>` }));
 
   // --- Menetelmäsivu ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Menetelmäsivu');
   put("/menetelma/", shell({ title: "Miten luvut lasketaan | Eduskuntaseuranta", desc: "Eduskuntaseurannan tietolähde, laskutavat ja rajoitukset.", path: "/menetelma/", body: METHOD }));
 
 
   // --- Avoin data: ladattavat tiedostot toimittajille, kouluille ja tutkijoille ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Avoin data: ladattavat tiedostot toimittajille, kouluille ja tutkijoille');
   const cell = x => { const t = x === null || x === undefined ? "" : String(x); return /[",\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
   const toCsv = (cols, rows) => "\uFEFF" + [cols.join(","), ...rows.map(r => cols.map(c => cell(r[c])).join(","))].join("\r\n") + "\r\n";
   const cellSemi = x => { const t = x === null || x === undefined ? "" : String(x); return /[";\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
@@ -623,6 +634,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   put("/data/", shell({ title: "Avoin data: kansanedustajien äänestykset CSV ja JSON | Eduskuntaseuranta", desc: "Lataa eduskunnan äänestysten ja kansanedustajien läsnäolon tiedot ilmaiseksi CSV- ja JSON-muodossa toimittajille, opiskelijoille ja tutkijoille.", path: "/data/", body: dataBody, head: `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>` }));
 
   // --- Testi: kuka äänestää kuten sinä ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Testi: kuka äänestää kuten sinä');
   // Testiin vain sisältöäänestyksiä (Jaa = hyväksyminen, Ei = hylkääminen); menettelyäänestykset (esim. valiokuntaan lähettäminen) jätetään pois, koska ne johtaisivat harhaan.
   const isContent = v => { const x = voteMeaning(v); return !!(x && /hyväksy/i.test(x.jaa || "") && /hylkää/i.test(x.ei || "")); };
   const cand = detail.filter(v => Math.min(v.jaa || 0, v.ei || 0) >= 35 && (v.jaa || 0) + (v.ei || 0) >= 150 && isContent(v)).sort((a, b) => (b.kysymys ? 1 : 0) - (a.kysymys ? 1 : 0));
@@ -641,6 +653,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } else console.log("Testiin ei löytynyt tarpeeksi äänestyksiä, ohitetaan.");
 
   // --- Uutiset ja blogi ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Uutiset ja blogi');
   let blogRss = "";
   try {
     const news = await loadNews();
@@ -658,6 +671,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("Blogi ohitettu:", e.message); }
 
   // --- Julkiset hankinnat (Hilma) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Julkiset hankinnat (Hilma)');
   try {
     const hd = await loadHilma(process.env.HILMA_API_KEY);
     if (hd) {
@@ -667,6 +681,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
 
   let lobbRows = [], vaaliRows = [];
   // --- Lobbaus (Avoimuusrekisteri) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Lobbaus (Avoimuusrekisteri)');
   try {
     const ld = await loadLobbaus();
     if (ld) {
@@ -684,6 +699,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("Lobbaus ohitettu:", e.message); }
 
   // --- Vaalirahoitus (Vaalirahoitusvalvonta) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Vaalirahoitus (Vaalirahoitusvalvonta)');
   try {
     const vd = await loadVaalirahoitus(mps.map(m => ({ etunimi: m.etunimi, sukunimi: m.sukunimi, slug: mpSlug.get(m.henkilo), name: full(m), party: pname(m.puolue) })));
     if (vd) {
@@ -701,6 +717,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("Vaalirahoitus ohitettu:", e.message); }
 
   // --- Yritykset (PRH + lobbaus + vaalirahoitus) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Yritykset (PRH + lobbaus + vaalirahoitus)');
   try {
     const ids = [...lobbRows.map(r => r.id), ...vaaliRows.flatMap(r => ((r.donors && r.donors.yrit) || []).map(d => d.y))];
     if (ids.length) {
@@ -712,6 +729,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("Yritykset ohitettu:", e.message); }
 
   // --- Valtionavustukset (linkki Valtiokonttorin palveluun) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Valtionavustukset (linkki Valtiokonttorin palveluun)');
   put("/valtionavustukset/", shell({
     title: "Valtionavustukset | Eduskuntaseuranta",
     desc: "Mihin valtion rahaa on myönnetty? Valtionavustukset ja haetut avustukset Valtiokonttorin Tutkiavustuksia.fi-palvelussa.",
@@ -720,6 +738,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   }));
 
   // --- VTV:n raportit ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'VTV:n raportit');
   try {
     const vr = await loadVtv();
     if (vr) {
@@ -730,6 +749,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("VTV ohitettu:", e.message); }
 
   // --- EU (meppien äänet, avoimuusrekisteri) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'EU (meppien äänet, avoimuusrekisteri)');
   try {
     const ed = await loadEu();
     if (ed) {
@@ -740,15 +760,18 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("EU ohitettu:", e.message); }
 
   // --- EU:n rahavirrat ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'EU:n rahavirrat');
   try {
     const rr = await loadRrf();
     for (const pg of rahatPages({ shell, esc, rrf: rr })) put(pg.path, pg.html);
   } catch (e) { console.log("Rahat ohitettu:", e.message); }
 
   // --- Tilastot ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Tilastot');
   try { for (const pg of tilastotPages({ shell, esc })) put(pg.path, pg.html); } catch (e) { console.log("Tilastot ohitettu:", e.message); }
 
   // --- Finlex (uudet lait) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Finlex (uudet lait)');
   try {
     const fd = loadFinlexArchive() || await loadFinlex();
     if (fd) {
@@ -759,6 +782,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("Finlex ohitettu:", e.message); }
 
   // --- Kunnat (Tilastokeskus) ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Kunnat (Tilastokeskus)');
   try {
     const kd = await loadKunnat();
     if (kd) {
@@ -770,6 +794,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   } catch (e) { console.log("Kunnat ohitettu:", e.message); }
 
   // --- Kirjoitus levylle ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Kirjoitus levylle');
   await pool(jobs, 16, async j => { const dir = OUT + j.path; await mkdir(dir, { recursive: true }); await writeFile(dir + "index.html", j.html); });
   if (blogRss) await writeFile(OUT + "/blogi/rss.xml", blogRss);
   if (existsSync("og.png")) await copyFile("og.png", `${OUT}/og.png`);
