@@ -8,16 +8,14 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: valtiontalous
+      - name: valtiontalous2
         run: |
           set +e
-          B="https://api.tutkimushallintoa.fi/valtiontalous/v1"
-          t() { echo "== $1"; curl -sS -L -m 40 -D /tmp/h -o /tmp/r -w "HTTP %{http_code} %{size_download} B %{content_type}\n" -H "Origin: https://eduskuntaseuranta.fi" "$2"; grep -i "access-control-allow-origin" /tmp/h | head -1; head -c "$3" /tmp/r | tr '\n' '|'; echo; }
-          t "paaluokat" "$B/paaluokat" 500
-          t "paaluokat2" "$B/paaluokat?vuosi=2025" 500
-          t "hallinnonalat" "$B/hallinnonalat" 400
-          t "momentit" "$B/momentit?vuosi=2025" 400
-          t "tapahtumat" "$B/budjettitalouden-tapahtumat?vuosi=2025&paaluokka=28" 600
-          t "tapahtumat2" "$B/budjettitaloudentapahtumat?vuosi=2025&paaluokka=28" 600
-          t "swagger" "$B/swagger.json" 300
+          t() { echo "== $1"; curl -sS -L -m 40 -D /tmp/h -o /tmp/r -w "HTTP %{http_code} %{size_download} B %{content_type}\n" -H "Origin: https://eduskuntaseuranta.fi" "$1" 2>&1 | tail -2; [ -f /tmp/h ] && grep -i "access-control-allow-origin" /tmp/h | head -1; [ -f /tmp/r ] && head -c 500 /tmp/r | tr '\n' '|'; echo; rm -f /tmp/r /tmp/h; }
+          t "https://api.tutkihallintoa.fi/valtiontalous/v1/paaluokat"
+          t "https://api.tutkihallintoa.fi/valtiontalous/v1/hallinnonalat"
+          t "https://api.tutkihallintoa.fi/valtiontalous/v1/budjettitalouden-tapahtumat?vuosi=2025&paaluokka=28"
+          t "https://avoindata.tutkihallintoa.fi/api/valtiontalous/v1/paaluokat"
+          t "https://avoindata.tutkihallintoa.fi/valtiontalous/v1/paaluokat"
+          t "https://api.tutkimushallintoa.fi/valtiontalous/v1/paaluokat"
           exit 0
