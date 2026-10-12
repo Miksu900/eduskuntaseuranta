@@ -225,9 +225,21 @@ async function main() {
     const row = [+ds, +vuosi, +l, eur, sa, months, t];
     if (!byKunta.has(kn)) byKunta.set(kn, []);
     byKunta.get(kn).push(row);
-    const nk = ds + "|" + vuosi + "|" + l + "|" + t;
+  }
+  // Poista koko maan yhteissumma- ja muut kokoomarivit (muuten kansallinen summa tuplaantuu)
+  const tot = new Map(); let grand = 0;
+  for (const [kn, rows] of byKunta) { let s = 0; for (const r of rows) s += r[3]; tot.set(kn, s); grand += s; }
+  const skip = new Set();
+  for (const [kn, s] of tot) {
+    const nm = names.get(kn);
+    if ((grand > 0 && s > 0.3 * grand) || (nm && /koko maa|yhteens|tuntem|ulkomaa|manner-suomi/i.test(nm[0]))) skip.add(kn);
+  }
+  console.log("\n## Ohitetut kokoomakunnat: " + ([...skip].map((k) => k + " (" + ((names.get(k) || ["?"])[0]) + ", " + Math.round((tot.get(k) || 0) / 1e6) + " milj. EUR)").join(", ") || "ei yhtään"));
+  for (const kn of skip) byKunta.delete(kn);
+  for (const rows of byKunta.values()) for (const row of rows) {
+    const nk = row[0] + "|" + row[1] + "|" + row[2] + "|" + row[6];
     const n = nat.get(nk);
-    if (n) { n[3] += eur; n[4] += sa; n[5] = Math.max(n[5], months); } else nat.set(nk, [...row]);
+    if (n) { n[3] += row[3]; n[4] += row[4]; n[5] = Math.max(n[5], row[5]); } else nat.set(nk, [...row]);
   }
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(path.join(OUT, "k"), { recursive: true });
