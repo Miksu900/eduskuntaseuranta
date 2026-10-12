@@ -8,16 +8,14 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: tilastot
+      - name: tilastot2
         run: |
           set +e
-          t() { echo "== $1"; curl -sS -m 30 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$2"; head -c 300 /tmp/r; echo; }
-          t "Tilastokeskus StatFin" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/"
-          t "THL Sotkanet indikaattorit" "https://sotkanet.fi/rest/1.1/indicators"
-          t "Kela avoin data" "https://beta.kela.fi/etuuskuvaajat"
-          t "Traficom avoin" "https://trafi2.stat.fi/PXWeb/api/v1/fi/TraFi/"
-          t "SYKE" "https://rajapinnat.ymparisto.fi/api/Hydrologiaws/odata/v1/Vesikunta?%24top=1"
-          t "Fingrid" "https://data.fingrid.fi/"
-          t "Tulli uljas" "https://uljas.tulli.fi/uljas/graph/api/v1/fi/"
-          t "Eurostat katalogi" "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=FI&format=JSON&lang=fi&sinceTimePeriod=2025-01"
-          t "Tilastokeskus uusi" "https://pxdata.stat.fi/PxWebApi/api/v1/fi/StatFin/"
+          t() { echo "== $1"; curl -sS -m 40 -D /tmp/h -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" -H "Origin: https://eduskuntaseuranta.fi" "$2"; grep -i "access-control-allow-origin" /tmp/h; head -c "$3" /tmp/r; echo; }
+          t "StatFin vaerak" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/vaerak" 600
+          t "StatFin tyti" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/tyti" 600
+          t "StatFin khi" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/khi" 600
+          t "StatFin vaerak 11ra meta" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/vaerak/statfin_vaerak_pxt_11ra.px" 700
+          t "Sotkanet alueet" "https://sotkanet.fi/rest/1.1/regions" 400
+          t "Sotkanet data" "https://sotkanet.fi/rest/1.1/json?indicator=127&years=2023&genders=total" 500
+          t "Traficom ensirek" "https://trafi2.stat.fi/PXWeb/api/v1/fi/TraFi/Ensirekisteroinnit" 500
