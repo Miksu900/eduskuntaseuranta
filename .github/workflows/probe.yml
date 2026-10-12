@@ -8,22 +8,33 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: vt8
+      - name: vt9
         run: |
           set +e
-          curl -sS -L -m 60 "https://api.tutkihallintoa.fi/valtiontalous/v1/budjettitalousvuosikuukausi" -o /tmp/l.json
+          curl -sS -L -m 120 -o /tmp/c.csv "https://tkdpprodjrpstacc02.blob.core.windows.net/valtiontalous/budjettitalous/2025/12/budjettitalous_2025_12.csv"
           python3 - <<'PY'
-          import json
-          l=json.load(open('/tmp/l.json'))
-          print("tiedostoja", len(l)); print("eka", l[0]); print("vika", l[-1])
-          open('/tmp/last.txt','w').write(l[-1]); open('/tmp/mid.txt','w').write([x for x in l if '/2024/12/' in x][0])
+          import csv,collections
+          rows=list(csv.DictReader(open('/tmp/c.csv',encoding='utf-8-sig')))
+          print("rivejä",len(rows))
+          def f(x):
+              try: return float(x)
+              except: return 0.0
+          c=collections.defaultdict(lambda:[0,0.0,0.0])
+          for r in rows:
+              k=(r['TakpT_TunnusP'],r['TakpT_sNimi'],r['Tilaji_sNimi'] if False else r['Tililaji_sNimi'])
+              a=c[(r['TakpT_sNimi'][:30],r['Tililaji_sNimi'][:28])]
+              a[0]+=1;a[1]+=f(r['Nettokertymä_ko_vuodelta']);a[2]+=f(r['Käytettävissä'])
+          print("--- TakpT / Tililaji: rivit, nettokertymä ko vuodelta, käytettävissä")
+          for k,v in sorted(c.items(),key=lambda kv:-kv[1][0])[:25]:
+              print(k,v[0],round(v[1]/1e6),round(v[2]/1e6))
+          print("--- paaluokka menot (Tililaji sisältää 'MENOT' tai 'menot')")
+          m=collections.defaultdict(float)
+          for r in rows:
+              if 'enot' in r['Tililaji_sNimi'] or 'ENOT' in r['Tililaji_sNimi']:
+                  m[(r['PaaluokkaOsasto_TunnusP'],r['PaaluokkaOsasto_sNimi'][:35])]+=f(r['Nettokertymä_ko_vuodelta'])
+          for k,v in sorted(m.items(),key=lambda kv:-kv[1])[:15]: print(k,round(v/1e6))
+          print("--- ylatiliryhmat")
+          y=collections.Counter((r['Tililuokka_sNimi'][:30],r['Ylatiliryhma_sNimi'][:30]) for r in rows)
+          for k,v in y.most_common(14): print(k,v)
           PY
-          for f in /tmp/mid.txt /tmp/last.txt; do
-            u=$(cat $f); echo "== $u"
-            curl -sS -L -m 90 -D /tmp/h -o /tmp/c.csv -w "HTTP %{http_code} %{size_download} B\n" -H "Origin: https://eduskuntaseuranta.fi" "$u"
-            grep -i "access-control-allow-origin" /tmp/h | head -1
-            echo "rivejä: $(wc -l < /tmp/c.csv)"
-            head -c 1500 /tmp/c.csv
-            echo
-          done
           exit 0
