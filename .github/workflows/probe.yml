@@ -8,21 +8,22 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: vt7
+      - name: vt8
         run: |
           set +e
-          B="https://api.tutkihallintoa.fi/valtiontalous/v1"
-          t() { echo "== $1"; curl -sS -L -m 60 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$B/$1" 2>&1 | tail -1; head -c 450 /tmp/r | tr '\n' '|'; echo; rm -f /tmp/r; }
-          t "budjettitalous"
-          t "budjettitalous/vuosikuukausi"
-          t "budjettitalous/2025/12"
-          t "budjettitalous?vuosi=2025&kuukausi=12"
-          t "budjettitalousvuosikuukausi"
-          t "budjettitalousvuosikuukausi?vuosi=2025&kuukausi=12"
-          t "budjettitalous-vuosi-kuukausi"
-          t "budjettitaloudentapahtumat/tiedostot"
-          t "budjettitaloudentapahtumat/vuosikuukausi"
-          t "budjettitaloudentapahtumat/2025/12"
-          t "budjettitaloudentapahtumatiedostot"
-          t "budjettitaloudentapahtumat_tiedostot"
+          curl -sS -L -m 60 "https://api.tutkihallintoa.fi/valtiontalous/v1/budjettitalousvuosikuukausi" -o /tmp/l.json
+          python3 - <<'PY'
+          import json
+          l=json.load(open('/tmp/l.json'))
+          print("tiedostoja", len(l)); print("eka", l[0]); print("vika", l[-1])
+          open('/tmp/last.txt','w').write(l[-1]); open('/tmp/mid.txt','w').write([x for x in l if '/2024/12/' in x][0])
+          PY
+          for f in /tmp/mid.txt /tmp/last.txt; do
+            u=$(cat $f); echo "== $u"
+            curl -sS -L -m 90 -D /tmp/h -o /tmp/c.csv -w "HTTP %{http_code} %{size_download} B\n" -H "Origin: https://eduskuntaseuranta.fi" "$u"
+            grep -i "access-control-allow-origin" /tmp/h | head -1
+            echo "rivejä: $(wc -l < /tmp/c.csv)"
+            head -c 1500 /tmp/c.csv
+            echo
+          done
           exit 0
