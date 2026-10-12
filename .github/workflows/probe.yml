@@ -8,33 +8,35 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: vt9
+      - name: vt10
         run: |
           set +e
           curl -sS -L -m 120 -o /tmp/c.csv "https://tkdpprodjrpstacc02.blob.core.windows.net/valtiontalous/budjettitalous/2025/12/budjettitalous_2025_12.csv"
           python3 - <<'PY'
           import csv,collections
           rows=list(csv.DictReader(open('/tmp/c.csv',encoding='utf-8-sig')))
-          print("rivejä",len(rows))
           def f(x):
               try: return float(x)
               except: return 0.0
-          c=collections.defaultdict(lambda:[0,0.0,0.0])
+          cols=['Alkuperäinen_talousarvio','Voimassaoleva_talousarvio','Käytettävissä','Nettokertymä_ko_vuodelta','Nettokertymä','Loppusaldo']
+          print("momentillisia rivejä",sum(1 for r in rows if r['Momentti_TunnusP']))
+          print("sarakkeet: alk, voim, käytettävissä, netto_ko_vuodelta, nettokertymä, loppusaldo (milj. €)")
+          g=collections.defaultdict(lambda:[0.0]*6)
+          nm={}
           for r in rows:
-              k=(r['TakpT_TunnusP'],r['TakpT_sNimi'],r['Tilaji_sNimi'] if False else r['Tililaji_sNimi'])
-              a=c[(r['TakpT_sNimi'][:30],r['Tililaji_sNimi'][:28])]
-              a[0]+=1;a[1]+=f(r['Nettokertymä_ko_vuodelta']);a[2]+=f(r['Käytettävissä'])
-          print("--- TakpT / Tililaji: rivit, nettokertymä ko vuodelta, käytettävissä")
-          for k,v in sorted(c.items(),key=lambda kv:-kv[1][0])[:25]:
-              print(k,v[0],round(v[1]/1e6),round(v[2]/1e6))
-          print("--- paaluokka menot (Tililaji sisältää 'MENOT' tai 'menot')")
-          m=collections.defaultdict(float)
+              if not r['Momentti_TunnusP']: continue
+              k=r['PaaluokkaOsasto_TunnusP']; nm[k]=r['PaaluokkaOsasto_sNimi'][:28]
+              for i,c in enumerate(cols): g[k][i]+=f(r[c])
+          for k in sorted(g): print(k,nm[k],[round(x/1e6) for x in g[k]])
+          print("--- esimerkki: pääluokka 28 isoimmat momentit")
+          m=collections.defaultdict(lambda:[0.0]*6); mn={}
           for r in rows:
-              if 'enot' in r['Tililaji_sNimi'] or 'ENOT' in r['Tililaji_sNimi']:
-                  m[(r['PaaluokkaOsasto_TunnusP'],r['PaaluokkaOsasto_sNimi'][:35])]+=f(r['Nettokertymä_ko_vuodelta'])
-          for k,v in sorted(m.items(),key=lambda kv:-kv[1])[:15]: print(k,round(v/1e6))
-          print("--- ylatiliryhmat")
-          y=collections.Counter((r['Tililuokka_sNimi'][:30],r['Ylatiliryhma_sNimi'][:30]) for r in rows)
-          for k,v in y.most_common(14): print(k,v)
+              if r['PaaluokkaOsasto_TunnusP']!='28.': continue
+              k=r['Momentti_TunnusP']; mn[k]=r['Momentti_sNimi'][:38]
+              for i,c in enumerate(cols): m[k][i]+=f(r[c])
+          for k,v in sorted(m.items(),key=lambda kv:-abs(kv[1][3]))[:8]: print(k,mn[k],[round(x/1e6) for x in v])
+          print("--- TakpT-tyyppien määrät momentillisissa riveissä")
+          t=collections.Counter(r['TakpT_sNimi'][:30]+' | '+r['Tililuokka_sNimi'][:24] for r in rows if r['Momentti_TunnusP'])
+          for k,v in t.most_common(8): print(k,v)
           PY
           exit 0
