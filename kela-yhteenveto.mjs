@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { spawn } from "node:child_process";
 globalThis.fetch = async (u) => {
-  const p = spawn("curl", ["-sL", "--fail", "--retry", "3", "--max-time", "1500", "-A", "Mozilla/5.0", u], { stdio: ["ignore", "pipe", "ignore"] });
+  const p = spawn("curl", ["-sL", "--fail", "--retry", "3", "--max-time", "1500", u], { stdio: ["ignore", "pipe", "ignore"] });
   const done = new Promise((res) => p.on("close", res));
   async function* body() { for await (const c of p.stdout) yield c; const code = await done; if (code !== 0) throw new Error("curl " + code); }
   return { ok: true, status: 200, get body() { return body(); }, json: async () => { const ch = []; for await (const c of p.stdout) ch.push(c); const code = await done; if (code !== 0) throw new Error("curl " + code); return JSON.parse(Buffer.concat(ch).toString("utf8")); } };
@@ -142,7 +142,7 @@ async function discover() {
   const items = []; const seen = new Set();
   for (let start = 0; start < 1000; start += 200) {
     const r = await fetch("https://avoindata.suomi.fi/data/api/3/action/package_search?q=Kela&rows=200&start=" + start);
-    let j; try { j = await r.json(); } catch (e) { console.log("Haku sivu " + start + " ei palauttanut JSON:ia (" + r.status + "), lopetetaan haku"); break; }
+    let j; try { j = await r.json(); } catch (e) { console.log("Haku sivu " + start + " ei palauttanut JSON:ia (" + e.message + "), lopetetaan haku"); break; }
     const res = j.result.results;
     if (!res.length) break;
     for (const p of res) {
