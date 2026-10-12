@@ -25,7 +25,7 @@ function t(){if(i>=ys.length)return{};var yy=ys[i++];return j("https://sotkanet.
 return t()}).then(function(m){popM=m;if(popY===null)popY=0;return m}).catch(function(){popM={};popY=0;return popM})}
 function pick(id){curId=id;yr=null;history.replaceState(null,"","#"+id);kr.innerHTML='<p class="meta">Haetaan…</p>';
 Promise.all([get(id),id==="all"?Promise.resolve(null):get("all")]).then(function(a){render(id,a[0],a[1])}).catch(function(x){kr.innerHTML="<p>Haku epäonnistui: "+e(x.message)+"</p>"})}
-function defYear(rows){var ys={};rows.forEach(function(r){if(r[5]>=12)ys[r[1]]=1});var k=Object.keys(ys).map(Number).sort(function(a,b){return b-a});if(k.length)return k[0];var m=0;rows.forEach(function(r){if(r[1]>m)m=r[1]});return m}
+function defYear(rows){var a={},b={};rows.forEach(function(r){a[r[1]]=(a[r[1]]||0)+1;if(r[5]>=12)b[r[1]]=(b[r[1]]||0)+1});var k=Object.keys(a).map(Number).sort(function(x,y){return y-x});for(var i=0;i<k.length;i++){if((b[k[i]]||0)/a[k[i]]>=0.5)return k[i]}return k[0]||0}
 function render(id,d,nat){
 var rows=d.r;if(yr===null)yr=defYear(rows);
 var years={};rows.forEach(function(r){years[r[1]]=1});var ylist=Object.keys(years).map(Number).sort(function(a,b){return b-a});
@@ -50,7 +50,9 @@ out+='<details'+(di<3?" open":"")+'><summary><b>'+e(IDX.datasets[ds])+'</b></sum
 rr.forEach(function(r){var lab=IDX.labels[r[2]]||IDX.datasets[ds];var ns=natMap[r[0]+"|"+r[1]+"|"+r[2]];
 out+='<tr data-d="'+r[0]+'" data-l="'+r[2]+'" style="cursor:pointer"><td>'+e(lab)+(r[5]<12?' <span class="meta">('+r[5]+' kk)</span>':'')+'</td><td class="n">'+eu(r[3])+'</td>'+(p?'<td class="n">'+nf(r[3]/p,2)+' €</td>':'')+'<td class="n">'+(r[4]?nf(r[4]):'–')+'</td>'+(nat?'<td class="n">'+(ns>0?nf(100*r[3]/ns,2)+' %':'–')+'</td>':'')+'</tr>'});
 out+='</tbody></table></div></details>'});
-out+='<p class="meta">Lähde: Kelan avoin data (avoindata.fi), laskettu yhteen kunnittain ja vuosittain. Rivit voivat sisältää toisiaan, esimerkiksi &quot;yhteensä&quot;-rivi ja sen alarivit, joten älä laske rivejä yhteen. Kesken olevan vuoden luvut kattavat vain sulkeissa mainitut kuukaudet. Saajamäärä on kuukausikeskiarvo, jos tieto on kuukausitasolla. Tämä ei ole Kelan virallinen julkaisu.</p>';
+out+='<p class="meta">Lähde: Kelan avoin data (avoindata.fi), laskettu yhteen kunnittain ja vuosittain. Rivit voivat sisältää toisiaan, esimerkiksi &quot;yhteensä&quot;-rivi ja sen alarivit, joten älä laske taulukoiden rivejä itse yhteen. Ylhäällä oleva summa on laskettu vain Kelan etuusryhmistä. Kesken olevan vuoden luvut kattavat vain sulkeissa mainitut kuukaudet. Saajamäärä on kuukausikeskiarvo, jos tieto on kuukausitasolla. Tämä ei ole Kelan virallinen julkaisu.</p>';
+var KD=IDX.datasets.indexOf("Kelan etuuksien saajat ja maksetut etuudet"),tot=0,cnt=0,mo=0;sel.forEach(function(r){if(r[0]===KD){tot+=r[3];cnt++;if(r[5]>mo)mo=r[5]}});
+if(cnt)out='<div class="note"><b>Kela maksoi: '+e(d.n)+', '+yr+', yhteensä noin '+milj(tot)+'</b>'+(p?' ('+nf(tot/p)+' € asukasta kohden)':'')+'<br><span class="meta">Summa on laskettu Kelan etuusryhmien maksetuista euroista ('+cnt+' ryhmää, tilasto &quot;Kelan etuuksien saajat ja maksetut etuudet&quot;)'+(mo<12?'. Luku kattaa vain '+mo+' kuukautta.':'.')+'</span></div>'+out;
 kt.innerHTML=out;
 kt.querySelectorAll("tr[data-d]").forEach(function(tr){tr.onclick=function(){trend(Number(tr.getAttribute("data-d")),Number(tr.getAttribute("data-l")))}})}
 function trend(ds,l){var s=rows.filter(function(r){return r[0]===ds&&r[2]===l}).sort(function(a,b){return a[1]-b[1]});var kg=document.getElementById("kg");
