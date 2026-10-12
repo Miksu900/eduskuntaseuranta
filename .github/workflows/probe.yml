@@ -8,13 +8,9 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: hicp
+      - name: hicp2
         run: |
           set +e
-          B="https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_manr"
-          t() { echo "== $1"; curl -sS -m 40 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$2"; head -c "$3" /tmp/r | tr '\n' ' '; echo; }
-          t "coicop18" "$B?coicop18=CP00&geo=FI&lang=EN&format=JSON&lastTimePeriod=2" 700
-          t "coicop" "$B?coicop=CP00&geo=FI&lang=EN&format=JSON&lastTimePeriod=2" 400
-          t "ei suodatinta" "$B?geo=FI&unit=RCH_A&lang=EN&format=JSON&lastTimePeriod=1" 900
-          curl -sS -m 40 "$B?geo=FI&unit=RCH_A&lang=EN&format=JSON&lastTimePeriod=1" | grep -o '"id":\[[^]]*\]'
-          curl -sS -m 40 "$B?geo=FI&lang=EN&format=JSON&lastTimePeriod=1" | grep -o '"time":{[^}]*}[^}]*}'
+          curl -sS -m 90 "https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en" -o /tmp/toc.txt
+          ls -la /tmp/toc.txt
+          grep -i "hicp" /tmp/toc.txt | grep -i "annual rate" | cut -c1-200
