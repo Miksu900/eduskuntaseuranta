@@ -1,0 +1,23 @@
+name: Lahteet
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/lahteet.yml"
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lahteet
+        run: |
+          set +e
+          for q in "kela etuudet" "tulli ulkomaankauppa" "SYKE ymparisto vesi" "fingrid sahko"; do
+            echo "=== $q ==="
+            curl -sL -m 30 -G "https://avoindata.suomi.fi/data/api/3/action/package_search" --data-urlencode "q=$q" --data-urlencode "rows=6" | jq -r '.result.results[] | "* " + (.title|tostring|.[0:70]) + " | " + (.organization.name // ""), (.resources[:3][] | "     " + (.format // "") + " " + (.url // "")[0:110])'
+          done
+          echo "=== SYKE API CORS ==="
+          curl -sIL -m 30 -H "Origin: https://eduskuntaseuranta.fi" "https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.1/odata/Paikka?\$top=1" | grep -i -E "^HTTP|access-control"
+          echo "=== Tulli Uljas ==="
+          curl -sIL -m 30 -H "Origin: https://eduskuntaseuranta.fi" "https://uljas.tulli.fi/uljas/graph/api/" | grep -i -E "^HTTP|access-control"
+          echo "=== Fingrid ==="
+          curl -sIL -m 30 -H "Origin: https://eduskuntaseuranta.fi" "https://data.fingrid.fi/api/datasets" | grep -i -E "^HTTP|access-control"
