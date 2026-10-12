@@ -1,0 +1,23 @@
+name: Tutkimus2
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/tutkimus2.yml"
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tutkimus2
+        run: |
+          set +e
+          echo "== Vipunen yo-resurssit =="
+          curl -sL -m 30 "https://api.vipunen.fi/api/resources" | python3 -c "import sys,json; print([x for x in json.load(sys.stdin) if x.startswith('yo') or 'tutk' in x or 'tki' in x])"
+          echo "== Vipunen yo_talous2 =="
+          curl -sL -m 30 "https://api.vipunen.fi/api/resources/yo_talous2/latest/data?limit=3" -w "\n%{http_code}\n" | head -c 1500
+          echo "== research.fi API GET funding =="
+          curl -sL -m 30 "https://researchfi-api-production.2.rahtiapp.fi/portalapi/funding/_search?size=2" -w "\n%{http_code}\n" | head -c 1500
+          echo "== research.fi API POST funding =="
+          curl -sL -m 30 -X POST -H "Content-Type: application/json" -d '{"size":2}' "https://researchfi-api-production.2.rahtiapp.fi/portalapi/funding/_search" -w "\n%{http_code}\n" | head -c 1500
+          echo "== research.fi API juuri =="
+          curl -sL -m 30 "https://researchfi-api-production.2.rahtiapp.fi/" -w "\n%{http_code}\n" | head -c 500
