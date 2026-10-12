@@ -1,0 +1,31 @@
+name: rajapinnat-koe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/rajapinnat.yml"
+jobs:
+  koe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tulli
+        run: |
+          set +e
+          curl -s "https://avoindata.suomi.fi/data/api/3/action/package_search?q=Tulli+ulkomaankauppa&rows=3" | jq -r '.result.results[] | .name, (.resources[] | "  " + .format + " " + .url)'
+          U=$(curl -s "https://avoindata.suomi.fi/data/api/3/action/package_search?q=Tulli+ulkomaankauppa&rows=1" | jq -r '[.result.results[0].resources[] | select(.format=="CSV")][0].url')
+          echo "TULLI URL: $U"
+          curl -sIL "$U" | grep -iE "^(HTTP|content-type|content-length|location|access-control)"
+          curl -sL "$U" | head -c 600
+      - name: SYKE
+        run: |
+          set +e
+          for P in "Hydrologiarajapinta/1.1/odata/Paikka?\$top=2" "jarvirajapinta/1.0/odata/Jarvi?\$top=2" "vesla/2.0/odata/Vesimuodostuma?\$top=2" "Hydrologiarajapinta/1.1/odata/" "Ilmanlaatu/1.0/odata/"; do
+            echo "=== $P"
+            curl -s -o /tmp/r.txt -w "HTTP %{http_code}\n" "https://rajapinnat.ymparisto.fi/api/$P"
+            head -c 400 /tmp/r.txt
+            curl -sI -H "Origin: https://eduskuntaseuranta.fi" "https://rajapinnat.ymparisto.fi/api/$P" | grep -i "access-control"
+          done
+      - name: Kela kuntanimet
+        run: |
+          set +e
+          curl -s "https://sotkanet.fi/rest/1.1/regions" | jq -c '[.[] | select(.category=="KUNTA")][0:3]'
