@@ -234,4 +234,19 @@ async function main() {
     fs.writeFileSync(path.join(OUT, "k", kn + ".json"), s);
   }
   fs.writeFileSync(path.join(OUT, "k", "all.json"), JSON.stringify({ n: "Koko maa", r: [...nat.values()] }));
-  const years = [...new Set([...groups.keys()].map((g) => +g.split("|
+  const years = [...new Set([...groups.keys()].map((g) => +g.split("|")[2]))].sort();
+  fs.writeFileSync(path.join(OUT, "index.json"), JSON.stringify({
+    built: new Date().toISOString(), files: items.length, rows: totalRows, datasets: dsList, labels, kunnat,
+    years: [years[0], years[years.length - 1]], types: TYPE_ORDER,
+  }));
+  console.log("\n## VALMIS");
+  console.log("Tiedostoja " + items.length + ", epäonnistui " + fails + ", rivejä luettu " + totalRows);
+  console.log("Tietosarjoja " + dsList.length + ", etuusnimikkeitä " + labels.length + ", kuntia " + byKunta.size + ", vuodet " + years[0] + "-" + years[years.length - 1]);
+  console.log("Suurin kuntatiedosto " + Math.round(maxSize / 1024) + " kt");
+  console.log("Aikaa " + Math.round((Date.now() - t0) / 1000) + " s");
+  const sample = byKunta.get("564") || byKunta.values().next().value || [];
+  console.log("Esimerkki (kunta 564 tai ensimmäinen), 12 riviä:");
+  for (const r of sample.filter((x) => x[1] >= 2023).slice(0, 12)) console.log(" " + dsList[r[0]] + " | " + labels[r[2]] + " | " + r[1] + " | " + r[3] + " € | saajia " + r[4] + " | kk " + r[5] + " | tyyppi " + TYPE_ORDER[r[6]]);
+  if (fails > items.length / 4) process.exit(1);
+}
+main().catch((e) => { console.error(e); process.exit(1); });
