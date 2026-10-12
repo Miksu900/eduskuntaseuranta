@@ -1,0 +1,18 @@
+name: kela-otsikot
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/kelaotsikot.yml"
+jobs:
+  otsikot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Kelan sarakkeet
+        run: |
+          set +e
+          A=https://avoindata.suomi.fi/data/api/3/action
+          curl -s "$A/package_search?q=Kela&rows=200" | jq -r '.result.results[] | select(((.organization.title // "") + " " + (.title // "")) | test("Kela|Kansaneläke"; "i")) | . as $p | .resources[] | select(.format=="CSV") | [($p.title_translated.fi // $p.title // $p.name), .url] | @tsv' | grep -iE "csv|download" > kela.tsv
+          echo "Kelan CSV-tiedostoja: $(wc -l < kela.tsv)" | tee -a $GITHUB_STEP_SUMMARY
+          while IFS=$'\t' read -r T U; do echo "=== $T" | tee -a $GITHUB_STEP_SUMMARY; echo "$U" | sed 's#.*/dataset/##' | tee -a $GITHUB_STEP_SUMMARY; curl -sL --max-time 60 "$U" | head -3 | cut -c1-300 | tee -a $GITHUB_STEP_SUMMARY; done < kela.tsv
