@@ -1,0 +1,41 @@
+name: sivuston-tarkistus
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/tarkistus.yml"
+jobs:
+  tarkista:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sivut
+        run: |
+          set +e
+          S=https://eduskuntaseuranta.fi
+          curl -s $S/sitemap.xml | grep -o "<loc>[^<]*</loc>" | sed 's/<[^>]*>//g' > all.txt
+          echo "Sitemapissa sivuja: $(wc -l < all.txt)" | tee -a $GITHUB_STEP_SUMMARY
+          sed -E 's#https://eduskuntaseuranta.fi/([^/]*).*#\1#' all.txt | sort | uniq -c | sort -rn | head -25 | tee -a $GITHUB_STEP_SUMMARY
+          for p in "" tilastot/ yritykset/ vtv/ eu/ valtion-talous/ valtionavustukset/ lait/ lobbaus/ blogi/ tilaa/ haku/; do echo "$S/$p"; done > top.txt
+          shuf -n 250 all.txt >> top.txt
+          cat top.txt | xargs -P 10 -I{} curl -s -o /dev/null -w "%{http_code} %{size_download} {}\n" --max-time 30 {} > res.txt
+          echo "Tarkistettu: $(wc -l < res.txt) sivua" | tee -a $GITHUB_STEP_SUMMARY
+          echo "Virheelliset (ei 200):" | tee -a $GITHUB_STEP_SUMMARY
+          grep -v "^200" res.txt | head -30 | tee -a $GITHUB_STEP_SUMMARY
+          echo "Tyhjat tai pienet (alle 3000 tavua):" | tee -a $GITHUB_STEP_SUMMARY
+          awk '$1==200 && $2<3000' res.txt | head -20 | tee -a $GITHUB_STEP_SUMMARY
+      - name: Tietolahteet
+        run: |
+          set +e
+          O="Origin: https://eduskuntaseuranta.fi"
+          for U in "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/" "https://trafi2.stat.fi/PXWeb/api/v1/fi/TraFi/" "https://sotkanet.fi/rest/1.1/indicators" "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=FI&lastTimePeriod=1" "https://avoindata.suomi.fi/data/api/3/action/package_search?rows=1" "https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.1/odata/Paikka?\$top=1" "https://avoindata.suomi.fi/data/api/3/action/organization_list" ; do
+            R=$(curl -s -o /dev/null -D h.txt -w "%{http_code}" --max-time 30 -H "$O" "$U")
+            C=$(grep -i "^access-control-allow-origin" h.txt | head -1 | tr -d '\r')
+            echo "$R CORS=[$C] $U" | tee -a $GITHUB_STEP_SUMMARY
+          done
+      - name: Data
+        run: |
+          set +e
+          S=https://eduskuntaseuranta.fi
+          for P in data/vt/index.json; do curl -s -o /dev/null -w "%{http_code} %{size_download} $P\n" $S/$P | tee -a $GITHUB_STEP_SUMMARY; done
+          curl -s $S/tilastot/ | grep -c 'id="vir"' | sed 's/^/Kela-osio sivulla (1=kyllä): /' | tee -a $GITHUB_STEP_SUMMARY
+          curl -s $S/tilastot/ | grep -c 'id="hyd"' | sed 's/^/SYKE-osio sivulla (1=kyllä): /' | tee -a $GITHUB_STEP_SUMMARY
