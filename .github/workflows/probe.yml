@@ -8,18 +8,13 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: muut
+      - name: hicp
         run: |
           set +e
-          t() { echo "== $1"; curl -sS -L -m 40 -D /tmp/h -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" -H "Origin: https://eduskuntaseuranta.fi" "$2"; grep -i "access-control-allow-origin" /tmp/h | head -1; head -c "$3" /tmp/r | tr '\n' ' '; echo; }
-          t "Eurostat tyottomyys" "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=FI&geo=SE&lang=EN&format=JSON&sinceTimePeriod=2026-06" 400
-          t "Eurostat velka" "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10dd_edpt1?geo=FI&lang=EN&format=JSON&sinceTimePeriod=2023&na_item=GD&unit=PC_GDP&sector=S13" 400
-          t "Kela 1" "https://tilastot.kela.fi/PXWeb/api/v1/fi/" 300
-          t "Kela 2" "https://www.kela.fi/tilastot-ja-tutkimukset" 200
-          t "Kela 3" "https://www.avoindata.fi/data/api/3/action/package_search?q=kela&rows=3" 300
-          t "Tulli 1" "https://uljas.tulli.fi/v3rti/" 300
-          t "Tulli 2" "https://uljas.tulli.fi/v3rti/graph/api/v1/fi/" 300
-          t "Tulli 3" "https://www.avoindata.fi/data/api/3/action/package_search?q=tulli&rows=3" 300
-          t "SYKE 1" "https://rajapinnat.ymparisto.fi/api/" 300
-          t "SYKE 2" "https://rajapinnat.ymparisto.fi/api/Hydrologiaws/odata/v1/%24metadata" 300
-          t "SYKE 3" "https://www.avoindata.fi/data/api/3/action/package_search?q=syke&rows=3" 300
+          B="https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_manr"
+          t() { echo "== $1"; curl -sS -m 40 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$2"; head -c "$3" /tmp/r | tr '\n' ' '; echo; }
+          t "coicop18" "$B?coicop18=CP00&geo=FI&lang=EN&format=JSON&lastTimePeriod=2" 700
+          t "coicop" "$B?coicop=CP00&geo=FI&lang=EN&format=JSON&lastTimePeriod=2" 400
+          t "ei suodatinta" "$B?geo=FI&unit=RCH_A&lang=EN&format=JSON&lastTimePeriod=1" 900
+          curl -sS -m 40 "$B?geo=FI&unit=RCH_A&lang=EN&format=JSON&lastTimePeriod=1" | grep -o '"id":\[[^]]*\]'
+          curl -sS -m 40 "$B?geo=FI&lang=EN&format=JSON&lastTimePeriod=1" | grep -o '"time":{[^}]*}[^}]*}'
