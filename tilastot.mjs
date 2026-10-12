@@ -64,7 +64,7 @@ const EUS = String.raw`<script>(function(){
 var B="https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/";
 var P=[
 {t:"Työttömyysaste (%)",ds:"une_rt_m",p:["sex=T&age=TOTAL&unit=PC_ACT&s_adj=SA"],d:1},
-{t:"Inflaatio, vuosimuutos (%)",ds:"prc_hicp_manr",p:["coicop18=CP00","coicop=CP00"],d:1},
+{t:"Inflaatio, vuosimuutos (%)",ds:"prc_hicp_minr",p:["unit=RCH_A&coicop18=TOTAL","unit=RCH_A&coicop18=CP00","unit=RCH_A&coicop18=TOT"],d:1},
 {t:"Julkinen velka (% BKT:sta)",ds:"gov_10dd_edpt1",p:["na_item=GD&unit=PC_GDP&sector=S13"],d:1},
 {t:"Julkisen talouden ali-/ylijäämä (% BKT:sta)",ds:"gov_10dd_edpt1",p:["na_item=B9&unit=PC_GDP&sector=S13"],d:1},
 {t:"BKT asukasta kohti (euroa)",ds:"nama_10_pc",p:["na_item=B1GQ&unit=CP_EUR_HAB"],d:0},
@@ -90,7 +90,7 @@ root.querySelectorAll("button").forEach(function(b){b.onclick=function(){show(P[
 const AVO = String.raw`<script>(function(){
 var A="https://avoindata.suomi.fi/data/api/3/action/package_search",root=document.getElementById("avo"),q="",start=0,N=15;
 function e(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function tr(o){if(!o)return"";if(typeof o==="string")return o;return o.fi||o.en||o.sv||""}
+function tr(o){if(!o)return"";if(typeof o==="string"){if(o.charAt(0)==="{"){try{o=JSON.parse(o)}catch(x){return o}}else return o}return o.fi||o.en||o.sv||""}
 root.innerHTML='<input type="search" id="aq" placeholder="Hae aineistoa, esim. Kela, Tulli, vesi, liikenne, budjetti"><div id="as" class="meta">Kirjoita hakusana.</div><div id="ao"></div><div class="tb"><button id="am" style="display:none">Näytä lisää</button></div>';
 var aq=document.getElementById("aq"),as=document.getElementById("as"),ao=document.getElementById("ao"),am=document.getElementById("am"),tm=null;
 function card(p){var d=document.createElement("div");d.className="card";var t=tr(p.title_translated)||p.title||p.name;var o=p.organization?(tr(p.organization.title_translated)||p.organization.title):"";var n=(tr(p.notes_translated)||p.notes||"").replace(/\s+/g," ").slice(0,220);
