@@ -14,6 +14,7 @@ import { loadVtv, vtvPages } from "./vtv.mjs";
 import { loadEu, euPages } from "./eu.mjs";
 import { loadRrf, rahatPages } from "./rahat.mjs";
 import { tilastotPages } from "./tilastot.mjs";
+import { loadVt, vtPages as valtiontalousPages } from "./valtiontalous.mjs";
 import { loadFinlex, loadFinlexArchive, finlexPages } from "./finlex.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
@@ -153,7 +154,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
     + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Lait ja asetukset"], ["/vtv/", "VTV:n raportit"], ["/eu/", "EU"], ["/tilastot/", "Tilastot"], ["/yritykset/", "Yritykset"], ["/valtionavustukset/", "Valtionavustukset"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Lait ja asetukset"], ["/vtv/", "VTV:n raportit"], ["/eu/", "EU"], ["/tilastot/", "Tilastot"], ["/valtion-talous/", "Valtion talous"], ["/yritykset/", "Yritykset"], ["/valtionavustukset/", "Valtionavustukset"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
 };
 const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
@@ -765,6 +766,16 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     const rr = await loadRrf();
     for (const pg of rahatPages({ shell, esc, rrf: rr })) put(pg.path, pg.html);
   } catch (e) { console.log("Rahat ohitettu:", e.message); }
+
+  // --- Valtion talous (Valtiokonttori) ---
+  try {
+    const vtd = loadVt();
+    if (vtd) {
+      const vtp = valtiontalousPages({ shell, esc, data: vtd });
+      for (const pg of vtp.pages) put(pg.path, pg.html);
+      for (const f of vtp.files) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
+    }
+  } catch (e) { console.log("Valtion talous ohitettu:", e.message); }
 
   // --- Tilastot ---
   console.log("[aika]", Math.round(process.uptime())+"s", 'Tilastot');
