@@ -1,0 +1,22 @@
+name: rajapinnat-koe2
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/rajapinnat2.yml"
+jobs:
+  koe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tulli
+        run: |
+          set +e
+          curl -sL "https://tulli.fi/tilastot/uljas-api" | grep -oiE "https?://[a-zA-Z0-9./_?=&%-]*(uljas|api|swagger|odata|pxweb|json)[a-zA-Z0-9./_?=&%-]*" | sort -u | head -40
+          for U in "https://uljas.tulli.fi/uljas/graph/api" "https://uljas.tulli.fi/api" "https://api.uljas.tulli.fi" "https://tulli.fi/documents/uljas-api"; do curl -s -o /dev/null -w "$U %{http_code}\n" "$U"; done
+      - name: SYKE
+        run: |
+          set +e
+          curl -s "https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.1/odata/" | grep -oE 'collection href="[^"]*"' | head -30
+          curl -s "https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.1/odata/Virtaama?\$top=2" | head -c 500
+          echo
+          curl -s "https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.1/odata/Suure?\$top=12" | head -c 900
