@@ -171,10 +171,10 @@ function finlexArchivePages({ shell, esc, dateFi, data }) {
   const FILTER = `<input id="lf" type="search" placeholder="Hae koko arkistosta, esim. verotus tai ulkomaalaislaki" style="width:100%;box-sizing:border-box;padding:12px;font-size:16px;margin:10px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)">
 <div style="margin:6px 0 12px"><label style="margin-right:14px"><input type="radio" name="lk" value="" checked> Kaikki</label><label style="margin-right:14px"><input type="radio" name="lk" value="0"> Lait</label><label><input type="radio" name="lk" value="1"> Asetukset</label></div>
 <div id="lst" class="meta"></div><div id="res"></div>
-<script>(function(){var f=document.getElementById("lf"),res=document.getElementById("res"),st=document.getElementById("lst"),def=document.getElementById("def"),idx=null,loading=false,KN=${JSON.stringify(KN)};
+<script>(function(){var f=document.getElementById("lf"),res=document.getElementById("res"),st=document.getElementById("lst"),idx=null,loading=false,KN=${JSON.stringify(KN)};
 function kind(){return (document.querySelector('input[name=lk]:checked')||{}).value||""}
 function card(r){var d=document.createElement("div");d.className="card";var b=document.createElement("b");b.textContent=r[2];d.appendChild(b);d.appendChild(document.createElement("br"));var m=document.createElement("span");m.className="meta";m.textContent=KN[r[3]]+" "+r[1]+"/"+r[0];d.appendChild(m);d.appendChild(document.createElement("br"));var a=document.createElement("a");a.href="https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/"+r[0]+"/"+encodeURIComponent(r[1]);a.rel="noopener";a.textContent="Lue Finlexissä";d.appendChild(a);return d}
-function run(){var q=f.value.toLowerCase().trim().split(/\s+/).filter(Boolean),k=kind();res.textContent="";
+function run(){var def=document.getElementById("def");var q=f.value.toLowerCase().trim().split(/\s+/).filter(Boolean),k=kind();res.textContent="";
 if(!q.length&&!k){def.style.display="";st.textContent="";return}
 def.style.display="none";
 if(!idx){st.textContent="Ladataan arkistoa…";if(!loading){loading=true;fetch("/data/lait-haku.json").then(function(r){return r.json()}).then(function(j){idx=j.map(function(r){r.push((r[2]+" "+r[1]+"/"+r[0]).toLowerCase());return r});run()}).catch(function(){st.textContent="Arkiston lataus epäonnistui."})}return}
