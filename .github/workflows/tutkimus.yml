@@ -1,0 +1,25 @@
+name: Tutkimus
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/tutkimus.yml"
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tutkimusrahoitus
+        run: |
+          set +e
+          echo "== Akatemian rahoituspaatoshaku =="
+          curl -sL -m 30 "https://www.aka.fi/tutkimusrahoitus/arviointi-ja-rahoituspaatokset/rahoituspaatokset/rahoituspaatoshaku/" -o aka.html -w "%{http_code} %{size_download}\n"
+          grep -o -i -E "https?://[^\"' <>]*(api|search|haku|json|csv|xlsx|elastic)[^\"' <>]*" aka.html | sort -u | head -30
+          echo "== tiedejatutkimus.fi =="
+          curl -sL -m 30 "https://tiedejatutkimus.fi/fi/" -o tt.html -w "%{http_code} %{size_download}\n"
+          grep -o -E "[^\"' <>]*(api|json)[^\"' <>]*" tt.html | sort -u | head -20
+          echo "== research.fi API-yritys =="
+          curl -sL -m 30 -H "Accept: application/json" "https://research.fi/api/portalapi/" -w "\n%{http_code}\n" | head -c 400
+          echo "== Vipunen =="
+          curl -sL -m 30 "https://api.vipunen.fi/api/resources" -w "\n%{http_code}\n" | head -c 600
+          echo "== avoindata.suomi.fi =="
+          for q in akatemia tutkimusrahoitus yliopisto%20tutkimus; do echo "-- $q"; curl -sL -m 30 "https://avoindata.suomi.fi/data/api/3/action/package_search?q=$q&rows=8" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(str(p['title'])[:90], [r.get('format') for r in p['resources']][:4]) for p in d['result']['results']]"; done
