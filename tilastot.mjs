@@ -64,7 +64,7 @@ const EUS = String.raw`<script>(function(){
 var B="https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/";
 var P=[
 {t:"Työttömyysaste (%)",ds:"une_rt_m",p:["sex=T&age=TOTAL&unit=PC_ACT&s_adj=SA"],d:1},
-{t:"Inflaatio, vuosimuutos (%)",ds:"prc_hicp_manr",p:["coicop=CP00","coicop18=CP00"],d:1},
+{t:"Inflaatio, vuosimuutos (%)",ds:"prc_hicp_manr",p:["coicop18=CP00","coicop=CP00"],d:1},
 {t:"Julkinen velka (% BKT:sta)",ds:"gov_10dd_edpt1",p:["na_item=GD&unit=PC_GDP&sector=S13"],d:1},
 {t:"Julkisen talouden ali-/ylijäämä (% BKT:sta)",ds:"gov_10dd_edpt1",p:["na_item=B9&unit=PC_GDP&sector=S13"],d:1},
 {t:"BKT asukasta kohti (euroa)",ds:"nama_10_pc",p:["na_item=B1GQ&unit=CP_EUR_HAB"],d:0},
@@ -88,7 +88,7 @@ eo.innerHTML=o+'</tbody></table></div>'}).catch(function(err){eo.innerHTML="<p>H
 root.querySelectorAll("button").forEach(function(b){b.onclick=function(){show(P[Number(b.getAttribute("data-i"))])}})})()</script>`;
 
 const AVO = String.raw`<script>(function(){
-var A="https://www.avoindata.fi/data/api/3/action/package_search",root=document.getElementById("avo"),q="",start=0,N=15;
+var A="https://avoindata.suomi.fi/data/api/3/action/package_search",root=document.getElementById("avo"),q="",start=0,N=15;
 function e(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function tr(o){if(!o)return"";if(typeof o==="string")return o;return o.fi||o.en||o.sv||""}
 root.innerHTML='<input type="search" id="aq" placeholder="Hae aineistoa, esim. Kela, Tulli, vesi, liikenne, budjetti"><div id="as" class="meta">Kirjoita hakusana.</div><div id="ao"></div><div class="tb"><button id="am" style="display:none">Näytä lisää</button></div>';
@@ -97,7 +97,7 @@ function card(p){var d=document.createElement("div");d.className="card";var t=tr
 var h='<b>'+e(t)+'</b><br><span class="meta">'+e(o)+'</span>'+(n?'<br><span class="meta">'+e(n)+(n.length>=220?"…":"")+'</span>':"");
 var fm={};(p.resources||[]).forEach(function(r){var f=(r.format||"").toUpperCase()||"tiedosto";if(!fm[f]&&r.url&&/^https?:/.test(r.url))fm[f]=r.url});
 var ks=Object.keys(fm).slice(0,6);if(ks.length){h+='<br>'+ks.map(function(k){return'<a href="'+e(fm[k])+'" rel="noopener">'+e(k)+'</a>'}).join(" · ")}
-h+='<br><a href="https://www.avoindata.fi/data/fi/dataset/'+encodeURIComponent(p.name)+'" rel="noopener">Avaa avoindata.fi:ssä</a>';d.innerHTML=h;return d}
+h+='<br><a href="https://avoindata.suomi.fi/data/fi/dataset/'+encodeURIComponent(p.name)+'" rel="noopener">Avaa avoindata.fi:ssä</a>';d.innerHTML=h;return d}
 function go(more){if(!more){start=0;ao.textContent=""}as.textContent="Haetaan…";fetch(A+"?q="+encodeURIComponent(q)+"&rows="+N+"&start="+start).then(function(r){if(!r.ok)throw new Error("Palvelu vastasi "+r.status);return r.json()}).then(function(j){var R=j.result;R.results.forEach(function(p){ao.appendChild(card(p))});start+=R.results.length;as.textContent=R.count+" aineistoa"+(start<R.count?", näytetään "+start:"");am.style.display=start<R.count?"":"none"}).catch(function(x){as.textContent="Haku epäonnistui: "+x.message})}
 aq.oninput=function(){clearTimeout(tm);tm=setTimeout(function(){q=aq.value.trim();if(!q){ao.textContent="";as.textContent="Kirjoita hakusana.";am.style.display="none";return}go(false)},400)};am.onclick=function(){go(true)}})()</script>`;
 
