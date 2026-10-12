@@ -8,20 +8,15 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: avustukset2
+      - name: avustukset3
         run: |
           set +e
-          curl -sS -L -m 30 "https://www.tutkiavustuksia.fi/" -o /tmp/a.html -w "tutkiavustuksia HTTP %{http_code} %{size_download}\n"
-          grep -oE '(src|href)="[^"]+\.(js|json)[^"]*"' /tmp/a.html | head -10
-          grep -oiE 'https?://[a-z0-9./_-]*(api|rest|odata)[a-z0-9./_-]*' /tmp/a.html | sort -u | head -10
-          for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/a.html | sed 's/src="//;s/"//' | head -4); do
-            case "$js" in http*) u="$js";; /*) u="https://www.tutkiavustuksia.fi$js";; *) u="https://www.tutkiavustuksia.fi/$js";; esac
-            echo "--- $u"
-            curl -sS -L -m 30 "$u" | grep -oE '"(/?api/[a-zA-Z0-9/_.-]+|https?://[a-zA-Z0-9./_-]*api[a-zA-Z0-9./_-]*)"' | sort -u | head -15
-          done
-          echo "=== tutkihallintoa"
-          curl -sS -L -m 30 "https://avoindata.tutkihallintoa.fi/" -o /tmp/b.html -w "HTTP %{http_code} %{size_download}\n"
-          sed 's/<[^>]*>/ /g' /tmp/b.html | tr -s ' \n' | head -c 1200
-          echo
-          grep -oiE 'href="[^"]*(avustus|csv|xlsx|api)[^"]*"' /tmp/b.html | head -15
+          curl -sS -L -m 30 "https://www.tutkihallintoa.fi/avoimet-rajapinnat/" -o /tmp/c.html -w "ohjesivu HTTP %{http_code} %{size_download}\n"
+          sed -e 's/<script[^>]*>.*<\/script>//g' -e 's/<[^>]*>/ /g' /tmp/c.html | tr -s ' \n' | grep -iE "avustus|rajapin|avain|rekister|ilmain|tilaus|api" | head -40 | cut -c1-300
+          echo "=== linkit"
+          grep -oE 'href="[^"]*(avustus|rajapin|api)[^"]*"' /tmp/c.html | sort -u | head -20
+          echo "=== apis-sivu"
+          curl -sS -L -m 30 "https://avoindata.tutkihallintoa.fi/apis" -o /tmp/d.html -w "HTTP %{http_code} %{size_download}\n"
+          grep -oiE '"[^"]*avustus[^"]*"' /tmp/d.html | sort -u | head -15
+          for p in "/developer/apis" "/api/apis" "/apis/avustus"; do curl -sS -L -m 20 -o /dev/null -w "$p HTTP %{http_code}\n" "https://avoindata.tutkihallintoa.fi$p"; done
           exit 0
