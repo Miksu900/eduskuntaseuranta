@@ -8,10 +8,24 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: hicp3
+      - name: avustukset
         run: |
           set +e
-          curl -sS -m 90 "https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en" -o /tmp/toc.txt
-          grep -E '"prc_hicp_(m|a|c|i)[a-z]*"' /tmp/toc.txt | sed -E 's/ +/ /g' | cut -c1-170
-          echo ====
-          grep -i "2026" /tmp/toc.txt | grep -i "hicp\|inflation\|consumer price" | sed -E 's/ +/ /g' | cut -c1-170 | head -20
+          S="https://avoindata.suomi.fi/data/api/3/action/package_search"
+          for q in valtionavustus avustuspäätökset valtiokonttori; do
+            echo "=== $q"
+            curl -sS -m 40 "$S?q=$q&rows=8" | python3 -c "
+          import sys,json
+          d=json.load(sys.stdin)['result']
+          print('osumia',d['count'])
+          for p in d['results']:
+              t=p.get('title_translated') or {}
+              print('-',p['name'],'|',(t.get('fi') or p.get('title') or '')[:70])
+              for r in p.get('resources',[])[:3]:
+                  print('    ',(r.get('format') or '?'),(r.get('url') or '')[:110])
+          "
+          done
+          echo "=== valtiokonttori suoraan"
+          for u in "https://www.valtionavustukset.fi/" "https://avustukset.valtiokonttori.fi/" "https://tutkimus.valtiokonttori.fi/"; do
+            curl -sS -L -m 30 -o /tmp/r -w "$u HTTP %{http_code} %{size_download}\n" "$u"
+          done
