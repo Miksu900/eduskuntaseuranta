@@ -8,14 +8,18 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: tilastot2
+      - name: muut
         run: |
           set +e
-          t() { echo "== $1"; curl -sS -m 40 -D /tmp/h -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" -H "Origin: https://eduskuntaseuranta.fi" "$2"; grep -i "access-control-allow-origin" /tmp/h; head -c "$3" /tmp/r; echo; }
-          t "StatFin vaerak" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/vaerak" 600
-          t "StatFin tyti" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/tyti" 600
-          t "StatFin khi" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/khi" 600
-          t "StatFin vaerak 11ra meta" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/vaerak/statfin_vaerak_pxt_11ra.px" 700
-          t "Sotkanet alueet" "https://sotkanet.fi/rest/1.1/regions" 400
-          t "Sotkanet data" "https://sotkanet.fi/rest/1.1/json?indicator=127&years=2023&genders=total" 500
-          t "Traficom ensirek" "https://trafi2.stat.fi/PXWeb/api/v1/fi/TraFi/Ensirekisteroinnit" 500
+          t() { echo "== $1"; curl -sS -L -m 40 -D /tmp/h -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" -H "Origin: https://eduskuntaseuranta.fi" "$2"; grep -i "access-control-allow-origin" /tmp/h | head -1; head -c "$3" /tmp/r | tr '\n' ' '; echo; }
+          t "Eurostat tyottomyys" "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=FI&geo=SE&lang=EN&format=JSON&sinceTimePeriod=2026-06" 400
+          t "Eurostat velka" "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10dd_edpt1?geo=FI&lang=EN&format=JSON&sinceTimePeriod=2023&na_item=GD&unit=PC_GDP&sector=S13" 400
+          t "Kela 1" "https://tilastot.kela.fi/PXWeb/api/v1/fi/" 300
+          t "Kela 2" "https://www.kela.fi/tilastot-ja-tutkimukset" 200
+          t "Kela 3" "https://www.avoindata.fi/data/api/3/action/package_search?q=kela&rows=3" 300
+          t "Tulli 1" "https://uljas.tulli.fi/v3rti/" 300
+          t "Tulli 2" "https://uljas.tulli.fi/v3rti/graph/api/v1/fi/" 300
+          t "Tulli 3" "https://www.avoindata.fi/data/api/3/action/package_search?q=tulli&rows=3" 300
+          t "SYKE 1" "https://rajapinnat.ymparisto.fi/api/" 300
+          t "SYKE 2" "https://rajapinnat.ymparisto.fi/api/Hydrologiaws/odata/v1/%24metadata" 300
+          t "SYKE 3" "https://www.avoindata.fi/data/api/3/action/package_search?q=syke&rows=3" 300
