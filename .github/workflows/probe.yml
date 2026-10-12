@@ -8,13 +8,15 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: vt4
+      - name: vt5
         run: |
           set +e
           B="https://api.tutkihallintoa.fi/valtiontalous/v1/budjettitaloudentapahtumat"
-          t() { echo "== $1"; curl -sS -L -m 90 -D /tmp/h -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" -H "Origin: https://eduskuntaseuranta.fi" "$B?$1" 2>&1 | tail -1; grep -i "access-control-allow-origin" /tmp/h | head -1; head -c 700 /tmp/r | tr '\n' '|'; echo; echo "rivejä: $(wc -l < /tmp/r)"; rm -f /tmp/r /tmp/h; }
-          t "vuosiAlkaen=2025&vuosi=2025&paaluokka=28"
-          t "vuosi=2025&vuosiAlkaen=2025&paaluokka=28&tililaji=3"
-          t "kuukausiAlkaen=1&kuukausi=12&vuosiAlkaen=2025&vuosi=2025&paaluokka=28"
-          t "vuosiAlkaen=2025&vuosi=2025"
+          t() { echo "== $1"; curl -sS -L -m 120 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$B?$1" 2>&1 | tail -1; head -c 500 /tmp/r | tr '\n' '|'; echo; echo "rivejä: $(wc -l < /tmp/r)"; rm -f /tmp/r; }
+          t "paaluokka=28"
+          t "vuosiAlkaen=2025&paaluokka=28"
+          t "kuukausiAlkaen=2025-01&kuukausi=2025-12&paaluokka=28"
+          t "kuukausiAlkaen=202501&kuukausi=202512&paaluokka=28"
+          t "hetki=2025-12-31&paaluokka=28"
+          t "luku=2801&vuosi=2025"
           exit 0
