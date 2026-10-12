@@ -134,7 +134,7 @@ async function discover() {
   const items = []; const seen = new Set();
   for (let start = 0; start < 1000; start += 200) {
     const r = await fetch("https://avoindata.suomi.fi/data/api/3/action/package_search?q=Kela&rows=200&start=" + start);
-    const j = await r.json();
+        let j; try { j = await r.json(); } catch (e) { console.log("Haku sivu " + start + " ei palauttanut JSON:ia (" + r.status + "), lopetetaan haku"); break; }
     const res = j.result.results;
     if (!res.length) break;
     for (const p of res) {
