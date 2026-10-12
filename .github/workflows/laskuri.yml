@@ -1,0 +1,37 @@
+name: rivilaskuri
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/laskuri.yml"
+jobs:
+  laske:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Oma tietokanta
+        run: |
+          set +e
+          SB=https://arwenhbwzoavbonlwkdr.supabase.co
+          K=sb_publishable_7baeuteHYaarCEv4-j8C_g_OLxcKzJp
+          T=0
+          for t in aanestykset aanestys_edustaja mp_stats puolue_aanet edustaja_vaalipiiri; do N=$(curl -sI "$SB/rest/v1/$t?select=*" -H "apikey: $K" -H "Prefer: count=exact" -H "Range: 0-0" | grep -i "^content-range" | sed 's/.*\///' | tr -d '\r '); echo "Supabase $t: $N" | tee -a $GITHUB_STEP_SUMMARY; T=$((T+${N:-0})); done
+          echo "SUPABASE YHTEENSA: $T" | tee -a $GITHUB_STEP_SUMMARY
+          echo "Sivuja sitemapissa: $(curl -s https://eduskuntaseuranta.fi/sitemap.xml | grep -o '<loc>' | wc -l)" | tee -a $GITHUB_STEP_SUMMARY
+      - name: SYKE
+        run: |
+          set +e
+          S=0
+          for t in Virtaama Vedenkorkeus LampoPintavesi Valuma Haihdunta LumiPiste Jaanpaksuus; do N=$(curl -s --max-time 120 "https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.1/odata/$t/\$count" | tr -d '\r\n '); echo "SYKE $t: $N" | tee -a $GITHUB_STEP_SUMMARY; case "$N" in ''|*[!0-9]*) ;; *) S=$((S+N));; esac; done
+          echo "SYKE YHTEENSA: $S" | tee -a $GITHUB_STEP_SUMMARY
+      - name: Kela
+        run: |
+          set +e
+          A=https://avoindata.suomi.fi/data/api/3/action
+          ORG=$(curl -s "$A/organization_list?all_fields=true&limit=1000" | jq -r '[.result[] | select((.title // .display_name // "") | test("Kansaneläke|^Kela$"))][0].name')
+          echo "Kelan organisaatio: $ORG" | tee -a $GITHUB_STEP_SUMMARY
+          curl -s "$A/package_search?rows=100&fq=organization:$ORG" | jq -r '.result.results[].resources[] | select(.format=="CSV") | .url' | grep -iE "csv|download" | sort -u > kela.txt
+          echo "Kelan CSV-tiedostoja: $(wc -l < kela.txt)" | tee -a $GITHUB_STEP_SUMMARY
+          cat kela.txt | xargs -P 4 -I{} sh -c 'n=$(curl -sL --max-time 900 "{}" | wc -l); echo "$n {}"' > kela-rivit.txt
+          sort -rn kela-rivit.txt | head -15 | tee -a $GITHUB_STEP_SUMMARY
+          awk '{s+=$1-1} END {print "KELA YHTEENSA rivia: " s}' kela-rivit.txt | tee -a $GITHUB_STEP_SUMMARY
