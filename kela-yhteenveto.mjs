@@ -1,7 +1,9 @@
 // Kelan avoimen datan kunnittainen yhteenveto -> data/kela/
 import fs from "node:fs";
-import path from "node:path";
 
+
+const _fetch = globalThis.fetch;
+globalThis.fetch = (u, o = {}) => _fetch(u, { ...o, headers: { "User-Agent": "Mozilla/5.0 (compatible; Eduskuntaseuranta-datapankki)", "Accept": "*/*", ...(o.headers || {}) } });
 const SAMPLE = 200000;
 const CONC = 4;
 const OUT = "data/kela";
