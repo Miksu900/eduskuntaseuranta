@@ -14,7 +14,7 @@ import { loadVtv, vtvPages } from "./vtv.mjs";
 import { loadEu, euPages } from "./eu.mjs";
 import { loadRrf, rahatPages } from "./rahat.mjs";
 import { tilastotPages } from "./tilastot.mjs";
-import { loadVt, vtPages as valtiontalousPages } from "./valtiontalous.mjs";
+import { loadVt, vtPages as valtiontalousPages, avustusPage } from "./valtiontalous.mjs";
 import { loadFinlex, loadFinlexArchive, finlexPages } from "./finlex.mjs";
 import { existsSync } from "node:fs";
 import { SRC, TIMELINE, GOV as BGOV, PARTIES, AI_FACTS, TABLE, KEY2, WELL, TRANSPORT } from "./budget.mjs";
@@ -112,7 +112,7 @@ async function fetchVaalipiirit() {
 }
 
 // ---------- Ulkoasu ----------
-const CSS = `:root{color-scheme:dark;--bg:#0a1424;--surface:#101f36;--line:#1e3252;--text:#eef3fb;--mute:#93a4bd;--jaa:#3ddc97;--ei:#ff6b81;--tyhja:#ffc857;--poissa:#5b6b86;--link:#7cc4ff;--accent:#7cc4ff}*{box-sizing:border-box}
+let CSS = `:root{color-scheme:dark;--bg:#0a1424;--surface:#101f36;--line:#1e3252;--text:#eef3fb;--mute:#93a4bd;--jaa:#3ddc97;--ei:#ff6b81;--tyhja:#ffc857;--poissa:#5b6b86;--link:#7cc4ff;--accent:#7cc4ff}*{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
@@ -150,14 +150,111 @@ footer{max-width:760px;margin:auto;padding:0 16px 40px;color:#7d8794;font-size:1
 .q{background:var(--surface);border-radius:14px;padding:16px;margin:12px 0}
 .q .t{font-size:17px;margin-bottom:6px}.bar{height:6px;background:#2a2a2a;border-radius:3px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:#2a5db0}`;
 
+// ---------- Uudistettu ilme (kerrostuu vanhan CSS:n päälle) ----------
+const EXTRA_CSS = String.raw`
+:root{--accent:#6cb8ff;--surface2:#16294a;--r:18px}
+body{font-size:17px;line-height:1.6}
+.top{padding:10px 16px;backdrop-filter:blur(10px);background:rgba(10,20,36,.92)}
+.brand{font-size:19px;font-weight:700;letter-spacing:-.02em}.brand span{color:var(--accent);font-weight:800}
+.askb{background:linear-gradient(135deg,#3b82f6,#7c5cff);color:#fff;font-weight:700;font-size:15px;padding:9px 14px;border-radius:999px;box-shadow:0 2px 14px rgba(80,110,255,.35)}
+.menu summary{font-size:15px;padding:9px 14px}
+.menu nav{grid-template-columns:1fr 1fr}
+.menu nav a{padding:9px 0;font-size:17px}
+main{max-width:780px;padding:18px 16px 90px}
+h1{font-size:clamp(28px,6.5vw,36px);letter-spacing:-.025em}
+h2{font-size:22px}
+.card,.q,.chip{border-radius:var(--r)}
+.card{padding:14px 18px;border:1px solid transparent}.card:hover{border-color:var(--line)}
+.note{background:var(--surface);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5}
+.btn,button{min-height:44px}
+input[type=search],select{min-height:48px}
+.tiles{display:grid;grid-template-columns:1fr;gap:10px;margin:22px 0 4px}
+@media(min-width:560px){.tiles{grid-template-columns:1fr 1fr}}
+.tile{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;color:var(--text)}
+.tile:hover{text-decoration:none;background:var(--surface2);border-color:var(--accent)}
+.tile .ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--c,#2a5db0)}
+.tile .ic svg{width:25px;height:25px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tile b{display:block;font-size:18px;letter-spacing:-.01em}
+.tile span{display:block;color:var(--mute);font-size:14px;line-height:1.4;margin-top:2px}
+.fab{position:fixed;right:16px;bottom:16px;z-index:20;border-radius:999px;padding:14px 20px;font-weight:700;font-size:16px;color:#fff;background:linear-gradient(135deg,#3b82f6,#7c5cff);box-shadow:0 6px 24px rgba(60,90,255,.5)}
+.sheet{position:fixed;inset:0;z-index:30;display:none;background:rgba(3,8,18,.7)}
+.sheet.open{display:block}
+.sheet .in{position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow:auto;background:var(--bg);border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 16px 28px;max-width:780px;margin:auto}
+.sheet h3{margin:0 0 4px;font-size:21px;letter-spacing:-.01em}
+.sheet .x{position:absolute;right:12px;top:12px;background:var(--surface);width:44px;padding:0}
+.sheet input[type=search]{width:100%;font:inherit;font-size:17px;color:var(--text);background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0}
+.sheet input[type=search]:focus{outline:none;border-color:var(--accent)}
+.sheet .go{background:linear-gradient(135deg,#3b82f6,#7c5cff);width:100%;font-weight:700;font-size:17px}
+.sheet .eg{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.sheet .eg button{background:var(--surface);font-size:14px;padding:8px 12px;min-height:0;text-align:left}
+.sheet label{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--mute);margin:6px 0 12px}
+.hero2{padding:14px 0 4px}
+.hero2 p{color:var(--mute);margin:0 0 14px;font-size:18px}
+.askbig{display:block;width:100%;text-align:left;background:linear-gradient(135deg,#1c3b78,#35307a);border:1px solid #3a5fb0;border-radius:var(--r);padding:16px 18px;color:#fff;font-size:18px;margin-top:10px}
+.askbig small{display:block;color:#b9c8e8;font-size:14px;margin-top:2px}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+`;
+CSS += EXTRA_CSS;
+
+const ICONS = {
+  vote: '<path d="M4 12l5 5L20 6"/>',
+  person: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  law: '<path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/>',
+  money: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9c-.5-1-1.5-1.5-2.7-1.5-1.6 0-2.6.8-2.6 2 0 3 5.6 1.5 5.6 4.5 0 1.2-1.1 2-2.8 2-1.3 0-2.4-.6-2.9-1.7M12 6v1.5M12 16.5V18"/>',
+  firm: '<path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6M8 11h.01M16 11h.01"/>',
+  chart: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
+  eu: '<circle cx="12" cy="12" r="9"/><path d="M12 5l1 2.5 2.6.2-2 1.7.7 2.6-2.3-1.4-2.3 1.4.7-2.6-2-1.7 2.6-.2z"/>',
+  mega: '<path d="M3 11v3l12 5V6L3 11z"/><path d="M18 9a4 4 0 010 6"/>',
+  city: '<path d="M3 21h18M5 21V8h6v13M13 21V4h6v17"/>',
+  cart: '<path d="M3 4h3l2 12h10l2-8H7"/><circle cx="10" cy="20" r="1"/><circle cx="17" cy="20" r="1"/>',
+  book: '<path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19a2 2 0 012-2h13"/>',
+};
+const tilesHtml = () => {
+  const t = (h, ic, c, title, d) => `<a class="tile" href="${h}"><div class="ic" style="--c:${c}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[ic]}</svg></div><div><b>${title}</b><span>${d}</span></div></a>`;
+  return `<div class="tiles">`
+    + t("/aanestykset/", "vote", "#2f7be0", "Äänestykset", "Miten eduskunta äänesti ja kuka äänesti miten")
+    + t("/edustajat/", "person", "#7c5cff", "Kansanedustajat", "Läsnäolo, äänet ja poikkeamat ryhmän linjasta")
+    + t("/budjetti/", "money", "#1fa971", "Mihin rahat menevät", "Valtion budjetti, menot, verot ja avustukset")
+    + t("/lait/", "law", "#d9822b", "Lait ja asetukset", "Hae Suomen lakeja ja katso, mitä ne sanovat")
+    + t("/yritykset/", "firm", "#c24d8a", "Yritykset", "Hae yritystä, sen tietoja ja lobbausta")
+    + t("/tilastot/", "chart", "#2aa7b8", "Tilastot", "Työttömyys, inflaatio, väestö ja paljon muuta")
+    + t("/eu/", "eu", "#3b4ec9", "EU", "Euroopan parlamentin äänet, meppien ja EU-rahat")
+    + t("/lobbaus/", "mega", "#b84545", "Lobbaus ja vaalirahoitus", "Kuka vaikuttaa ja kuka rahoittaa")
+    + t("/kunnat/", "city", "#6b8e23", "Kunnat", "Oman kuntasi luvut ja vertailu")
+    + t("/hankinnat/", "cart", "#8a6bd1", "Julkiset hankinnat", "Mihin julkinen raha tilataan")
+    + `</div>`;
+};
+
+const ASK_EG = ["Mitä budjetti 2027 tekee veroille?", "Milloin eduskunta äänesti kissoista?", "Miten eduskunta äänesti viimeksi?"];
+const ASK_HTML = `<button type="button" class="fab" data-ask aria-label="Kysy tekoälyltä">Kysy tekoälyltä</button>
+<div class="sheet" id="asksheet" role="dialog" aria-modal="true" aria-labelledby="askt"><div class="in"><button type="button" class="x" id="askx" aria-label="Sulje">✕</button>
+<h3 id="askt">Kysy tekoälyltä</h3><p class="meta" style="margin:0">Vastaa äänestysten, lakialoitteiden, hallituksen esitysten ja budjetin perusteella ja näyttää lähteet. Voi erehtyä, tarkista tärkeät asiat lähteestä.</p>
+<form id="askf"><input id="askq" type="search" maxlength="300" placeholder="Kirjoita kysymys" autocomplete="off"><div class="eg">${ASK_EG.map(x => `<button type="button" data-eg="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+<label><input type="checkbox" id="askl"> Laaja haku (käyttää myös verkkoa, hitaampi)</label><button type="submit" class="go" id="askg">Kysy</button></form><div id="aska" aria-live="polite" style="margin-top:14px"></div></div></div>
+<script>(function(){var S=document.getElementById("asksheet"),q=document.getElementById("askq"),A=document.getElementById("aska"),G=document.getElementById("askg"),F=document.getElementById("askf");
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function open(){S.classList.add("open");document.body.style.overflow="hidden";setTimeout(function(){q.focus()},50)}
+function close(){S.classList.remove("open");document.body.style.overflow=""}
+document.querySelectorAll("[data-ask]").forEach(function(b){b.addEventListener("click",open)});
+document.getElementById("askx").onclick=close;S.addEventListener("click",function(e){if(e.target===S)close()});document.addEventListener("keydown",function(e){if(e.key==="Escape")close()});
+document.querySelectorAll("[data-eg]").forEach(function(b){b.onclick=function(){q.value=b.getAttribute("data-eg");F.requestSubmit()}});
+if(/[?&]kysy=1/.test(location.search))open();
+F.addEventListener("submit",function(e){e.preventDefault();var v=q.value.trim();if(v.length<3){A.textContent="Kirjoita kysymys.";return}G.disabled=true;A.textContent="Haetaan…";
+fetch(${JSON.stringify(`${SB}/functions/v1/haku`)},{method:"POST",headers:{"Content-Type":"application/json",apikey:${JSON.stringify(KEY)},Authorization:"Bearer "+${JSON.stringify(KEY)}},body:JSON.stringify({q:v,laaja:!!document.getElementById("askl").checked})}).then(function(r){return r.json()}).then(function(j){G.disabled=false;
+if(j.virhe){A.innerHTML='<div class="ai">'+esc(j.virhe)+'</div>';return}
+var h='<div class="ai"><b>Vastaus</b><div style="white-space:pre-wrap;margin-top:6px">'+esc(j.vastaus||"")+'</div><small>'+(j.laaja?"Laaja haku: tekoäly käytti verkkoa ja omaa tulkintaansa, tiedot eivät ole Eduskuntaseurannan vahvistamia.":"Tekoälyn tekemä vastaus sivuston tietojen perusteella, voi sisältää virheitä.")+'</small></div>';
+if(j.lahteet&&j.lahteet.length){h+='<h2>Lähteet</h2>'+j.lahteet.map(function(s){return'<a class="card" href="'+esc(s.url)+'"><div>'+esc(s.otsikko)+'</div></a>'}).join("")}
+A.innerHTML=h}).catch(function(){G.disabled=false;A.textContent="Haku ei onnistunut juuri nyt. Yritä myöhemmin uudelleen."})})})()</script>`;
+
 const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
-  return g("Seuraa", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/seuranta/", "Seurantani"]])
-    + g("Lue", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"]])
-    + g("Työkalut", [["/kunnat/", "Kunnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/lobbaus/", "Lobbaus"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/lait/", "Lait ja asetukset"], ["/vtv/", "VTV:n raportit"], ["/eu/", "EU"], ["/tilastot/", "Tilastot"], ["/valtion-talous/", "Valtion talous"], ["/yritykset/", "Yritykset"], ["/valtionavustukset/", "Valtionavustukset"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/haku/", "Kysy"], ["/budjetti/", "Budjetti"], ["/tilaa/", "Tilaa viikkokirje"]])
-    + g("Tietoa", [["/data/", "Data"], ["/menetelma/", "Menetelmä"]]);
+  return g("Kansanedustajat", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/testi/", "Kuka äänestää kuten sinä?"], ["/seuranta/", "Seurantani"]])
+    + g("Raha", [["/budjetti/", "Valtion budjetti"], ["/valtion-talous/", "Valtion talous"], ["/valtionavustukset/", "Valtionavustukset"], ["/eu/rahat/", "EU:n rahat"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/hankinnat/", "Julkiset hankinnat"], ["/kunnat/", "Kunnat"]])
+    + g("Lait ja tieto", [["/lait/", "Lait ja asetukset"], ["/tilastot/", "Tilastot"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/lobbaus/", "Lobbaus"], ["/eu/", "EU"]])
+    + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Tietoa", [["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
 };
-const headerHtml = (bare = false) => `<header class="top"><a class="brand" href="/">Eduskuntaseuranta</a><div class="tr"><a id="acct" class="acct" href="/kirjaudu/">Kirjaudu</a>${bare ? "" : `<details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details>`}</div></header>`;
+const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><div class="tr"><button type="button" class="askb" data-ask>Kysy tekoälyltä</button><details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details></div></header>`;
 
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
@@ -192,7 +289,7 @@ function shell({ title, desc, path, body, head = "" }) {
 ${headerHtml()}
 <main>${commentsWanted(path) ? (body.includes("<!--KOM-->") ? body.replace("<!--KOM-->", () => commentsBlock({ path, SB, KEY })) : body + commentsBlock({ path, SB, KEY })) : body}</main>
 ${footerHtml(path)}
-${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
+${ASK_HTML}${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
 }
 
 // Asiakirjatunnukset (HE 123/2026, VaVM 5/2026 ...) otsikosta -> linkit Eduskunnan omille sivuille
@@ -729,7 +826,8 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     }
   } catch (e) { console.log("Yritykset ohitettu:", e.message); }
 
-  // --- Valtionavustukset (linkki Valtiokonttorin palveluun) ---
+  // --- Valtionavustukset (momenttidata; pääsivu rakennetaan Valtion talous -lohkossa) ---
+  if (!loadVt()) {
   console.log("[aika]", Math.round(process.uptime())+"s", 'Valtionavustukset (linkki Valtiokonttorin palveluun)');
   put("/valtionavustukset/", shell({
     title: "Valtionavustukset | Eduskuntaseuranta",
@@ -737,6 +835,8 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     path: "/valtionavustukset/",
     body: `<h1>Valtionavustukset</h1><p>Valtionavustukset ovat valtion budjetista myönnettyä rahoitusta, jolla tuetaan yhteiskunnallisesti tarpeellisena pidettyä toimintaa tai hanketta. Avustuksia myöntävät ministeriöt ja noin 30 keskusvirastoa.</p><div class="note"><b>Mistä tiedot löytyvät</b><br>Valtiokonttori julkaisee tiedot haetuista ja myönnetyistä valtionavustuksista Tutkiavustuksia.fi-palvelussa. Siellä voi suodattaa avustuksia myöntäjän, avustuslajin, hakijan tyypin, toimialan ja päätöspäivän mukaan sekä katsoa, kuinka paljon rahaa on myönnetty ja kenelle. Tiedot ovat valtionapuviranomaisten ilmoittamia ja kertyvät palveluun vähitellen, koska viranomaisilla on kolme kuukautta aikaa ilmoittaa päätökset. Tietoja ei voi tällä hetkellä ladata tai hakea koneellisesti, joten emme näytä niitä tällä sivustolla. Linkki vie Valtiokonttorin omaan palveluun.</div><p><a class="btn" href="https://www.tutkiavustuksia.fi/" rel="noopener">Avaa Tutkiavustuksia.fi</a></p><p>Valtion talouden muita tietoja löytyy Valtiokonttorin portaalista <a href="https://avoindata.tutkihallintoa.fi/" rel="noopener">avoindata.tutkihallintoa.fi</a>.</p>`,
   }));
+
+  }
 
   // --- VTV:n raportit ---
   console.log("[aika]", Math.round(process.uptime())+"s", 'VTV:n raportit');
@@ -773,6 +873,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     if (vtd) {
       const vtp = valtiontalousPages({ shell, esc, data: vtd });
       for (const pg of vtp.pages) put(pg.path, pg.html);
+      { const ap = avustusPage({ shell }); put(ap.path, ap.html); }
       for (const f of vtp.files) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
     }
   } catch (e) { console.log("Valtion talous ohitettu:", e.message); }
@@ -813,9 +914,9 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     const topicChips = TOPICS.filter(t => loaded.some(v => topicOf(v).name === t.name) && t.name !== "Muut aiheet").map(t => `<a class="tag" href="/aihe/${tslug(t)}/">${esc(t.name)}</a>`).join("");
     const partyMap = {}; for (const [k, v] of Object.entries(PARTY)) partyMap[k] = v;
     let idx = await readFile("index.html", "utf8");
-    idx = idx.replace("/*CSS*/", () => CSS).replace("<!--HEADER-->", () => headerHtml(true)).replace("<!--NAV-->", () => navGroups()).replace("<!--AIHEET-->", () => topicChips)
+    idx = idx.replace("/*CSS*/", () => CSS).replace("<!--HEADER-->", () => headerHtml()).replace("<!--TILES-->", () => tilesHtml()).replace("<!--AIHEET-->", () => topicChips)
       .replace("/*PARTIES*/", () => JSON.stringify(partyMap)).replace("%%SB%%", () => SB).replace("%%KEY%%", () => KEY)
-      .replace("<!--FOOT-->", () => `${footerHtml()}\n${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}`);
+      .replace("<!--FOOT-->", () => `${footerHtml()}\n${ASK_HTML}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}`);
     await writeFile(`${OUT}/index.html`, idx);
   }
   const today = new Date().toISOString().slice(0, 10);

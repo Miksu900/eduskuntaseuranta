@@ -62,3 +62,33 @@ export function vtPages({ shell, esc, data }) {
 <p><a href="/tilastot/">Muut tilastot</a> · <a href="/budjetti/">Budjetti</a></p>`;
   return { pages: [{ path: "/valtion-talous/", html: shell({ title: "Valtion talous | Eduskuntaseuranta", desc: "Valtion talousarviotalouden toteuma pääluokittain ja momenteittain vuosilta 1998–2026: menot, verotulot ja kehitys vuosien yli.", path: "/valtion-talous/", body }) }], files };
 }
+
+const AJS = String.raw`<script>(function(){
+var IDX=null,Y=null,root=document.getElementById("var");
+function e(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function eur(v){var a=Math.abs(v);if(a>=1e9)return new Intl.NumberFormat("fi-FI",{maximumFractionDigits:2}).format(v/1e9)+" mrd €";if(a>=1e6)return new Intl.NumberFormat("fi-FI",{maximumFractionDigits:1}).format(v/1e6)+" milj. €";return new Intl.NumberFormat("fi-FI",{maximumFractionDigits:0}).format(v)+" €"}
+function nm(s){s=String(s||"");return s.charAt(0)+s.slice(1).toLowerCase()}
+function j(u){return fetch(u).then(function(r){if(!r.ok)throw new Error("Lataus epäonnistui ("+r.status+")");return r.json()})}
+function isAv(r){var p=String(r[0]).split(".");var n=Number(p[2]);var pl=Number(r[2]);return p.length===3&&n>=50&&n<=69&&pl>=21&&pl<=35&&r[3]>0}
+function tbl(rows){var h='<div style="overflow-x:auto"><table><thead><tr><th>Momentti</th><th class="n">Euroa</th></tr></thead><tbody>';rows.forEach(function(r){h+='<tr><td>'+e(r[0])+' '+e(nm(r[1]))+'</td><td class="n">'+eur(r[3])+'</td></tr>'});return h+'</tbody></table></div>'}
+function boot(){root.innerHTML='<p class="meta">Ladataan…</p>';j("/data/vt/index.json").then(function(i){IDX=i;var yrs=i.years.slice().sort(function(a,b){return b-a});var full=yrs.filter(function(y){return i.months[y]===12})[0]||yrs[0];draw(full)}).catch(function(x){root.innerHTML="<p>"+e(x.message)+"</p>"})}
+function draw(y){var yrs=IDX.years.slice().sort(function(a,b){return b-a});var h='<label>Vuosi <select id="vy">';yrs.forEach(function(v){h+='<option value="'+v+'"'+(v===y?" selected":"")+'>'+v+(IDX.months[v]<12?" ("+IDX.months[v]+" kk)":"")+'</option>'});h+='</select></label><div id="vo"><p class="meta">Ladataan…</p></div>';root.innerHTML=h;document.getElementById("vy").onchange=function(){draw(Number(this.value))};
+j("/data/vt/"+y+".json").then(function(d){Y=d;show(y)}).catch(function(x){document.getElementById("vo").innerHTML="<p>"+e(x.message)+"</p>"})}
+function show(y){var rows=Y.rows.filter(isAv).sort(function(a,b){return b[3]-a[3]}),tot=0,by={};rows.forEach(function(r){tot+=r[3];by[r[2]]=(by[r[2]]||0)+r[3]});
+var keys=Object.keys(by).sort(function(a,b){return by[b]-by[a]}),mx=keys.length?by[keys[0]]:1;
+var part=IDX.months[y]<12?'<p class="meta">Vuosi on kesken: luvut ovat '+IDX.months[y]+' kuukaudelta.</p>':"";
+var h=part+'<div class="big"><div><b>'+eur(tot)+'</b>Avustuksia, tukia ja valtionosuuksia</div><div><b>'+rows.length+'</b>Momenttia</div></div><h3>Hallinnonaloittain</h3><div style="overflow-x:auto"><table><tbody>';
+keys.forEach(function(k){h+='<tr><td>'+k+'. '+e(nm(Y.paaluokat[k]||k))+'<div class="vb" style="width:'+Math.max(2,Math.round(100*by[k]/mx))+'%"></div></td><td class="n">'+eur(by[k])+'</td></tr>'});
+h+='</tbody></table></div><h3>Suurimmat erät</h3>'+tbl(rows.slice(0,50))+'<h3>Hae avustusta</h3><input type="search" id="vq" placeholder="Esim. yhdistys, kunta, maatalous, urheilu, kulttuuri"><div id="vs"></div>';
+document.getElementById("vo").innerHTML=h;var q=document.getElementById("vq"),vs=document.getElementById("vs");
+q.oninput=function(){var w=q.value.toLowerCase().trim().split(/\s+/).filter(Boolean);vs.innerHTML="";if(!w.length)return;var out=[],n=0;rows.forEach(function(r){var t=(r[1]+" "+r[0]).toLowerCase();for(var i=0;i<w.length;i++)if(t.indexOf(w[i])<0)return;n++;if(out.length<60)out.push(r)});vs.innerHTML='<p class="meta">'+n+' osumaa'+(n>60?", näytetään 60 suurinta":"")+'</p>'+tbl(out)}}
+boot()})()</script>`;
+
+export function avustusPage({ shell }) {
+  const body = `<h1>Valtionavustukset</h1><p>Valtio jakaa budjetista rahaa avustuksina, tukina ja valtionosuuksina. Tässä näet, mihin tarkoituksiin rahaa on budjetissa käytetty, hallinnonaloittain ja momenteittain vuosilta 1998 alkaen. Valitse vuosi ja hae esimerkiksi yhdistyksiä, kuntia, urheilua tai maataloutta.</p>
+<div class="note"><b>Mitä luvut kertovat – ja mitä eivät</b><br>Luvut ovat valtion talousarvion siirtomenomomentteja (momenttinumeron lopussa 50–69), jotka sisältävät avustukset, tuet ja valtionosuudet, myös lakisääteiset kuten asumistuen. Ne kertovat, mihin tarkoitukseen rahaa on käytetty, mutta eivät sitä, kuka yksittäisen avustuksen sai. Lähde on Valtiokonttorin Valtion talous -rajapinta (CC BY 4.0). Tämä ei ole virallinen lähde.</div>
+<p>Yksittäisten avustuspäätösten saajat löytyvät Valtiokonttorin omasta palvelusta: <a href="https://www.tutkiavustuksia.fi/" rel="noopener">Tutkiavustuksia.fi</a>. Tietoja ei voi ladata koneellisesti, joten niitä ei näytetä tällä sivustolla.</p>
+<div class="vt">${CSS}<div id="var"></div>${AJS}</div>
+<p><a href="/valtion-talous/">Koko valtion talous</a> · <a href="/tilastot/">Tilastot</a></p>`;
+  return { path: "/valtionavustukset/", html: shell({ title: "Valtionavustukset | Eduskuntaseuranta", desc: "Valtion avustukset, tuet ja valtionosuudet hallinnonaloittain ja momenteittain vuosilta 1998 alkaen.", path: "/valtionavustukset/", body }) };
+}
