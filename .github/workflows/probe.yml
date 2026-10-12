@@ -8,15 +8,29 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: vt5
+      - name: vt6
         run: |
           set +e
-          B="https://api.tutkihallintoa.fi/valtiontalous/v1/budjettitaloudentapahtumat"
-          t() { echo "== $1"; curl -sS -L -m 120 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$B?$1" 2>&1 | tail -1; head -c 500 /tmp/r | tr '\n' '|'; echo; echo "rivejä: $(wc -l < /tmp/r)"; rm -f /tmp/r; }
-          t "paaluokka=28"
-          t "vuosiAlkaen=2025&paaluokka=28"
-          t "kuukausiAlkaen=2025-01&kuukausi=2025-12&paaluokka=28"
-          t "kuukausiAlkaen=202501&kuukausi=202512&paaluokka=28"
-          t "hetki=2025-12-31&paaluokka=28"
-          t "luku=2801&vuosi=2025"
+          A="https://api.tutkihallintoa.fi"
+          for p in "/valtiontalous/v1/swagger.json" "/valtiontalous/v1/openapi.json" "/valtiontalous/swagger.json" "/valtiontalous/v1?format=openapi" "/valtiontalous/v1/?format=swagger"; do
+            echo "== $p"; curl -sS -L -m 30 -o /tmp/s -w "HTTP %{http_code} %{size_download} B\n" "$A$p" 2>&1 | tail -1
+            if grep -q '"budjettitaloudentapahtumat"' /tmp/s 2>/dev/null; then echo "LÖYTYI"; python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/s'))
+          for k,v in d.get('paths',{}).items():
+              if 'tapahtumat' in k:
+                  print(k)
+                  for m,o in v.items():
+                      for p in o.get('parameters',[]):
+                          print('  ',p.get('name'),p.get('in'),(p.get('schema') or {}).get('type'),(p.get('schema') or {}).get('format'),(p.get('description') or '')[:90])
+          PY
+            fi
+            rm -f /tmp/s
+          done
+          B="$A/valtiontalous/v1/budjettitaloudentapahtumat"
+          t() { echo "== $1"; curl -sS -L -m 120 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$B?$1" 2>&1 | tail -1; head -c 350 /tmp/r | tr '\n' '|'; echo; rm -f /tmp/r; }
+          t "vuosiAlkaen=2025&vuosiPaattyen=2025&paaluokka=28"
+          t "alkuvuosi=2025&loppuvuosi=2025&paaluokka=28"
+          t "tilivirasto=110&vuosi=2025&vuosiAlkaen=2024"
+          t "vuosi=2025&vuosiAlkaen=2024&kuukausi=12&kuukausiAlkaen=1&hallinnonala=21"
           exit 0
