@@ -1,4 +1,4 @@
-name: Rajapintatesti
+name: probe
 on:
   workflow_dispatch:
   push:
@@ -8,34 +8,16 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: EU
+      - name: tilastot
         run: |
           set +e
-          D="https://cohesiondata.ec.europa.eu"
-          echo "=== 1 Sarakkeet 557j-pmg8"
-          curl -sS -m 40 "$D/api/views/557j-pmg8.json" | python3 -c "
-          import json,sys
-          d=json.load(sys.stdin)
-          print([ (c['fieldName'],c['dataTypeName']) for c in d['columns']])"
-          echo "=== 2 Maiden summat (cast)"
-          curl -sS -m 60 -G "$D/resource/557j-pmg8.json" --data-urlencode 'tmp=1' --data-urlencode '$select=country,count(*) as n,sum(project_eu_budget::number) as eu' --data-urlencode '$group=country' --data-urlencode '$limit=40' | head -c 1800; echo
-          echo "=== 3 Italia remontit isoimmat"
-          curl -sS -m 60 -G "$D/resource/557j-pmg8.json" --data-urlencode "\$where=country='Italy' AND upper(category_label) like '%HOUSING%'" --data-urlencode '$select=operation_name_english,project_eu_budget,region,category_label' --data-urlencode '$order=project_eu_budget::number DESC' --data-urlencode '$limit=3' | head -c 1200; echo
-          echo "=== 4 Italia asuminen yhteensä"
-          curl -sS -m 60 -G "$D/resource/557j-pmg8.json" --data-urlencode "\$where=country='Italy' AND upper(category_label) like '%HOUSING%'" --data-urlencode '$select=category_label,count(*) as n,sum(project_eu_budget::number) as eu' --data-urlencode '$group=category_label' | head -c 1200; echo
-          echo "=== 5 Muut koheesiodatat"
-          for q in "2021-2027 projects" "Kohesio 2021-2027" "cohesion open data projects 2021"; do
-            curl -sS -m 40 -G "$D/api/catalog/v1" --data-urlencode "domains=cohesiondata.ec.europa.eu" --data-urlencode "q=$q" --data-urlencode "limit=6" | python3 -c "
-          import json,sys
-          for r in json.load(sys.stdin)['results']: print(r['resource']['id'],r['resource']['name'])"
-          done
-          echo "=== 6 Eurostat elpymisrahasto kaikki maat"
-          curl -sS -m 90 -o /tmp/e.json "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_rrf_fa?format=JSON&lang=EN"
-          python3 - <<'PY'
-          import json
-          d=json.load(open('/tmp/e.json'))
-          print(d['id'],d['size'])
-          for k,v in d['dimension'].items():
-              c=v['category']['label']; print(k,len(c),list(c.items())[:5])
-          print(list(d['value'].items())[:5])
-          PY
+          t() { echo "== $1"; curl -sS -m 30 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$2"; head -c 300 /tmp/r; echo; }
+          t "Tilastokeskus StatFin" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/"
+          t "THL Sotkanet indikaattorit" "https://sotkanet.fi/rest/1.1/indicators"
+          t "Kela avoin data" "https://beta.kela.fi/etuuskuvaajat"
+          t "Traficom avoin" "https://trafi2.stat.fi/PXWeb/api/v1/fi/TraFi/"
+          t "SYKE" "https://rajapinnat.ymparisto.fi/api/Hydrologiaws/odata/v1/Vesikunta?%24top=1"
+          t "Fingrid" "https://data.fingrid.fi/"
+          t "Tulli uljas" "https://uljas.tulli.fi/uljas/graph/api/v1/fi/"
+          t "Eurostat katalogi" "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=FI&format=JSON&lang=fi&sinceTimePeriod=2025-01"
+          t "Tilastokeskus uusi" "https://pxdata.stat.fi/PxWebApi/api/v1/fi/StatFin/"
