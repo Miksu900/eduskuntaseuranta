@@ -59,10 +59,54 @@ var h='<h2>'+e(x.t)+'</h2><p class="meta">Vuosi '+best+', '+rows.length+' kuntaa
 var kb=document.getElementById("kb"),kf=document.getElementById("kf");function dr(){var q=kf.value.toLowerCase().trim();kb.innerHTML="";var c=0;rows.forEach(function(r,i){if(q&&r.n.toLowerCase().indexOf(q)<0)return;if(c++>400)return;kb.insertAdjacentHTML("beforeend","<tr><td>"+(i+1)+". "+e(r.n)+"</td><td class='n'>"+nf(r.v)+"</td></tr>")})}kf.oninput=dr;dr()}).catch(function(x){so.innerHTML="<p>Haku epäonnistui: "+e(x.message)+"</p>"})}
 })()</script>`;
 
+
+const EUS = String.raw`<script>(function(){
+var B="https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/";
+var P=[
+{t:"Työttömyysaste (%)",ds:"une_rt_m",p:["sex=T&age=TOTAL&unit=PC_ACT&s_adj=SA"],d:1},
+{t:"Inflaatio, vuosimuutos (%)",ds:"prc_hicp_manr",p:["coicop=CP00","coicop18=CP00"],d:1},
+{t:"Julkinen velka (% BKT:sta)",ds:"gov_10dd_edpt1",p:["na_item=GD&unit=PC_GDP&sector=S13"],d:1},
+{t:"Julkisen talouden ali-/ylijäämä (% BKT:sta)",ds:"gov_10dd_edpt1",p:["na_item=B9&unit=PC_GDP&sector=S13"],d:1},
+{t:"BKT asukasta kohti (euroa)",ds:"nama_10_pc",p:["na_item=B1GQ&unit=CP_EUR_HAB"],d:0},
+{t:"Väkiluku",ds:"demo_pjan",p:["age=TOTAL&sex=T&unit=NR"],d:0}];
+var root=document.getElementById("eur");
+function e(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function nf(v,d){return new Intl.NumberFormat("fi-FI",{maximumFractionDigits:d}).format(v)}
+var h='<div class="tb">';P.forEach(function(x,i){h+='<button data-i="'+i+'">'+e(x.t)+'</button>'});root.innerHTML=h+'</div><div id="eo"></div>';
+var eo=document.getElementById("eo");
+function get(x,k){var u=B+x.ds+"?"+x.p[k]+"&lang=EN&format=JSON&lastTimePeriod=3";return fetch(u).then(function(r){if(!r.ok){if(k+1<x.p.length)return get(x,k+1);throw new Error("Palvelu vastasi "+r.status)}return r.json()})}
+function show(x){eo.innerHTML='<p class="meta">Haetaan…</p>';get(x,0).then(function(d){var ids=d.id,size=d.size,gi=ids.indexOf("geo"),ti=ids.indexOf("time");if(gi<0||ti<0)throw new Error("Odottamaton rakenne");
+function dim(id){var c=d.dimension[id].category,ix=c.index,lab=c.label||{},keys=Array.isArray(ix)?ix:Object.keys(ix).sort(function(a,b){return ix[a]-ix[b]});return{keys:keys,lab:lab}}
+var G=dim("geo"),T=dim("time"),st=[],s=1,i;for(i=ids.length-1;i>=0;i--){st[i]=s;s*=size[i]}
+var vals=d.value,keys=Array.isArray(vals)?vals.map(function(_,i){return i}):Object.keys(vals),best={};
+keys.forEach(function(k){var v=vals[k];if(v==null)return;var n=Number(k),g=Math.floor(n/st[gi])%size[gi],t=Math.floor(n/st[ti])%size[ti],gk=G.keys[g];if(!best[gk]||t>best[gk].t)best[gk]={t:t,v:v}});
+var rows=Object.keys(best).map(function(g){return{c:g,n:G.lab[g]||g,v:best[g].v,p:T.keys[best[g].t]}}).filter(function(r){return !/^(EU|EA|EEA)/.test(r.c)||r.c==="EU27_2020"||r.c==="EA20"});
+rows.sort(function(a,b){return b.v-a.v});var fi=-1;rows.forEach(function(r,i){if(r.c==="FI")fi=i});
+var o='<h3>'+e(x.t)+'</h3><p class="meta">Uusin saatavilla oleva luku maittain. '+(fi>=0?'Suomi on sijalla <b>'+(fi+1)+' / '+rows.length+'</b> (suurimmasta pienimpään). ':'')+'Lähde: Eurostat ('+e(x.ds)+'). Maiden nimet englanniksi.</p><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Maa</th><th class="n">Arvo</th><th>Kausi</th></tr></thead><tbody>';
+rows.forEach(function(r,i){var b=r.c==="FI";o+='<tr'+(b?' style="font-weight:700;background:rgba(80,140,255,.15)"':'')+'><td>'+(i+1)+'</td><td>'+e(r.n)+'</td><td class="n">'+nf(r.v,x.d)+'</td><td>'+e(r.p)+'</td></tr>'});
+eo.innerHTML=o+'</tbody></table></div>'}).catch(function(err){eo.innerHTML="<p>Haku epäonnistui: "+e(err.message)+"</p>"})}
+root.querySelectorAll("button").forEach(function(b){b.onclick=function(){show(P[Number(b.getAttribute("data-i"))])}})})()</script>`;
+
+const AVO = String.raw`<script>(function(){
+var A="https://www.avoindata.fi/data/api/3/action/package_search",root=document.getElementById("avo"),q="",start=0,N=15;
+function e(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function tr(o){if(!o)return"";if(typeof o==="string")return o;return o.fi||o.en||o.sv||""}
+root.innerHTML='<input type="search" id="aq" placeholder="Hae aineistoa, esim. Kela, Tulli, vesi, liikenne, budjetti"><div id="as" class="meta">Kirjoita hakusana.</div><div id="ao"></div><div class="tb"><button id="am" style="display:none">Näytä lisää</button></div>';
+var aq=document.getElementById("aq"),as=document.getElementById("as"),ao=document.getElementById("ao"),am=document.getElementById("am"),tm=null;
+function card(p){var d=document.createElement("div");d.className="card";var t=tr(p.title_translated)||p.title||p.name;var o=p.organization?(tr(p.organization.title_translated)||p.organization.title):"";var n=(tr(p.notes_translated)||p.notes||"").replace(/\s+/g," ").slice(0,220);
+var h='<b>'+e(t)+'</b><br><span class="meta">'+e(o)+'</span>'+(n?'<br><span class="meta">'+e(n)+(n.length>=220?"…":"")+'</span>':"");
+var fm={};(p.resources||[]).forEach(function(r){var f=(r.format||"").toUpperCase()||"tiedosto";if(!fm[f]&&r.url&&/^https?:/.test(r.url))fm[f]=r.url});
+var ks=Object.keys(fm).slice(0,6);if(ks.length){h+='<br>'+ks.map(function(k){return'<a href="'+e(fm[k])+'" rel="noopener">'+e(k)+'</a>'}).join(" · ")}
+h+='<br><a href="https://www.avoindata.fi/data/fi/dataset/'+encodeURIComponent(p.name)+'" rel="noopener">Avaa avoindata.fi:ssä</a>';d.innerHTML=h;return d}
+function go(more){if(!more){start=0;ao.textContent=""}as.textContent="Haetaan…";fetch(A+"?q="+encodeURIComponent(q)+"&rows="+N+"&start="+start).then(function(r){if(!r.ok)throw new Error("Palvelu vastasi "+r.status);return r.json()}).then(function(j){var R=j.result;R.results.forEach(function(p){ao.appendChild(card(p))});start+=R.results.length;as.textContent=R.count+" aineistoa"+(start<R.count?", näytetään "+start:"");am.style.display=start<R.count?"":"none"}).catch(function(x){as.textContent="Haku epäonnistui: "+x.message})}
+aq.oninput=function(){clearTimeout(tm);tm=setTimeout(function(){q=aq.value.trim();if(!q){ao.textContent="";as.textContent="Kirjoita hakusana.";am.style.display="none";return}go(false)},400)};am.onclick=function(){go(true)}})()</script>`;
+
 export function tilastotPages({ shell, esc }) {
   const body = `<h1>Tilastot</h1><p>Suomen virallista tilastodataa yhdessä paikassa. Tiedot haetaan suoraan lähteestä sillä hetkellä, kun avaat taulukon, joten luvut ovat aina ajantasaiset. Valitse lähde, selaa aihealueita ja avaa taulukko. Tilastokeskuksen ja Traficomin taulukoista saat luvut ja kuvaajan, THL:n mittareista kuntien vertailun.</p>
-<div class="note"><b>Mistä tiedot ovat</b><br>Tilastokeskus (statfin.stat.fi), Traficom (liikenne- ja viestintävirasto) ja Terveyden ja hyvinvoinnin laitos (Sotkanet). Luvut näytetään sellaisenaan lähteen avoimesta rajapinnasta. Tämä ei ole virallinen lähde, ja tarkat määritelmät ovat aina lähteessä.</div>
+<div class="note"><b>Mistä tiedot ovat</b><br>Tilastokeskus (statfin.stat.fi), Traficom, Terveyden ja hyvinvoinnin laitos (Sotkanet), Eurostat ja avoindata.fi (Digi- ja väestötietovirasto). Luvut näytetään sellaisenaan lähteen avoimesta rajapinnasta. Tämä ei ole virallinen lähde, ja tarkat määritelmät ovat aina lähteessä.</div>
 <div class="tl">${CSS}<h2>Tilastokeskus ja Traficom</h2><p class="meta">Väestö, työllisyys, hinnat, talous, liikenne ja paljon muuta.</p><div id="pxr"></div>${PX}
-<h2>Terveys ja hyvinvointi kunnittain (THL)</h2><p class="meta">Satoja mittareita: terveys, toimeentulo, koulutus, elinolot. Näet kuntien paremmuusjärjestyksen.</p><div id="sor"></div>${SOT}</div>`;
+<h2>Terveys ja hyvinvointi kunnittain (THL)</h2><p class="meta">Satoja mittareita: terveys, toimeentulo, koulutus, elinolot. Näet kuntien paremmuusjärjestyksen.</p><div id="sor"></div>${SOT}
+<h2>Suomi ja muut EU-maat (Eurostat)</h2><p class="meta">Vertaa Suomea EU-maihin: työttömyys, inflaatio, velka, talous ja väkiluku. Näet Suomen sijoituksen.</p><div id="eur"></div>${EUS}
+<h2>Suomen avoin data (avoindata.fi)</h2><p class="meta">Koko Suomen julkisen datan hakemisto: Kelan, Tullin, SYKE:n, ministeriöiden ja kuntien aineistot. Linkit vievät suoraan tiedostoihin ja rajapintoihin.</p><div id="avo"></div>${AVO}</div>`;
   return [{ path: "/tilastot/", html: shell({ title: "Tilastot | Eduskuntaseuranta", desc: "Tilastokeskuksen, Traficomin ja THL:n avointa tilastodataa selattavassa muodossa: väestö, työllisyys, hinnat, terveys ja liikenne.", path: "/tilastot/", body }) }];
 }
