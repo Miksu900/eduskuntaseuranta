@@ -8,9 +8,10 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: hicp2
+      - name: hicp3
         run: |
           set +e
           curl -sS -m 90 "https://ec.europa.eu/eurostat/api/dissemination/catalogue/toc/txt?lang=en" -o /tmp/toc.txt
-          ls -la /tmp/toc.txt
-          grep -i "hicp" /tmp/toc.txt | grep -i "annual rate" | cut -c1-200
+          grep -E '"prc_hicp_(m|a|c|i)[a-z]*"' /tmp/toc.txt | sed -E 's/ +/ /g' | cut -c1-170
+          echo ====
+          grep -i "2026" /tmp/toc.txt | grep -i "hicp\|inflation\|consumer price" | sed -E 's/ +/ /g' | cut -c1-170 | head -20
