@@ -8,24 +8,20 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: avustukset
+      - name: avustukset2
         run: |
           set +e
-          S="https://avoindata.suomi.fi/data/api/3/action/package_search"
-          for q in valtionavustus avustuspäätökset valtiokonttori; do
-            echo "=== $q"
-            curl -sS -m 40 "$S?q=$q&rows=8" | python3 -c "
-          import sys,json
-          d=json.load(sys.stdin)['result']
-          print('osumia',d['count'])
-          for p in d['results']:
-              t=p.get('title_translated') or {}
-              print('-',p['name'],'|',(t.get('fi') or p.get('title') or '')[:70])
-              for r in p.get('resources',[])[:3]:
-                  print('    ',(r.get('format') or '?'),(r.get('url') or '')[:110])
-          "
+          curl -sS -L -m 30 "https://www.tutkiavustuksia.fi/" -o /tmp/a.html -w "tutkiavustuksia HTTP %{http_code} %{size_download}\n"
+          grep -oE '(src|href)="[^"]+\.(js|json)[^"]*"' /tmp/a.html | head -10
+          grep -oiE 'https?://[a-z0-9./_-]*(api|rest|odata)[a-z0-9./_-]*' /tmp/a.html | sort -u | head -10
+          for js in $(grep -oE 'src="[^"]+\.js[^"]*"' /tmp/a.html | sed 's/src="//;s/"//' | head -4); do
+            case "$js" in http*) u="$js";; /*) u="https://www.tutkiavustuksia.fi$js";; *) u="https://www.tutkiavustuksia.fi/$js";; esac
+            echo "--- $u"
+            curl -sS -L -m 30 "$u" | grep -oE '"(/?api/[a-zA-Z0-9/_.-]+|https?://[a-zA-Z0-9./_-]*api[a-zA-Z0-9./_-]*)"' | sort -u | head -15
           done
-          echo "=== valtiokonttori suoraan"
-          for u in "https://www.valtionavustukset.fi/" "https://avustukset.valtiokonttori.fi/" "https://tutkimus.valtiokonttori.fi/"; do
-            curl -sS -L -m 30 -o /tmp/r -w "$u HTTP %{http_code} %{size_download}\n" "$u"
-          done
+          echo "=== tutkihallintoa"
+          curl -sS -L -m 30 "https://avoindata.tutkihallintoa.fi/" -o /tmp/b.html -w "HTTP %{http_code} %{size_download}\n"
+          sed 's/<[^>]*>/ /g' /tmp/b.html | tr -s ' \n' | head -c 1200
+          echo
+          grep -oiE 'href="[^"]*(avustus|csv|xlsx|api)[^"]*"' /tmp/b.html | head -15
+          exit 0
