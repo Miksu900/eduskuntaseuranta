@@ -8,29 +8,21 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: vt6
+      - name: vt7
         run: |
           set +e
-          A="https://api.tutkihallintoa.fi"
-          for p in "/valtiontalous/v1/swagger.json" "/valtiontalous/v1/openapi.json" "/valtiontalous/swagger.json" "/valtiontalous/v1?format=openapi" "/valtiontalous/v1/?format=swagger"; do
-            echo "== $p"; curl -sS -L -m 30 -o /tmp/s -w "HTTP %{http_code} %{size_download} B\n" "$A$p" 2>&1 | tail -1
-            if grep -q '"budjettitaloudentapahtumat"' /tmp/s 2>/dev/null; then echo "LÖYTYI"; python3 - <<'PY'
-          import json
-          d=json.load(open('/tmp/s'))
-          for k,v in d.get('paths',{}).items():
-              if 'tapahtumat' in k:
-                  print(k)
-                  for m,o in v.items():
-                      for p in o.get('parameters',[]):
-                          print('  ',p.get('name'),p.get('in'),(p.get('schema') or {}).get('type'),(p.get('schema') or {}).get('format'),(p.get('description') or '')[:90])
-          PY
-            fi
-            rm -f /tmp/s
-          done
-          B="$A/valtiontalous/v1/budjettitaloudentapahtumat"
-          t() { echo "== $1"; curl -sS -L -m 120 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$B?$1" 2>&1 | tail -1; head -c 350 /tmp/r | tr '\n' '|'; echo; rm -f /tmp/r; }
-          t "vuosiAlkaen=2025&vuosiPaattyen=2025&paaluokka=28"
-          t "alkuvuosi=2025&loppuvuosi=2025&paaluokka=28"
-          t "tilivirasto=110&vuosi=2025&vuosiAlkaen=2024"
-          t "vuosi=2025&vuosiAlkaen=2024&kuukausi=12&kuukausiAlkaen=1&hallinnonala=21"
+          B="https://api.tutkihallintoa.fi/valtiontalous/v1"
+          t() { echo "== $1"; curl -sS -L -m 60 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$B/$1" 2>&1 | tail -1; head -c 450 /tmp/r | tr '\n' '|'; echo; rm -f /tmp/r; }
+          t "budjettitalous"
+          t "budjettitalous/vuosikuukausi"
+          t "budjettitalous/2025/12"
+          t "budjettitalous?vuosi=2025&kuukausi=12"
+          t "budjettitalousvuosikuukausi"
+          t "budjettitalousvuosikuukausi?vuosi=2025&kuukausi=12"
+          t "budjettitalous-vuosi-kuukausi"
+          t "budjettitaloudentapahtumat/tiedostot"
+          t "budjettitaloudentapahtumat/vuosikuukausi"
+          t "budjettitaloudentapahtumat/2025/12"
+          t "budjettitaloudentapahtumatiedostot"
+          t "budjettitaloudentapahtumat_tiedostot"
           exit 0
