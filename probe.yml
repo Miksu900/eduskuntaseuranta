@@ -1,21 +1,23 @@
-name: Rajapintatesti
-on: workflow_dispatch
+name: probe
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/probe.yml
 jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Finlex
+      - name: tilastot
         run: |
           set +e
-          B="https://opendata.finlex.fi/finlex/avoindata/v1"
-          g() { echo "=== $1"; curl -sS -L -m 40 -w "\n[HTTP %{http_code}, %{size_download} tavua, %{content_type}]\n" -H "Accept: application/json" "$B$1" -o r.out; tail -c 0 r.out; head -c ${2:-900} r.out; echo; }
-          g "/akn/fi/act/statute/list?page=1&limit=3&format=json&langAndVersion=fin@" 1200
-          g "/akn/fi/act/statute/list?page=1&limit=3&format=json" 1200
-          g "/akn/fi/act/statute-consolidated/list?page=1&limit=3&format=json" 1200
-          g "/akn/fi/act/statute/list?page=1&limit=3&format=json&typeStatute=laki&startYear=2025" 1200
-          g "/akn/fi/doc/government-proposal/list?page=1&limit=3&format=json" 1200
-          g "/akn/fi/doc/preparatory-work/list?page=1&limit=3&format=json" 600
-          echo "##### swagger"
-          curl -sS -L -m 40 "https://opendata.finlex.fi/finlex/avoindata/swagger-ui/index.html" -o s.html; ls -la s.html
-          curl -sS -L -m 40 "https://opendata.finlex.fi/finlex/avoindata/v3/api-docs" -o api.json; ls -la api.json
-          jq -r '.paths | keys[]' api.json 2>/dev/null | head -50
+          t() { echo "== $1"; curl -sS -m 30 -o /tmp/r -w "HTTP %{http_code} %{size_download} B\n" "$2"; head -c 300 /tmp/r; echo; }
+          t "Tilastokeskus StatFin" "https://statfin.stat.fi/PXWeb/api/v1/fi/StatFin/"
+          t "THL Sotkanet indikaattorit" "https://sotkanet.fi/rest/1.1/indicators"
+          t "Kela avoin data" "https://beta.kela.fi/etuuskuvaajat"
+          t "Traficom avoin" "https://trafi2.stat.fi/PXWeb/api/v1/fi/TraFi/"
+          t "SYKE" "https://rajapinnat.ymparisto.fi/api/Hydrologiaws/odata/v1/Vesikunta?%24top=1"
+          t "Fingrid" "https://data.fingrid.fi/"
+          t "Tulli uljas" "https://uljas.tulli.fi/uljas/graph/api/v1/fi/"
+          t "Eurostat katalogi" "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?geo=FI&format=JSON&lang=fi&sinceTimePeriod=2025-01"
+          t "Poliisi/Tike" "https://pxdata.stat.fi/PxWebApi/api/v1/fi/StatFin/"
