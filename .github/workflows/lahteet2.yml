@@ -1,0 +1,27 @@
+name: Lahteet2
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/lahteet2.yml"
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lahteet2
+        run: |
+          set +e
+          for id in 9af378a3-c235-491d-95fb-7226786250d0 437830a1-2c59-4c29-a869-8f85dcaa87c7 8df7939b-6c0e-4587-9aa1-95c076e7b0a3; do
+            echo "=== Kela $id ==="
+            curl -sL -m 30 "https://avoindata.suomi.fi/data/api/3/action/package_show?id=$id" | jq -r '.result.title | tostring | .[0:80], (.result.resources[] | (.format // "") + " " + (.url // "")[0:150])' | head -12
+            U=$(curl -sL -m 30 "https://avoindata.suomi.fi/data/api/3/action/package_show?id=$id" | jq -r '[.result.resources[] | select(.format=="CSV")][0].url')
+            echo "CSV: $U"
+            curl -sIL -m 30 -H "Origin: https://eduskuntaseuranta.fi" "$U" | grep -i -E "^HTTP|access-control|content-length"
+            curl -sL -m 30 "$U" | head -c 700
+            echo
+          done
+          echo "=== Tulli uljas-api ==="
+          curl -sL -m 30 "https://tulli.fi/tilastot/uljas-api" | sed 's/<[^>]*>/ /g' | tr -s ' \n' | head -c 2500
+          echo
+          echo "=== SYKE rajapintasivu ==="
+          curl -sL -m 30 "https://www.syke.fi/fi-FI/Avoin_tieto/Avoimet_rajapinnat/Avoimen_ymparistotiedon_rajapinnat" | grep -o -E "https?://[^\" <>]*(rajapinnat|api)[^\" <>]*" | sort -u | head -15
