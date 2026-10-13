@@ -1,0 +1,33 @@
+name: EU-haku
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * 1"
+permissions:
+  contents: write
+  actions: write
+jobs:
+  haku:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Hae ja tiivistä
+        run: node eu-haku.mjs | tee -a $GITHUB_STEP_SUMMARY
+      - name: Tallenna ja käynnistä rakennus
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data/eu
+          if git diff --cached --quiet; then
+            echo "Ei muutoksia"
+          else
+            git commit -m "EU-data päivitetty"
+            git push
+            gh workflow run build.yml
+          fi
