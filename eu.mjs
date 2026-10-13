@@ -1,4 +1,5 @@
 // EU-osio: suomalaisten meppien äänet (HowTheyVote, avoin data) ja suomalaiset organisaatiot EU:n avoimuusrekisterissä.
+import { euDataPages } from "./eu-data.mjs";
 import { Readable } from "node:stream";
 import { createGunzip, gunzipSync } from "node:zlib";
 import { createInterface } from "node:readline";
@@ -211,8 +212,9 @@ if(MEP<0){o.textContent="Ladataan…";load(show)}})()</script>`;
     title: "EU: äänestykset ja lobbaus | Eduskuntaseuranta",
     desc: "Suomalaisten meppien äänet Euroopan parlamentissa ja suomalaiset EU-lobbarit yhdessä paikassa.",
     path: "/eu/",
-    body: `<h1>EU</h1><p>Mitä Brysselissä päätetään, miten suomalaiset mepit äänestävät ja ketkä yrittävät vaikuttaa päätöksiin?</p>${D ? `<h2>Hae EU-äänestyksiä</h2><p>Katso, miten jokainen suomalainen meppi äänesti.</p>${pages.hubWidget}` : ""}${pages.mepList || ""}${L ? `<h2>EU-lobbaus</h2><p>${nf.format(L.length)} suomalaista organisaatiota EU:n avoimuusrekisterissä.</p><p><a class="btn" href="/eu/lobbaus/">Katso suomalaiset EU-lobbarit</a></p>` : ""}<h2>EU:n rahavirrat</h2><p>Mihin EU:n rahaa on mennyt, esimerkiksi asuntojen remontteihin Italiassa ja Espanjassa?</p><p><a class="btn" href="/eu/rahat/">Katso EU:n rahavirrat</a></p>`,
+    body: `<h1>EU</h1><p>Mitä Brysselissä päätetään, miten suomalaiset mepit äänestävät ja ketkä yrittävät vaikuttaa päätöksiin?</p><p><a class="card" href="/eu/vaikuttajat/"><div>Kuka vaikuttaa EU-päätöksiin Suomesta?</div><div class="meta">Avoimuusrekisterin suomalaiset organisaatiot, kulut ja avustukset</div></a><a class="card" href="/eu/rahat/suomi/"><div>EU-komission rahat Suomeen</div><div class="meta">Ohjelmat, saajat ja vuosisummat</div></a></p>${D ? `<h2>Hae EU-äänestyksiä</h2><p>Katso, miten jokainen suomalainen meppi äänesti.</p>${pages.hubWidget}` : ""}${pages.mepList || ""}${L ? `<h2>EU-lobbaus</h2><p>${nf.format(L.length)} suomalaista organisaatiota EU:n avoimuusrekisterissä.</p><p><a class="btn" href="/eu/lobbaus/">Katso suomalaiset EU-lobbarit</a></p>` : ""}<h2>EU:n rahavirrat</h2><p>Mihin EU:n rahaa on mennyt, esimerkiksi asuntojen remontteihin Italiassa ja Espanjassa?</p><p><a class="btn" href="/eu/rahat/">Katso EU:n rahavirrat</a></p>`,
   }) });
+  try { pages.push(...euDataPages({ shell, esc, dateFi })); } catch (err) { console.log("EU-data ohitettu:", err.message); }
   pages.files = files;
   console.log(`EU: sivuja ${pages.length}`);
   return pages;
