@@ -1,0 +1,35 @@
+name: Lisää sähkösivu
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  lisaa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Muokkaa build.mjs
+        run: |
+          node - <<'EOF'
+          const fs = require("fs");
+          let s = fs.readFileSync("build.mjs", "utf8");
+          if (s.includes("sahkoPages")) { console.log("Jo lisätty"); process.exit(0); }
+          const lines = s.split("\n");
+          let a = lines.findIndex(l => l.includes('import { tilastotPages }'));
+          if (a < 0) { console.error("import-riviä ei löytynyt"); process.exit(1); }
+          lines.splice(a + 1, 0, 'import { sahkoPages } from "./sahko.mjs";');
+          let b = lines.findIndex(l => l.includes("tilastotPages({ shell, esc })"));
+          if (b < 0) { console.error("tilastot-riviä ei löytynyt"); process.exit(1); }
+          lines.splice(b + 1, 0, '  try { for (const pg of sahkoPages({ shell, esc })) put(pg.path, pg.html); } catch (e) { console.log("Sähkö ohitettu:", e.message); }');
+          fs.writeFileSync("build.mjs", lines.join("\n"));
+          console.log("Lisätty");
+          EOF
+      - name: Tallenna
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add build.mjs
+          git diff --cached --quiet || (git commit -m "Lisää sähkösivu" && git push)
