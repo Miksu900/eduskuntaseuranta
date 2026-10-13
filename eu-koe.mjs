@@ -1,38 +1,41 @@
-const PAGES = [
-  "https://ec.europa.eu/budget/financial-transparency-system/download.html",
-  "https://transparency-register.europa.eu/open-data_en",
-  "https://data.europa.eu/data/datasets/transparency-register?locale=en",
-];
-const H = { "User-Agent": "Mozilla/5.0 (compatible; eduskuntaseuranta-probe)", Accept: "*/*" };
-console.log("## EU-koehaku\n");
-const seen = new Set();
-for (const p of PAGES) {
-  console.log("### " + p);
+const H = { "User-Agent": "Mozilla/5.0 (compatible; eduskuntaseuranta-probe)" };
+console.log("## EU-koehaku 2\n");
+
+async function getJson(u) {
+  const r = await fetch(u, { headers: Object.assign({ Accept: "application/json" }, H) });
+  const t = await r.text();
+  console.log("HTTP " + r.status + " " + u);
+  try { return JSON.parse(t); } catch (e) { console.log(t.slice(0, 300)); return null; }
+}
+
+console.log("### Dataportaalin haku\n");
+for (const q of ["transparency register", "financial transparency system fts"]) {
+  console.log("**Haku: " + q + "**\n");
   try {
-    const r = await fetch(p, { headers: H, redirect: "follow" });
-    const t = await r.text();
-    console.log("HTTP " + r.status + ", pituus " + t.length + ", lopullinen osoite: " + r.url + "\n");
-    const links = new Set();
-    for (const m of t.matchAll(/href="([^"#]+)"/gi)) {
-      const h = m[1];
-      if (/\.(zip|csv|xml|xlsx|json|gz)(\?|$)/i.test(h) || /download|export|open-data/i.test(h)) {
-        try { links.add(new URL(h, r.url).href); } catch (e) {}
+    const d = await getJson("https://data.europa.eu/api/hub/search/search?q=" + encodeURIComponent(q) + "&limit=8&filter=dataset");
+    const res = (d && d.result && d.result.results) || [];
+    console.log("Tuloksia: " + res.length + "\n");
+    for (const r of res) {
+      const title = r.title && (r.title.en || Object.values(r.title)[0]);
+      console.log("- " + r.id + " | " + title);
+      for (const dist of (r.distributions || []).slice(0, 6)) {
+        const urls = [].concat(dist.download_url || [], dist.access_url || []);
+        const f = dist.format && (dist.format.id || dist.format.label || dist.format);
+        console.log("  - " + f + " " + urls.join(" "));
       }
     }
-    const arr = [...links].slice(0, 25);
-    console.log("Löytyneitä linkkejä: " + links.size + "\n");
-    for (const l of arr) {
-      if (seen.has(l)) continue;
-      seen.add(l);
-      try {
-        const h = await fetch(l, { method: "HEAD", headers: H, redirect: "follow" });
-        console.log("- " + h.status + " " + (h.headers.get("content-type") || "") + " " + (h.headers.get("content-length") || "?") + " tavua: " + l);
-      } catch (e) {
-        console.log("- virhe " + e.message + ": " + l);
-      }
-    }
-  } catch (e) {
-    console.log("Virhe: " + e.message);
-  }
+  } catch (e) { console.log("Virhe: " + e.message); }
   console.log("");
+}
+
+console.log("### FTS-tiedostojen arvaus\n");
+const base = "https://ec.europa.eu/budget/financial-transparency-system/download/";
+const names = [];
+for (const y of [2023, 2024]) for (const ext of ["csv", "xlsx", "zip"]) names.push(y + "_FTS_dataset_en." + ext);
+for (const n of names) {
+  try {
+    const r = await fetch(base + n, { headers: Object.assign({ Range: "bytes=0-300" }, H), redirect: "follow" });
+    const t = r.status < 300 ? (await r.text()).slice(0, 150).replace(/\s+/g, " ") : "";
+    console.log("- " + r.status + " " + (r.headers.get("content-type") || "") + " " + n + " " + t);
+  } catch (e) { console.log("- virhe " + n + ": " + e.message); }
 }
