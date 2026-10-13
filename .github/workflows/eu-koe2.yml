@@ -1,0 +1,21 @@
+name: EU-koehaku 3
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  koe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Lataa tiedostot
+        run: |
+          curl -L -sS -A "Mozilla/5.0" --max-time 900 -o fts.csv "https://ec.europa.eu/budget/financial-transparency-system/download/2024_FTS_dataset_en.csv"
+          curl -L -sS -A "Mozilla/5.0" --max-time 600 -o reg.xml "https://transparency-register.europa.eu/odplastorganisationxml_en"
+          ls -la fts.csv reg.xml
+      - name: Analysoi
+        run: node eu-koe2.mjs fts.csv reg.xml | tee -a $GITHUB_STEP_SUMMARY
