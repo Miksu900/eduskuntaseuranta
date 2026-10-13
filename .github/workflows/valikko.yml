@@ -1,0 +1,40 @@
+name: Valikko ja alatunniste
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  muokkaa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Muokkaa build.mjs
+        run: |
+          node - <<'EOF'
+          const fs = require("fs");
+          let s = fs.readFileSync("build.mjs", "utf8");
+          let n = 0;
+          if (!s.includes('["/sahko/"')) {
+            const a = '["/tilastot/", "Tilastot"],';
+            if (s.includes(a)) { s = s.replace(a, a + ' ["/kela/", "Kela kunnittain"], ["/sahko/", "Sähkö"],'); n++; }
+            else console.log("Valikkoriviä ei löytynyt");
+          }
+          if (!s.includes("/^\\/kela\\//.test(path)")) {
+            const b = 'const footerHtml = (path = "") => /^\\/eu\\//.test(path)';
+            if (s.includes(b)) {
+              s = s.replace(b, 'const footerHtml = (path = "") => /^\\/kela\\//.test(path) ? `<footer>Lähde: Kela, avoin data (avoindata.fi), lasketu yhteen kunnittain. Päivitetty ${dateFi(new Date())}.</footer>` : /^\\/eu\\//.test(path)');
+              n++;
+            } else console.log("Alatunnistetta ei löytynyt");
+          }
+          fs.writeFileSync("build.mjs", s);
+          console.log("Muutoksia: " + n);
+          EOF
+      - name: Tallenna
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add build.mjs
+          git diff --cached --quiet || (git commit -m "Valikko: Kela ja Sähkö, Kelan alatunniste" && git push)
