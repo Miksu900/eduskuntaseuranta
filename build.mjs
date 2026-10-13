@@ -251,7 +251,7 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Kansanedustajat", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/testi/", "Kuka äänestää kuten sinä?"], ["/seuranta/", "Seurantani"]])
     + g("Raha", [["/budjetti/", "Valtion budjetti"], ["/valtion-talous/", "Valtion talous"], ["/valtionavustukset/", "Valtionavustukset"], ["/eu/rahat/", "EU:n rahat"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/hankinnat/", "Julkiset hankinnat"], ["/kunnat/", "Kunnat"]])
-    + g("Lait ja tieto", [["/lait/", "Lait ja asetukset"], ["/tilastot/", "Tilastot"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/lobbaus/", "Lobbaus"], ["/eu/", "EU"]])
+    + g("Lait ja tieto", [["/lait/", "Lait ja asetukset"], ["/tilastot/", "Tilastot"], ["/kela/", "Kela kunnittain"], ["/sahko/", "Sähkö"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/lobbaus/", "Lobbaus"], ["/eu/", "EU"]])
     + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
 };
@@ -260,7 +260,7 @@ const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunt
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
-const footerHtml = (path = "") => /^\/eu\//.test(path)
+const footerHtml = (path = "") => /^\/kela\//.test(path) ? `<footer>Lähde: Kela, avoin data (avoindata.fi), lasketu yhteen kunnittain. Päivitetty ${dateFi(new Date())}.</footer>` : /^\/eu\//.test(path)
   ? `<footer>Lähteet: HowTheyVote.eu (Euroopan parlamentin avoin data) ja EU:n avoimuusrekisteri (transparency-register.europa.eu). Päivitetty ${dateFi(new Date())}.</footer>`
   : /^\/vtv\//.test(path)
   ? `<footer>Lähde: Valtiontalouden tarkastusvirasto (vtv.fi), julkaistut raportit. Päivitetty ${dateFi(new Date())}.</footer>`
