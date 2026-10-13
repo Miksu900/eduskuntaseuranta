@@ -260,7 +260,7 @@ const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunt
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
-const footerHtml = (path = "") => /^\/kela\//.test(path) ? `<footer>Lähde: Kela, avoin data (avoindata.fi), lasketu yhteen kunnittain. Päivitetty ${dateFi(new Date())}.</footer>` : /^\/eu\//.test(path)
+const footerHtml = (path = "") => /^\/kela\//.test(path) ? `<footer>Lähde: Kela, avoin data (avoindata.fi), laskettu yhteen kunnittain. Päivitetty ${dateFi(new Date())}.</footer>` : /^\/eu\//.test(path)
   ? `<footer>Lähteet: HowTheyVote.eu (Euroopan parlamentin avoin data) ja EU:n avoimuusrekisteri (transparency-register.europa.eu). Päivitetty ${dateFi(new Date())}.</footer>`
   : /^\/vtv\//.test(path)
   ? `<footer>Lähde: Valtiontalouden tarkastusvirasto (vtv.fi), julkaistut raportit. Päivitetty ${dateFi(new Date())}.</footer>`
