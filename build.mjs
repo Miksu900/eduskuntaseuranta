@@ -14,6 +14,7 @@ import { loadVtv, vtvPages } from "./vtv.mjs";
 import { loadEu, euPages } from "./eu.mjs";
 import { loadRrf, rahatPages } from "./rahat.mjs";
 import { tilastotPages } from "./tilastot.mjs";
+import { sahkoPages } from "./sahko.mjs";
 import { loadVt, vtPages as valtiontalousPages, avustusPage } from "./valtiontalous.mjs";
 import { loadFinlex, loadFinlexArchive, finlexPages } from "./finlex.mjs";
 import { existsSync } from "node:fs";
@@ -881,6 +882,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   // --- Tilastot ---
   console.log("[aika]", Math.round(process.uptime())+"s", 'Tilastot');
   try { for (const pg of tilastotPages({ shell, esc })) put(pg.path, pg.html); } catch (e) { console.log("Tilastot ohitettu:", e.message); }
+  try { for (const pg of sahkoPages({ shell, esc })) put(pg.path, pg.html); } catch (e) { console.log("Sähkö ohitettu:", e.message); }
 
   // --- Finlex (uudet lait) ---
   console.log("[aika]", Math.round(process.uptime())+"s", 'Finlex (uudet lait)');
