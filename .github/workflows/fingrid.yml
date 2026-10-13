@@ -1,0 +1,25 @@
+name: Fingrid-haku
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+permissions:
+  contents: write
+jobs:
+  haku:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Hae Fingrid-data
+        env:
+          FINGRID_API_KEY: ${{ secrets.FINGRID_API_KEY }}
+        run: node fingrid-haku.mjs | tee -a $GITHUB_STEP_SUMMARY
+      - name: Tallenna
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data/fingrid
+          git diff --cached --quiet || (git commit -m "Fingrid-data päivitetty" && git push)
