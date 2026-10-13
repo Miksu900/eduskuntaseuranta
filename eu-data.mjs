@@ -11,7 +11,14 @@ const CAT = {
   "Academic institutions": "Yliopistot ja korkeakoulut", "Associations and networks of public authorities": "Viranomaisten yhteenliittymät",
   "Other organisations, public or mixed entities": "Muut julkiset ja sekamuotoiset", "Self-employed individuals": "Yksityiset elinkeinonharjoittajat",
 };
-const PRG = (s) => String(s).replace(/^[\d.]+\s*-\s*/, "");
+const PFI = [
+  [/Recovery and Resilience/i, "Elpymis- ja palautumistukiväline (RRF)"], [/Horizon Europe/i, "Horisontti Eurooppa"], [/Horizon 2020/i, "Horisontti 2020"],
+  [/Erasmus/i, "Erasmus+ (koulutus, nuoriso ja urheilu)"], [/NDICI/i, "Kehitysyhteistyö ja naapuruus (NDICI, Global Europe)"], [/Civil Protection/i, "Unionin pelastuspalvelumekanismi (RescEU)"],
+  [/Decentralised agencies, Joint/i, "EU:n virastot, yhteisyritykset ja toimielimet"], [/Decentralised agencies/i, "EU:n hajautetut virastot"], [/Connecting Europe.*Transport/i, "Verkkojen Eurooppa: liikenne (CEF)"],
+  [/Innovation Fund/i, "Innovaatiorahasto (päästökauppatulot)"], [/^(\S+ - )?Transport$/i, "Liikenne (komission budjettilinja)"], [/^(\S+ - )?Energy$/i, "Energia (komission budjettilinja)"], [/LIFE/, "Ympäristö- ja ilmastotoimien LIFE-ohjelma"],
+  [/Marco Polo/i, "Marco Polo (liikenteen ympäristöhankkeet)"], [/Humanitarian Aid/i, "Humanitaarinen apu (HUMA)"],
+];
+const PRG = (s) => { const n = String(s).replace(/^[A-Z0-9./]+\s+-\s+/i, ""); const m = PFI.find(([re]) => re.test(String(s))); return m ? m[1] : n; };
 
 export function euDataPages({ shell, esc, dateFi }) {
   const pages = [];
