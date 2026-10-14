@@ -253,7 +253,7 @@ const navGroups = () => {
     + g("Raha", [["/budjetti/", "Valtion budjetti"], ["/valtion-talous/", "Valtion talous"], ["/valtionavustukset/", "Valtionavustukset"], ["/eu/rahat/", "EU:n rahat"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/hankinnat/", "Julkiset hankinnat"], ["/kunnat/", "Kunnat"]])
     + g("Lait ja tieto", [["/lait/", "Lait ja asetukset"], ["/tilastot/", "Tilastot"], ["/kela/", "Kela kunnittain"], ["/sahko/", "Sähkö"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/lobbaus/", "Lobbaus"], ["/eu/", "EU"]])
     + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
-    + g("Tietoa", [["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
+    + g("Tietoa", [["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/datapankki/", "Datapankki"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
 };
 const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><div class="tr"><button type="button" class="askb" data-ask>Kysy tekoälyltä</button><details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details></div></header>`;
 
@@ -881,7 +881,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
 
   // --- Tilastot ---
   console.log("[aika]", Math.round(process.uptime())+"s", 'Tilastot');
-  try { for (const pg of tilastotPages({ shell, esc })) put(pg.path, pg.html); } catch (e) { console.log("Tilastot ohitettu:", e.message); }
+  try { for (const pg of tilastotPages({ shell, esc, files: FILES })) put(pg.path, pg.html); } catch (e) { console.log("Tilastot ohitettu:", e.message); }
   try { for (const pg of sahkoPages({ shell, esc })) put(pg.path, pg.html); } catch (e) { console.log("Sähkö ohitettu:", e.message); }
 
   // --- Finlex (uudet lait) ---
