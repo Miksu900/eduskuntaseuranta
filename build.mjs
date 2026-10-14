@@ -14,6 +14,7 @@ import { loadVtv, vtvPages } from "./vtv.mjs";
 import { loadEu, euPages } from "./eu.mjs";
 import { loadRrf, rahatPages } from "./rahat.mjs";
 import { tilastotPages } from "./tilastot.mjs";
+import { tilesHtml2, TILE_CSS } from "./etusivu.mjs";
 import { sahkoPages } from "./sahko.mjs";
 import { loadVt, vtPages as valtiontalousPages, avustusPage } from "./valtiontalous.mjs";
 import { loadFinlex, loadFinlexArchive, finlexPages } from "./finlex.mjs";
@@ -196,6 +197,7 @@ input[type=search],select{min-height:48px}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 `;
 CSS += EXTRA_CSS;
+CSS += TILE_CSS;
 
 const ICONS = {
   vote: '<path d="M4 12l5 5L20 6"/>',
@@ -252,7 +254,7 @@ const navGroups = () => {
   return g("Kansanedustajat", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/testi/", "Kuka äänestää kuten sinä?"], ["/seuranta/", "Seurantani"]])
     + g("Raha", [["/budjetti/", "Valtion budjetti"], ["/valtion-talous/", "Valtion talous"], ["/valtionavustukset/", "Valtionavustukset"], ["/eu/rahat/", "EU:n rahat"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/hankinnat/", "Julkiset hankinnat"], ["/kunnat/", "Kunnat"]])
     + g("Lait ja tieto", [["/lait/", "Lait ja asetukset"], ["/tilastot/", "Tilastot"], ["/kela/", "Kela kunnittain"], ["/sahko/", "Sähkö"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/lobbaus/", "Lobbaus"], ["/eu/", "EU"]])
-    + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/videot/", "Videot"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/datapankki/", "Datapankki"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
 };
 const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><div class="tr"><button type="button" class="askb" data-ask>Kysy tekoälyltä</button><details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details></div></header>`;
@@ -916,7 +918,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
     const topicChips = TOPICS.filter(t => loaded.some(v => topicOf(v).name === t.name) && t.name !== "Muut aiheet").map(t => `<a class="tag" href="/aihe/${tslug(t)}/">${esc(t.name)}</a>`).join("");
     const partyMap = {}; for (const [k, v] of Object.entries(PARTY)) partyMap[k] = v;
     let idx = await readFile("index.html", "utf8");
-    idx = idx.replace("/*CSS*/", () => CSS).replace("<!--HEADER-->", () => headerHtml()).replace("<!--TILES-->", () => tilesHtml()).replace("<!--AIHEET-->", () => topicChips)
+    idx = idx.replace("/*CSS*/", () => CSS).replace("<!--HEADER-->", () => headerHtml()).replace("<!--TILES-->", () => { try { return tilesHtml2(); } catch (e) { console.log("Uudet laatat ohitettu:", e.message); return tilesHtml(); } }).replace("<!--AIHEET-->", () => topicChips)
       .replace("/*PARTIES*/", () => JSON.stringify(partyMap)).replace("%%SB%%", () => SB).replace("%%KEY%%", () => KEY)
       .replace("<!--FOOT-->", () => `${footerHtml()}\n${ASK_HTML}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}`);
     await writeFile(`${OUT}/index.html`, idx);
