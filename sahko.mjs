@@ -93,6 +93,66 @@ function priceChart(items, nowMs) {
 const legend = (items) =>
   '<p class="meta">' + items.map((i) => '<span style="color:' + i.color + '">■</span> ' + i.label).join(" &nbsp; ") + "</p>";
 
+
+// ---- Laskuri: halvin aika käyttää laitetta ----
+// Puhdas funktio, testattavissa Nodessa. hours = [[alkuMs, c/kWh], ...] tunneittain.
+export const BEST_FN = `function bestWindow(hours,nowMs,dur,kw,horizonH){
+  var H=3600000,a=[];
+  for(var i=0;i<hours.length;i++){if(hours[i][0]+H>nowMs&&(horizonH<=0||hours[i][0]<nowMs+horizonH*H))a.push(hours[i]);}
+  a.sort(function(x,y){return x[0]-y[0]});
+  var runs=[],cur=[];
+  for(var j=0;j<a.length;j++){if(cur.length&&a[j][0]-cur[cur.length-1][0]!==H){runs.push(cur);cur=[];}cur.push(a[j]);}
+  if(cur.length)runs.push(cur);
+  var all=[];
+  runs.forEach(function(r){for(var k=0;k+dur<=r.length;k++){var c=0;for(var m=0;m<dur;m++)c+=r[k+m][1];all.push({start:r[k][0],end:r[k+dur-1][0]+H,cost:c*kw/100,avg:c/dur});}});
+  if(!all.length)return null;
+  var best=all[0],worst=all[0];
+  all.forEach(function(w){if(w.cost<best.cost)best=w;if(w.cost>worst.cost)worst=w;});
+  return {best:best,worst:worst,now:all[0],n:all.length};
+}`;
+
+const CALC_CSS = `<style>.lk{background:var(--surface);border-radius:14px;padding:14px;margin:14px 0}.lk label{display:block;font-size:14px;color:var(--mute);margin:10px 0 4px}.lk select,.lk input{font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);width:100%;box-sizing:border-box}.lk .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lk .res{margin-top:14px;font-size:17px;line-height:1.5}.lk .res b{font-size:22px}.lk .sv{color:#3ddc97}.ht{width:100%;border-collapse:collapse;font-size:15px}.ht td{padding:7px 4px;border-bottom:1px solid var(--line)}.ht td.n{text-align:right;font-weight:700}</style>`;
+
+const calcJs = () => `<script>(function(){
+var D=JSON.parse(document.getElementById("spot").textContent),hours=D.map(function(x){return[x[0],x[1]]});
+${BEST_FN}
+var pre={wash:[0.5,2],dish:[0.5,2],dry:[0.8,2],sauna:[6,1],car:[3.7,8],boiler:[2,3]};
+var $=function(i){return document.getElementById(i)};
+function fm(t){return new Date(t).toLocaleString("fi-FI",{timeZone:"Europe/Helsinki",hour:"2-digit",minute:"2-digit"})}
+function fd(t){var o={timeZone:"Europe/Helsinki"},a=new Date(t).toLocaleDateString("fi-FI",o),n=new Date(),b=n.toLocaleDateString("fi-FI",o),c=new Date(n.getTime()+864e5).toLocaleDateString("fi-FI",o);return a===b?"tänään":a===c?"huomenna":a}
+function eur(v){return v.toLocaleString("fi-FI",{minimumFractionDigits:2,maximumFractionDigits:2})+" €"}
+function run(){var kw=parseFloat(String($("lk-kw").value).replace(",",".")),dur=parseInt($("lk-h").value,10),hz=parseInt($("lk-hz").value,10),out=$("lk-out");
+if(!(kw>0)||!(dur>=1)||dur>12){out.textContent="Anna teho (kW) ja kesto 1–12 tuntia.";return}
+var r=bestWindow(hours,Date.now(),dur,kw,hz);
+if(!r){out.textContent="Hintatietoja ei ole tälle ajalle tarpeeksi. Huomisen hinnat tulevat yleensä iltapäivällä.";return}
+var save=r.now.cost-r.best.cost,tot=kw*dur;
+out.innerHTML="Halvin aloitusaika: <b>"+fd(r.best.start)+" klo "+fm(r.best.start)+"</b> (valmis klo "+fm(r.best.end)+")<br>Hinta silloin noin <b>"+eur(r.best.cost)+"</b> ("+(Math.round(r.best.avg*100)/100).toLocaleString("fi-FI")+" c/kWh keskimäärin).<br>Jos aloitat heti: "+eur(r.now.cost)+". "+(save>0.005?'Säästö <span class="sv"><b>'+eur(save)+'</b></span>.':"Nyt on jo halvin aika.")+"<br>Kalleimmalla ajalla: "+eur(r.worst.cost)+". Energiaa kuluu yhteensä "+(Math.round(tot*10)/10).toLocaleString("fi-FI")+" kWh."}
+$("lk-dev").onchange=function(){var v=pre[this.value];if(v){$("lk-kw").value=String(v[0]).replace(".",",");$("lk-h").value=v[1]}run()};
+["lk-kw","lk-h","lk-hz"].forEach(function(i){$(i).oninput=run;$(i).onchange=run});
+run()})()</script>`;
+
+const calcSec = (hours) =>
+  CALC_CSS +
+  "<h2>Milloin kannattaa käyttää sähköä?</h2>" +
+  "<p>Valitse laite, niin laskuri etsii halvimman ajan, jolloin sen voi käyttää, ja kertoo paljonko säästät verrattuna siihen, että aloittaisit heti.</p>" +
+  '<div class="lk"><label for="lk-dev">Laite</label><select id="lk-dev">' +
+  '<option value="wash">Pyykinpesukone</option><option value="dish">Astianpesukone</option><option value="dry">Kuivausrumpu</option><option value="sauna">Sauna</option><option value="car">Sähköauton lataus</option><option value="boiler">Lämminvesivaraaja</option><option value="own">Oma laite</option></select>' +
+  '<div class="two"><div><label for="lk-kw">Teho (kW)</label><input id="lk-kw" inputmode="decimal" value="0,5"></div><div><label for="lk-h">Kesto (tuntia)</label><input id="lk-h" inputmode="numeric" value="2"></div></div>' +
+  '<label for="lk-hz">Ajanjakso</label><select id="lk-hz"><option value="12">Seuraavat 12 tuntia</option><option value="24">Seuraavat 24 tuntia</option><option value="0">Kaikki saatavilla olevat tunnit</option></select>' +
+  '<div class="res" id="lk-out" aria-live="polite">Lasketaan…</div></div>' +
+  '<p class="note">Laitteiden tehot ovat suuntaa antavia esimerkkejä, joten muokkaa teho ja kesto omaksi. Laskuri käyttää pörssisähkön tuntihintoja ilman sähköyhtiön marginaalia ja siirtomaksua, joten se kertoo hintaeron, ei koko laskua.</p>' +
+  '<script type="application/json" id="spot">' + JSON.stringify(hours.map((x) => [x.t, Math.round(x.p * 1000) / 1000])) + "</script>" +
+  calcJs();
+
+const hourTable = (hours, q1, q3, nowMs) =>
+  "<details><summary>Kaikki tunnit taulukkona</summary><table class=\"ht\"><tbody>" +
+  hours.map((x) => {
+    const cur = x.t <= nowMs && nowMs < x.e;
+    const mark = x.p <= q1 ? " · halpa" : x.p >= q3 ? " · kallis" : "";
+    return "<tr" + (cur ? ' style="font-weight:700"' : "") + "><td>" + fmt(x.t, { weekday: "short", day: "numeric", month: "numeric" }) + " klo " + hm(x.t) + "–" + hm(x.e) + (cur ? " (nyt)" : "") + '</td><td class="n">' + nf(x.p, 2) + " c/kWh" + mark + "</td></tr>";
+  }).join("") +
+  "</tbody></table></details>";
+
 export function sahkoPages({ shell, esc }) {
   const ids = [124, 192, 74, 181, 188, 191, 194, 265, 177];
   const d = {};
@@ -121,10 +181,6 @@ export function sahkoPages({ shell, esc }) {
     const avg = (a) => a.reduce((s, x) => s + x.p, 0) / a.length;
     const tod = day(todayKey), tom = day(tomorrowKey);
     const chip = (v, label) => '<div class="chip"><b>' + v + "</b><span>" + label + "</span></div>";
-    let chips = "";
-    if (cur) chips += chip(nf(cur.p, 2), "hinta nyt (c/kWh)");
-    if (tod.length) chips += chip(nf(avg(tod), 2), "tänään keskimäärin");
-    if (tom.length >= 20) chips += chip(nf(avg(tom), 2), "huomenna keskimäärin");
     // tuntikeskihinnat listoja varten (toimii sekä tunti- että vartin datalla)
     const bucket = new Map();
     for (const x of items) {
@@ -133,6 +189,15 @@ export function sahkoPages({ shell, esc }) {
       o.s += x.p; o.n++; bucket.set(k, o);
     }
     const hours = [...bucket.values()].map((o) => ({ t: o.t, e: o.e, p: o.s / o.n }));
+    const hsorted = hours.map((x) => x.p).sort((a, b) => a - b);
+    const q1h = hsorted[Math.floor(hsorted.length * 0.25)], q3h = hsorted[Math.floor(hsorted.length * 0.75)];
+    let chips = "";
+    if (cur) {
+      const lvl = cur.p <= q1h ? "halpa" : cur.p >= q3h ? "kallis" : "normaali";
+      chips += chip(nf(cur.p, 2), "hinta nyt (c/kWh), " + lvl + " tänään ja huomenna");
+    }
+    if (tod.length) chips += chip(nf(avg(tod), 2), "tänään keskimäärin");
+    if (tom.length >= 20) chips += chip(nf(avg(tom), 2), "huomenna keskimäärin");
     const upcoming = hours.filter((x) => x.e > nowMs);
     const cheap = upcoming.slice().sort((a, b) => a.p - b.p).slice(0, 3).sort((a, b) => a.t - b.t);
     const dear = upcoming.slice().sort((a, b) => b.p - a.p).slice(0, 3).sort((a, b) => a.t - b.t);
@@ -144,6 +209,8 @@ export function sahkoPages({ shell, esc }) {
       '<p class="note">Palkit ovat hintoja tänään ja huomenna, ja valkoinen reunus on kuluva jakso. Alareunan numerot ovat kellonaikoja. Listoissa on tuntikeskihinnat.</p>' +
       (cheap.length ? "<h3>Halvimmat tulevat tunnit</h3><ul>" + cheap.map((x) => "<li>" + row(x) + "</li>").join("") + "</ul>" : "") +
       (dear.length ? "<h3>Kalleimmat tulevat tunnit</h3><ul>" + dear.map((x) => "<li>" + row(x) + "</li>").join("") + "</ul>" : "") +
+      calcSec(hours) +
+      hourTable(hours, q1h, q3h, nowMs) +
       '<p class="note">Tämä on sähkön pörssihinta. Sähköyhtiön marginaali ja siirtomaksu tulevat sen päälle. Huomisen hinnat julkaistaan yleensä iltapäivällä.</p>';
   }
 
