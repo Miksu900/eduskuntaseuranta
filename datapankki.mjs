@@ -49,7 +49,8 @@ export function datapankkiPages({ shell, esc, files = [] }) {
     total += n;
     return { title, desc, n };
   });
-  const own = files.map((x) => ({ title: x.desc ? x.desc.split(":")[0] : x.name, n: x.n || 0 }));
+  const NAMES = { edustajat: "kansanedustajat", aanestykset: "äänestykset" };
+  const own = files.map((x) => ({ title: NAMES[x.name] || x.name, n: x.n || 0 }));
   total += own.reduce((a, b) => a + b.n, 0);
   const rows = [
     ...own.map((o) => `<tr><td>Eduskunta: ${esc(o.title)}</td><td class="n">${nf(o.n)}</td></tr>`),
