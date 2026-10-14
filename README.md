@@ -1,1 +1,2 @@
 # eduskuntavahti
+Claude-yhteys toimii
