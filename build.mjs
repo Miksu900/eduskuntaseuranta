@@ -7,6 +7,7 @@ import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from ".
 import { followBlock, followPages } from "./seuranta.mjs";
 import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
 import { loadKunnat, kunnatPages, loadMaakunnat } from "./kunnat.mjs";
+import { loadRwa, rwaPages } from "./rwa.mjs";
 import { loadLobbaus, lobbausPages } from "./lobbaus.mjs";
 import { loadVaalirahoitus, vaalirahoitusPages } from "./vaalirahoitus.mjs";
 import { loadPrh, yrityksetPages, linkifyHtml, normId } from "./yritykset.mjs";
@@ -908,6 +909,12 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
       for (const f of kp.files || []) { await mkdir(OUT + f.path.replace(/\/[^/]+$/, ""), { recursive: true }); await writeFile(OUT + f.path, f.content); }
     }
   } catch (e) { console.log("Kunnat ohitettu:", e.message); }
+
+  // --- RWA-prototyyppi (DeFiLlama), ei sitemapissa ---
+  try {
+    const rd = await loadRwa();
+    for (const pg of rwaPages({ shell, esc, data: rd })) jobs.push({ path: pg.path, html: pg.html });
+  } catch (e) { console.log("RWA-prototyyppi ohitettu:", e.message); }
 
   // --- Kirjoitus levylle ---
   console.log("[aika]", Math.round(process.uptime())+"s", 'Kirjoitus levylle');
