@@ -1,1 +1,34 @@
-[]
+[
+ {
+  "otsikko": "Tee oma datasivu: koko matka lyhyesti",
+  "mp4": "/media/opas-A-koukku.mp4",
+  "tyyppi": "opas",
+  "pvm": "2026-10-15",
+  "kuvaus": "Näin teet oman datasivun, joka päivittyy itsestään. Pelkällä puhelimella.",
+  "sivu": "/opas/"
+ },
+ {
+  "otsikko": "Vaihe 1: ilmainen GitHub-tili",
+  "mp4": "/media/opas-B-tili.mp4",
+  "tyyppi": "opas",
+  "pvm": "2026-10-15",
+  "kuvaus": "Ensimmäinen vaihe: tili, jossa sivusi tiedostot ovat.",
+  "sivu": "/opas/"
+ },
+ {
+  "otsikko": "Vaihe 2: aihe ja data",
+  "mp4": "/media/opas-C-aihe-ja-data.mp4",
+  "tyyppi": "opas",
+  "pvm": "2026-10-15",
+  "kuvaus": "Valitse aihe ja tarkista, että datasi kelpaa.",
+  "sivu": "/opas/"
+ },
+ {
+  "otsikko": "Vaihe 3: sivu verkkoon",
+  "mp4": "/media/opas-D-sivu-verkkoon.mp4",
+  "tyyppi": "opas",
+  "pvm": "2026-10-15",
+  "kuvaus": "Ensimmäinen sivusi verkkoon ilmaiseksi.",
+  "sivu": "/opas/"
+ }
+]
