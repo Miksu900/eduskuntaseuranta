@@ -12,9 +12,18 @@ tabs.forEach(function(b){b.onclick=function(){show(b.getAttribute("data-t"))}});
 root.querySelectorAll("button[data-yt]").forEach(function(b){b.onclick=function(){var f=document.createElement("iframe");f.src="https://www.youtube-nocookie.com/embed/"+b.getAttribute("data-yt")+"?autoplay=1&rel=0";f.allow="autoplay; encrypted-media; picture-in-picture";f.allowFullscreen=true;f.style.cssText="width:100%;aspect-ratio:16/9;border:0;border-radius:10px";b.parentNode.replaceChild(f,b)}});
 })()</script>`;
 
+// Hyväksyy joko pelkän tunnisteen tai minkä tahansa YouTube-linkin (watch, youtu.be, shorts, embed).
+export function ytId(x) {
+  const t = String(x || "").trim();
+  if (/^[\w-]{11}$/.test(t)) return t;
+  const m = t.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);
+  return m ? m[1] : "";
+}
+
 export function videotPages({ shell, esc }) {
   const lista = lataa();
   const kortti = v => {
+    v = { ...v, youtube: ytId(v.youtube) };
     const k = v.tyyppi === "kanta" ? "kanta" : "datasta";
     let media = "";
     if (v.youtube) media = `<button data-yt="${esc(v.youtube)}" style="width:100%;aspect-ratio:16/9;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-size:16px;cursor:pointer">Katso video</button>`;
