@@ -23,7 +23,7 @@ export function opasPages({ shell, esc }) {
 <ol class="mods">
 <li><b>1. Mitä tarvitset</b>Ilmainen. Luet tässä.</li>
 <li><b>2. Idea ja yksi datalähde</b>Ilmainen. Luet tässä.</li>
-<li><b>3. Sivu verkkoon</b>Sivu verkkoon ilmaiseksi, omalla osoitteella. PDF-oppaassa.</li>
+<li><b>3. Sivu verkkoon</b>Ensimmäinen sivu verkkoon omalla osoitteella: ilmainen, luet tässä. Automaattinen julkaisu on PDF-oppaassa.</li>
 <li><b>4. Data sivulle</b>Datan tuonti sivulle ja sen näyttäminen selkeästi. PDF-oppaassa.</li>
 <li><b>5. Päivitys automaattiseksi</b>Sivu päivittyy itsestään, ilman että avaat mitään. PDF-oppaassa.</li>
 <li><b>6. Mihin tämä kasvaa ja miten datasta tulee asiakkaita</b>Miten pieni sivu muuttuu isommaksi, ja miten sillä ansaitaan. PDF-oppaassa.</li>
@@ -99,8 +99,52 @@ export function opasPages({ shell, esc }) {
 <li>☐ Tiedän datan yksikön</li>
 </ul>
 
-<h2>Seuraavaksi: osat 3–6</h2>
-<div class="lock"><b>Täysi opas PDF:nä</b>Osissa 3–6 rakennat sivun, tuot datan sille, teet päivityksestä automaattisen ja pohdit, miten pienestä sivusta kasvaa tuote. PDF sisältää valmiit kopioitavat koodit, tarkistuslistat ja koko esimerkin askel askeleelta, myös viimeisen osan, joka säästää sinulta suurimman osan työstä.</div>
+<h2>Osa 3. Ensimmäinen sivu verkkoon</h2>
+<p><b>Tavoite:</b> sinulla on oma sivu, joka näkyy internetissä omalla osoitteella. Tämä vie noin kymmenen minuuttia.</p>
+<p>Alla näet, millainen esimerkkisivu on valmiina. Luvut ovat esimerkkejä, ja omalla sivullasi on oikea data.</p>
+<div class="lock" aria-label="Esimerkkikuva valmiista sivusta"><b>Esimerkki: Pörssisähkön hinta nyt</b><div style="font-size:34px;font-weight:800;margin:6px 0">4,2 c/kWh</div><div class="meta">Normaali hinta</div><div style="margin-top:10px;font-size:14px"><div style="display:flex;gap:8px;align-items:center;margin:4px 0"><span style="width:70px;color:var(--mute)">klo 21</span><i style="display:block;height:10px;width:20%;border-radius:5px;background:#3b82f6"></i><b style="margin-left:auto">1,3</b></div><div style="display:flex;gap:8px;align-items:center;margin:4px 0"><span style="width:70px;color:var(--mute)">klo 22</span><i style="display:block;height:10px;width:38%;border-radius:5px;background:#3b82f6"></i><b style="margin-left:auto">3,1</b></div><div style="display:flex;gap:8px;align-items:center;margin:4px 0"><span style="width:70px;color:var(--mute)">klo 23</span><i style="display:block;height:10px;width:60%;border-radius:5px;background:#3b82f6"></i><b style="margin-left:auto">6,0</b></div></div></div>
+<h3>1. Tee repositorio</h3>
+<ol>
+<li>Kirjaudu GitHubiin ja paina oikeassa yläkulmassa <b>+</b>-merkkiä, sitten <b>New repository</b>.</li>
+<li>Nimeksi <code>oma-datasivu</code>.</li>
+<li>Valitse <b>Public</b> (julkinen). Julkisen repositorion sivu on ilmainen.</li>
+<li>Rastita <b>Add a README file</b> ja paina <b>Create repository</b>.</li>
+</ol>
+<h3>2. Tee ensimmäinen sivu</h3>
+<ol>
+<li>Paina <b>Add file</b>, sitten <b>Create new file</b>.</li>
+<li>Tiedoston nimeksi <code>index.html</code>.</li>
+<li>Liitä kenttään tämä koodi:</li>
+</ol>
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="fi"&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8"&gt;
+&lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;
+&lt;title&gt;Oma datasivu&lt;/title&gt;
+&lt;/head&gt;
+&lt;body style="font:20px system-ui;padding:24px"&gt;
+&lt;h1&gt;Moi, tämä on minun sivuni&lt;/h1&gt;
+&lt;p&gt;Tämä sivu on nyt verkossa.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<ol start="4"><li>Paina <b>Commit changes</b> ja vielä kerran <b>Commit changes</b>.</li></ol>
+<h3>3. Julkaise</h3>
+<ol>
+<li>Avaa repositoriossa <b>Settings</b> (jos et näe sitä, avaa ensin ylävalikko).</li>
+<li>Paina vasemmasta valikosta <b>Pages</b>.</li>
+<li>Kohdassa <b>Build and deployment</b> valitse <b>Source</b>-kohtaan <b>Deploy from a branch</b>. Valitse haaraksi <b>main</b> ja kansioksi <b>/ (root)</b>, ja paina <b>Save</b>.</li>
+<li>Odota 1–3 minuuttia. Sivusi osoite on <code>https://KÄYTTÄJÄNIMI.github.io/oma-datasivu/</code> (vaihda KÄYTTÄJÄNIMI omaksesi). Se näkyy myös Pages-asetuksissa.</li>
+</ol>
+<p><b>Tarkistuslista:</b></p>
+<ul class="chk">
+<li>☐ Repositorio on julkinen</li>
+<li>☐ Sivu aukeaa omalla osoitteellani puhelimessa</li>
+</ul>
+<div class="note"><b>Mitä tästä puuttuu?</b> Sivulla ei ole vielä dataa, eikä se päivity itsestään. PDF-oppaassa vaihdat julkaisun automaatioon, tuot sivulle oikean pörssisähkön hinnan ja saat sivun päivittymään kolmen tunnin välein ilman, että teet mitään.</div>
+
+<h2>Seuraavaksi: osat 4–6 (PDF)</h2>
+<div class="lock"><b>Täysi opas PDF:nä</b>Osissa 3–6 viimeistelet julkaisun automaatioksi, tuot datan sivulle, teet päivityksestä automaattisen ja pohdit, miten pienestä sivusta kasvaa tuote. PDF sisältää valmiit kopioitavat koodit, tarkistuslistat ja koko esimerkin askel askeleelta, myös viimeisen osan, joka säästää sinulta suurimman osan työstä.</div>
 <p>PDF ei ole vielä myynnissä. Jos haluat tietää, kun se on valmis, kommentoi videolle <b>OPETA</b> tai lähetä viesti osoitteeseen <a href="mailto:miika@eduskuntaseuranta.fi">miika@eduskuntaseuranta.fi</a>.</p>
 </div>`;
   return [{ path: "/opas/", html: shell({ title: TITLE + " | Eduskuntaseuranta", desc: "Ilmainen opas: tee oma datasivu, joka päivittyy itsestään, pelkällä puhelimella.", path: "/opas/", body }) }];
