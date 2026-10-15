@@ -148,15 +148,10 @@ export function opasPages({ shell, esc }) {
 <p>PDF ei ole vielä myynnissä. Kerro, jos se kiinnostaa, niin tiedän, kannattaako se viimeistellä.</p>
 <form class="kiinnostus" id="kiinnostus" style="border:1px solid #2a3f66;border-radius:12px;padding:16px;margin:16px 0">
 <label style="display:block;margin-bottom:10px"><input type="checkbox" id="kk" required> Haluan täyden oppaan PDF:nä ja ilmoitan siitä sähköpostilla</label>
-<fieldset style="border:0;padding:0;margin:0 0 12px"><legend style="margin-bottom:6px">Mikä hinta tuntuisi kohtuulliselta?</legend>
-<label style="margin-right:14px;white-space:nowrap"><input type="radio" name="h" value="alle 10 €"> alle 10 €</label>
-<label style="margin-right:14px;white-space:nowrap"><input type="radio" name="h" value="10–20 €"> 10–20 €</label>
-<label style="margin-right:14px;white-space:nowrap"><input type="radio" name="h" value="20–30 €"> 20–30 €</label>
-<label style="white-space:nowrap"><input type="radio" name="h" value="yli 30 €"> yli 30 €</label></fieldset>
 <button type="submit" class="btn on">Ilmoita kiinnostus</button>
 <p style="font-size:14px;margin:10px 0 0;opacity:.85">Painike avaa sähköpostisi valmiilla viestillä. Viesti lähtee vasta, kun painat siellä Lähetä. Käytän osoitettasi vain ilmoittaakseni oppaasta.</p>
 </form>
-<script>document.getElementById("kiinnostus").addEventListener("submit",function(e){e.preventDefault();var h=(document.querySelector('input[name=h]:checked')||{}).value||"en vastannut";location.href="mailto:miika@eduskuntaseuranta.fi?subject="+encodeURIComponent("Kiinnostaa täysi opas")+"&body="+encodeURIComponent("Haluan tiedon, kun täysi opas on valmis.\\nKohtuullinen hinta: "+h+"\\n");});</script>
+<script>document.getElementById("kiinnostus").addEventListener("submit",function(e){e.preventDefault();location.href="mailto:miika@eduskuntaseuranta.fi?subject="+encodeURIComponent("Kiinnostaa täysi opas")+"&body="+encodeURIComponent("Haluan tiedon, kun täysi opas on valmis.");});</script>
 </div>`;
   return [{ path: "/opas/", html: shell({ title: TITLE + " | Eduskuntaseuranta", desc: "Ilmainen opas: tee oma datasivu, joka päivittyy itsestään, pelkällä puhelimella.", path: "/opas/", body }) }];
 }
