@@ -2,6 +2,7 @@ import { tilastotPages as kela } from "./tilastot-kela.mjs";
 import { videotPages } from "./videot.mjs";
 import { kelaPages } from "./kela.mjs";
 import { datapankkiPages } from "./datapankki.mjs";
+import { opasPages } from "./opas.mjs";
 
 export function tilastotPages(args) {
   const out = kela(args);
@@ -11,5 +12,6 @@ export function tilastotPages(args) {
   try { out.push(...videotPages(args)); } catch (e) { console.log("Videot ohitettu:", e.message); }
   try { out.push(...kelaPages(args)); } catch (e) { console.log("Kela-sivu ohitettu:", e.message); }
   try { out.push(...datapankkiPages(args)); } catch (e) { console.log("Datapankki ohitettu:", e.message); }
+  try { out.push(...opasPages(args)); } catch (e) { console.log("Opas ohitettu:", e.message); }
   return out;
 }
