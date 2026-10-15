@@ -24,20 +24,20 @@ export function videotPages({ shell, esc }) {
   const lista = lataa();
   const kortti = v => {
     v = { ...v, youtube: ytId(v.youtube) };
-    const k = v.tyyppi === "kanta" ? "kanta" : "datasta";
+    const k = v.tyyppi === "kanta" ? "kanta" : v.tyyppi === "opas" ? "opas" : "datasta";
     let media = "";
     if (v.youtube) media = `<button data-yt="${esc(v.youtube)}" style="width:100%;aspect-ratio:16/9;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-size:16px;cursor:pointer">Katso video</button>`;
-    else if (v.mp4) media = `<video controls preload="none" style="width:100%;border-radius:10px" src="${esc(v.mp4)}"></video>`;
+    else if (v.mp4) media = `<video controls playsinline preload="metadata" style="display:block;width:100%;max-width:340px;margin:8px auto;border-radius:10px" src="${esc(v.mp4)}"></video>`;
     const linkit = [v.tiktok ? `<a href="${esc(v.tiktok)}" rel="noopener">Katso TikTokissa</a>` : "", v.youtube ? `<a href="https://www.youtube.com/watch?v=${esc(v.youtube)}" rel="noopener">Avaa YouTubessa</a>` : "", v.sivu ? `<a href="${esc(v.sivu)}">Aiheen sivu</a>` : ""].filter(Boolean).join(" · ");
-    return `<div class="card" data-k="${k}"><b>${esc(v.otsikko || "")}</b>${v.kuvaus ? `<p class="meta">${esc(v.kuvaus)}</p>` : ""}${media}<p class="meta">${esc(k === "kanta" ? "Omia kantoja" : "Datasta")}${v.pvm ? " · " + esc(v.pvm) : ""}${v.lahde ? " · Lähde: " + esc(v.lahde) : ""}</p>${linkit ? `<p>${linkit}</p>` : ""}</div>`;
+    return `<div class="card" data-k="${k}"><b>${esc(v.otsikko || "")}</b>${v.kuvaus ? `<p class="meta">${esc(v.kuvaus)}</p>` : ""}${media}<p class="meta">${esc(k === "kanta" ? "Omia kantoja" : k === "opas" ? "Opas" : "Datasta")}${v.pvm ? " · " + esc(v.pvm) : ""}${v.lahde ? " · Lähde: " + esc(v.lahde) : ""}</p>${linkit ? `<p>${linkit}</p>` : ""}</div>`;
   };
   const css = `<style>#vd .tb{display:flex;gap:6px;margin:12px 0}#vd button[data-t]{flex:1;font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer}#vd button[data-t].on{border-color:var(--accent,#888);font-weight:700}</style>`;
   const tyhja = (k, t) => `<p class="meta" data-e="${k}" style="display:none">${t}</p>`;
   const body = `<h1>Videot</h1>
 <p>Lyhyet videot Suomen julkisesta datasta ja politiikasta. <b>Datasta</b>-videoissa kerrotaan, mitä avoin data näyttää. <b>Kannat</b>-videoissa Miika kertoo omia mielipiteitään, ja ne ovat hänen omiaan, eivät sivuston kantoja. Sivuston luvut ja taulukot pysyvät puolueettomina.</p>
-${css}<div id="vd"><div class="tb"><button data-t="kaikki">Kaikki</button><button data-t="datasta">Datasta</button><button data-t="kanta">Kannat</button></div>
+${css}<div id="vd"><div class="tb"><button data-t="kaikki">Kaikki</button><button data-t="datasta">Datasta</button><button data-t="kanta">Kannat</button><button data-t="opas">Opas</button></div>
 ${lista.map(kortti).join("\n")}
 ${lista.length ? "" : '<p class="meta" data-e="kaikki">Videoita tulossa pian.</p>'}
-${lista.length ? tyhja("datasta", "Datasta-videoita tulossa pian.") + tyhja("kanta", "Kantavideoita tulossa pian.") : ""}</div>${JS}`;
+${lista.length ? tyhja("datasta", "Datasta-videoita tulossa pian.") + tyhja("kanta", "Kantavideoita tulossa pian.") + tyhja("opas", "Opasvideoita tulossa pian.") : ""}</div>${JS}`;
   return [{ path: "/videot/", html: shell({ title: "Videot | Eduskuntaseuranta", desc: "Lyhyet videot Suomen julkisesta datasta ja politiikasta.", path: "/videot/", body }) }];
 }

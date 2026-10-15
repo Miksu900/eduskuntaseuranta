@@ -1,7 +1,7 @@
 // build.mjs – rakentaa Eduskuntaseuranta-sivuston staattiset sivut Supabasen datasta.
 // Ajetaan GitHub Actionsissa (ks. .github/workflows/build.yml). Tulos kirjoitetaan kansioon dist/.
 import "./fetchcache.mjs";
-import { mkdir, writeFile, copyFile, rm, readFile } from "node:fs/promises";
+import { mkdir, writeFile, copyFile, rm, readFile, cp } from "node:fs/promises";
 import { loadNews, newsPage, blogPages } from "./extras.mjs";
 import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
 import { followBlock, followPages } from "./seuranta.mjs";
@@ -914,6 +914,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   await pool(jobs, 16, async j => { const dir = OUT + j.path; await mkdir(dir, { recursive: true }); await writeFile(dir + "index.html", j.html); });
   if (blogRss) await writeFile(OUT + "/blogi/rss.xml", blogRss);
   if (existsSync("og.png")) await copyFile("og.png", `${OUT}/og.png`);
+  if (existsSync("media")) await cp("media", `${OUT}/media`, { recursive: true });
   {
     const topicChips = TOPICS.filter(t => loaded.some(v => topicOf(v).name === t.name) && t.name !== "Muut aiheet").map(t => `<a class="tag" href="/aihe/${tslug(t)}/">${esc(t.name)}</a>`).join("");
     const partyMap = {}; for (const [k, v] of Object.entries(PARTY)) partyMap[k] = v;
