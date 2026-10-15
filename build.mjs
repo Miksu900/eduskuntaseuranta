@@ -254,7 +254,7 @@ const navGroups = () => {
   return g("Kansanedustajat", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/testi/", "Kuka äänestää kuten sinä?"], ["/seuranta/", "Seurantani"]])
     + g("Raha", [["/budjetti/", "Valtion budjetti"], ["/valtion-talous/", "Valtion talous"], ["/valtionavustukset/", "Valtionavustukset"], ["/eu/rahat/", "EU:n rahat"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/hankinnat/", "Julkiset hankinnat"], ["/kunnat/", "Kunnat"]])
     + g("Lait ja tieto", [["/lait/", "Lait ja asetukset"], ["/tilastot/", "Tilastot"], ["/kela/", "Kela kunnittain"], ["/sahko/", "Sähkö"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/lobbaus/", "Lobbaus"], ["/eu/", "EU"]])
-    + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/videot/", "Videot"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
+    + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/videot/", "Videot"], ["/opas/", "Tee oma datasivu (opas)"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/datapankki/", "Datapankki"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
 };
 const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><div class="tr"><button type="button" class="askb" data-ask>Kysy tekoälyltä</button><details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details></div></header>`;

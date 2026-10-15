@@ -17,6 +17,7 @@ const IC = {
   bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
   kela: '<path d="M12 21s-7-4.5-7-10a4 4 0 017-2.5A4 4 0 0119 11c0 5.5-7 10-7 10z"/>',
   db: '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  book: '<path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19a2 2 0 012-2h13"/>',
   play: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/>',
 };
 
@@ -36,6 +37,7 @@ const TILES = [
   ["/hankinnat/", "cart", "#8a6bd1", "Julkiset hankinnat", "Mihin julkinen raha tilataan", "hankinnat hankinta kilpailutus hilma tarjous"],
   ["/datapankki/", "db", "#2f9e9e", "Datapankki", "Kuinka paljon dataa sivustolla on ja mistä se tulee", "data datapankki avoin data rivit lataa csv json", true],
   ["/videot/", "play", "#c2410c", "Videot", "Lyhyet videot datasta ja politiikasta", "video videot tiktok youtube", true],
+  ["/opas/", "book", "#0e8a7d", "Tee oma datasivu", "Ilmainen opas: oma sivu verkkoon pelkällä puhelimella", "opas opetus ohje oma sivu verkkosivu github puhelin tee itse koodaus", true],
 ];
 
 export const TILE_CSS = String.raw`
