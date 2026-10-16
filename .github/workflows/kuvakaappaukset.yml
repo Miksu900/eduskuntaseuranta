@@ -1,0 +1,17 @@
+name: Kuvakaappaukset videoon
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  kuvat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install playwright && python -m playwright install --with-deps chromium
+      - run: python scripts/kuvakaappaukset.py
+      - name: Julkaise kuvat releaseen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create kuvat-${{ github.run_number }} kuvat/*.png --title "Kuvakaappaukset ${{ github.run_number }}" --notes "Pystyvideon kuvat (1080x1920)"
