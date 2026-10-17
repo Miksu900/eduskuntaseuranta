@@ -73,15 +73,16 @@ export async function loadNews() {
 const fmtTime = d => d ? new Date(d).toLocaleString("fi-FI", { timeZone: "Europe/Helsinki", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
 
 export function newsPage(news, { shell, esc }) {
-  const sources = [...new Set(news.map(n => n.lahde))];
-  const rows = news.map(n => `<a class="card nw" data-s="${esc(n.lahde)}" href="${esc(n.url)}" rel="noopener nofollow" target="_blank"><div>${esc(n.otsikko)}</div><div class="meta">${esc(n.lahde)} · ${esc(fmtTime(n.aika))}${n.laji === "mielipide" ? ' · <span class="op">Mielipide / kolumni</span>' : ""}</div></a>`).join("");
-  const chips = ["Kaikki", ...sources].map((s, i) => `<button type="button" data-f="${esc(s)}"${i === 0 ? ' class="on"' : ""}>${esc(s)}</button>`).join("");
-  const js = `<script>(function(){var b=document.querySelectorAll("[data-f]"),c=document.querySelectorAll(".nw");b.forEach(function(x){x.onclick=function(){b.forEach(function(y){y.classList.remove("on")});x.classList.add("on");var f=x.getAttribute("data-f");c.forEach(function(k){k.style.display=(f==="Kaikki"||k.getAttribute("data-s")===f)?"":"none"})}})})();</script>`;
-  const body = `<h1>Politiikan ja yhteiskunnan uutiset</h1>
-<p class="meta">Otsikot suomalaisilta uutismedioilta yhteen paikkaan. Linkki vie aina alkuperäiseen juttuun. Lista päivittyy useita kertoja päivässä.</p>
-<div class="share">${chips}</div>${news.length ? rows : "<p>Uutisia ei saatu juuri nyt. Kokeile hetken kuluttua uudelleen.</p>"}${js}
-<p class="note">Otsikot ja linkit ovat uutismedioiden RSS-syötteistä. Jutut ja otsikot kuuluvat niiden tekijöille. Mielipide- ja kolumnijutut on merkitty erikseen, ne ovat kirjoittajiensa näkemyksiä, eivät Eduskuntaseurannan. Valinta perustuu lähteiden omiin politiikkaosioihin, ei Eduskuntaseurannan arvioon jutun puolueellisuudesta.</p>`;
-  return shell({ title: "Politiikan ja yhteiskunnan uutiset | Eduskuntaseuranta", desc: "Politiikan ja yhteiskunnan uutisotsikot Ylestä, Iltalehdestä, Helsingin Sanomista ja Maaseudun Tulevaisuudesta yhdessä paikassa.", path: "/uutiset/", body, head: "<style>.op{color:#e6b450}</style>" });
+  // Eduskuntaseurannassa on maksullisia palveluja, joten uutismedioiden syötteitä ei näytetä täällä
+  // (Ylen ja Alman RSS-ehdot kieltävät käytön kaupallisessa palvelussa). Uutiset ovat ei-kaupallisessa Nytpuhutaan.fi:ssä.
+  const N = "https://nytpuhutaan.fi";
+  const linkit = [["Politiikka", "/politiikka/"], ["Eduskunta ja hallitus", "/politiikka/eduskunta-ja-hallitus/"], ["Vaalit ja puolueet", "/politiikka/vaalit-ja-puolueet/"], ["Verot ja budjetti", "/politiikka/verot-ja-budjetti/"], ["Maahanmuutto", "/politiikka/maahanmuutto/"], ["Ulkopolitiikka ja turvallisuus", "/politiikka/ulkopolitiikka/"], ["Paikalliset uutiset", "/paikalliset/"]];
+  const body = `<h1>Uutiset</h1>
+<p>Politiikan ja yhteiskunnan uutiset kaikista suomalaisista medioista löydät <b>Nytpuhutaan.fi</b>-palvelusta. Siellä näet myös, mistä juuri nyt puhutaan ja miten eri mediat otsikoivat saman uutisen.</p>
+<p><a class="btn on" href="${N}/" rel="noopener">Avaa Nytpuhutaan.fi</a></p>
+${linkit.map(([t, h]) => `<a class="card" href="${N}${h}" rel="noopener"><div>${esc(t)}</div><div class="meta">nytpuhutaan.fi${esc(h)}</div></a>`).join("")}
+<h2>Viranomaisten tiedotteet</h2><p>Ministeriöiden, virastojen, kuntien ja STT Infon tiedotteet ovat täällä Eduskuntaseurannassa: <a href="/tiedotteet/">Viranomaistiedotteet</a>.</p>`;
+  return shell({ title: "Uutiset | Eduskuntaseuranta", desc: "Politiikan ja yhteiskunnan uutiset kaikista suomalaisista medioista Nytpuhutaan.fi:ssä sekä viranomaisten tiedotteet.", path: "/uutiset/", body });
 }
 
 // ---------- Blogi ----------

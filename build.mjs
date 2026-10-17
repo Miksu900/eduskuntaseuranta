@@ -6,6 +6,8 @@ import { loadNews, newsPage, blogPages } from "./extras.mjs";
 import { authPages, guestPages, ACCT_JS, commentsWanted, commentsBlock } from "./auth.mjs";
 import { followBlock, followPages } from "./seuranta.mjs";
 import { loadHilma, hankinnatPages } from "./hankinnat.mjs";
+import { loadTiedotteet, tiedotteetPages } from "./viranomaiset.mjs";
+import { ammattilaisetPages } from "./ammattilaiset.mjs";
 import { loadKunnat, kunnatPages, loadMaakunnat } from "./kunnat.mjs";
 import { loadLobbaus, lobbausPages } from "./lobbaus.mjs";
 import { loadVaalirahoitus, vaalirahoitusPages } from "./vaalirahoitus.mjs";
@@ -253,9 +255,9 @@ const navGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Kansanedustajat", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/testi/", "Kuka äänestää kuten sinä?"], ["/seuranta/", "Seurantani"]])
     + g("Raha", [["/budjetti/", "Valtion budjetti"], ["/valtion-talous/", "Valtion talous"], ["/valtionavustukset/", "Valtionavustukset"], ["/eu/rahat/", "EU:n rahat"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/hankinnat/", "Julkiset hankinnat"], ["/kunnat/", "Kunnat"]])
-    + g("Lait ja tieto", [["/lait/", "Lait ja asetukset"], ["/tilastot/", "Tilastot"], ["/kela/", "Kela kunnittain"], ["/sahko/", "Sähkö"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/lobbaus/", "Lobbaus"], ["/eu/", "EU"]])
+    + g("Lait ja tieto", [["/tiedotteet/", "Viranomaistiedotteet"], ["/lait/", "Lait ja asetukset"], ["/tilastot/", "Tilastot"], ["/kela/", "Kela kunnittain"], ["/sahko/", "Sähkö"], ["/vtv/", "VTV:n raportit"], ["/yritykset/", "Yritykset"], ["/lobbaus/", "Lobbaus"], ["/eu/", "EU"]])
     + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/videot/", "Videot"], ["/opas/", "Tee oma datasivu (opas)"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
-    + g("Tietoa", [["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/datapankki/", "Datapankki"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
+    + g("Tietoa", [["/ammattilaisille/", "Ammattilaisille: hälytykset"], ["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/datapankki/", "Datapankki"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
 };
 const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><div class="tr"><button type="button" class="askb" data-ask>Kysy tekoälyltä</button><details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details></div></header>`;
 
@@ -757,8 +759,7 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   console.log("[aika]", Math.round(process.uptime())+"s", 'Uutiset ja blogi');
   let blogRss = "";
   try {
-    const news = await loadNews();
-    put("/uutiset/", newsPage(news, { shell, esc }));
+    put("/uutiset/", newsPage([], { shell, esc }));
   } catch (e) { console.log("Uutiset ohitettu:", e.message); }
   try {
     for (const pg of authPages({ shell, esc, SB, KEY })) put(pg.path, pg.html);
@@ -773,12 +774,33 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
 
   // --- Julkiset hankinnat (Hilma) ---
   console.log("[aika]", Math.round(process.uptime())+"s", 'Julkiset hankinnat (Hilma)');
+  const halyLahteet = { paivitetty: new Date().toISOString(), aanestykset: [], tiedotteet: [], hankinnat: [] };
   try {
     const hd = await loadHilma(process.env.HILMA_API_KEY);
     if (hd) {
       for (const pg of hankinnatPages({ shell, esc, dateFi, data: hd })) put(pg.path, pg.html);
+      const seen = new Set();
+      for (const n of [...(hd.recent || []), ...(hd.awards || [])]) {
+        if (!n || seen.has(n.id)) continue; seen.add(n.id);
+        halyLahteet.hankinnat.push({ id: String(n.id), otsikko: n.titleFi || "", ostaja: n.organisationNameFi || "", aika: n.datePublished || null, laji: n.mainType || "", url: n.tedPublicationId ? `https://ted.europa.eu/fi/notice/-/detail/${n.tedPublicationId}` : `${SITE}/hankinnat/` });
+      }
     }
   } catch (e) { console.log("Hankinnat ohitettu:", e.message); }
+
+  // --- Viranomaistiedotteet ja ammattilaisille-sivu ---
+  console.log("[aika]", Math.round(process.uptime())+"s", 'Viranomaistiedotteet');
+  try {
+    const td = await loadTiedotteet();
+    for (const pg of tiedotteetPages({ shell, esc, dateFi, data: td })) put(pg.path, pg.html);
+    halyLahteet.tiedotteet = td.slice(0, 1500);
+  } catch (e) { console.log("Tiedotteet ohitettu:", e.message); }
+  try { for (const pg of ammattilaisetPages({ shell, esc })) put(pg.path, pg.html); } catch (e) { console.log("Ammattilaisille ohitettu:", e.message); }
+  try {
+    const raja = Date.now() - 14 * 864e5;
+    halyLahteet.aanestykset = loaded.filter(v => new Date(v.alkoi).getTime() >= raja).map(v => ({ id: v.id, otsikko: vtitle(v), aihe: tslug(topicOf(v)), aiheNimi: topicOf(v).name, aika: v.alkoi, url: `${SITE}/aanestys/${v.id}/`, jaa: v.jaa, ei: v.ei }));
+    await mkdir(OUT + "/data", { recursive: true });
+    await writeFile(OUT + "/data/halytyslahteet.json", JSON.stringify(halyLahteet));
+  } catch (e) { console.log("Hälytyslähteet ohitettu:", e.message); }
 
   let lobbRows = [], vaaliRows = [];
   // --- Lobbaus (Avoimuusrekisteri) ---

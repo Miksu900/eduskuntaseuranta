@@ -1,0 +1,32 @@
+name: Seuraa-hälytykset (päivittäinen kooste)
+on:
+  schedule:
+    - cron: "40 4 * * *"   # klo 7.40 Suomen aikaa
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: halytykset
+  cancel-in-progress: false
+jobs:
+  laheta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/cache/restore@v4
+        with:
+          path: .halytystila
+          key: halytys-${{ github.run_id }}
+          restore-keys: halytys-
+      - run: node scripts/halytykset.mjs
+        env:
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          HALYTYS_LAHETTAJA: ${{ vars.HALYTYS_LAHETTAJA }}
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .halytystila
+          key: halytys-${{ github.run_id }}
