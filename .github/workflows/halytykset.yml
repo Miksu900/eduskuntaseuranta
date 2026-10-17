@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "40 4 * * *"   # klo 7.40 Suomen aikaa
   workflow_dispatch:
+    inputs:
+      tarkista:
+        description: "Vain tarkista avaimet ja lähettäjä (ei lähetä)"
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -25,8 +30,9 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           HALYTYS_LAHETTAJA: ${{ vars.HALYTYS_LAHETTAJA }}
+          TARKISTA: ${{ inputs.tarkista && '1' || '0' }}
       - uses: actions/cache/save@v4
-        if: always()
+        if: always() && !inputs.tarkista
         with:
           path: .halytystila
           key: halytys-${{ github.run_id }}

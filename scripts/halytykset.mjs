@@ -65,7 +65,28 @@ async function laheta(to, aihe, html) {
   if (!r.ok) throw new Error(`Brevo ${r.status} ${(await r.text()).slice(0, 200)}`);
 }
 
+// Tarkistaa avaimet ja lähettäjän; tulos näkyy ajon huomautuksena (::notice), ei paljasta avaimia.
+async function tarkista() {
+  const rivit = [];
+  rivit.push(`Supabase-avain: ${SERVICE ? "on" : "PUUTTUU"}`, `Brevo-avain: ${BREVO ? "on" : "PUUTTUU"}`);
+  if (SERVICE) {
+    try { const col = await kayttajaSarake(); const u = await kayttajat(); const s = await sbGet(`/rest/v1/seurannat?select=tyyppi&limit=100000`);
+      rivit.push(`Supabase OK: ${u.size} käyttäjää, ${s.length} seurantaa (sarake ${col})`); }
+    catch (e) { rivit.push(`Supabase VIRHE: ${e.message.slice(0, 120)}`); }
+  }
+  if (BREVO) {
+    try {
+      const r = await fetch("https://api.brevo.com/v3/senders", { headers: { "api-key": BREVO, accept: "application/json" } });
+      if (!r.ok) rivit.push(`Brevo VIRHE ${r.status}`);
+      else { const d = await r.json(); const l = (d.senders || []).find(x => x.email?.toLowerCase() === LAHETTAJA.toLowerCase());
+        rivit.push(`Brevo OK. Lähettäjä ${LAHETTAJA}: ${l ? (l.active ? "vahvistettu" : "EI VAHVISTETTU") : "EI LISÄTTY"}. Lähettäjät: ${(d.senders || []).map(x => x.email.replace(/^(.).*@/, "$1***@") + (x.active ? "" : "(ei vahv.)")).join(", ")}`); }
+    } catch (e) { rivit.push(`Brevo VIRHE: ${e.message.slice(0, 120)}`); }
+  }
+  for (const r of rivit) console.log(`::notice title=Tarkistus::${r}`);
+}
+
 async function main() {
+  if (process.env.TARKISTA === "1") return tarkista();
   // Tila: jo käsitellyt kohteet (url). Ensimmäisellä ajolla merkitään kaikki nykyiset nähdyiksi, jotta ei lähetetä vanhaa.
   const tila = existsSync(TILA) ? JSON.parse(readFileSync(TILA, "utf8")) : null;
   const nahdyt = new Set(tila?.nahdyt || []);
