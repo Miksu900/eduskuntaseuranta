@@ -1,7 +1,8 @@
 // Etsii viranomaisten RSS-syötteet: hakee etusivun ja ajankohtaista-sivun, poimii rel=alternate-syötteet ja testaa ne.
 const SITES = ["valtioneuvosto.fi","vm.fi","stm.fi","tem.fi","okm.fi","mmm.fi","lvm.fi","ym.fi","um.fi","intermin.fi","oikeusministerio.fi","defmin.fi","vnk.fi",
  "poliisi.fi","migri.fi","kela.fi","vero.fi","traficom.fi","ruokavirasto.fi","thl.fi","tukes.fi","kkv.fi","stat.fi","tilastokeskus.fi","sttinfo.fi","eduskunta.fi",
- "hel.fi","tampere.fi","ouka.fi","turku.fi","espoo.fi","vantaa.fi","kuntaliitto.fi","vtv.fi","oikeuskansleri.fi","oikeusasiamies.fi","valvira.fi","ely-keskus.fi","avi.fi","pelastustoimi.fi","rajavartiolaitos.fi","puolustusvoimat.fi","fimea.fi","ttl.fi","energiavirasto.fi","fiva.fi","suomenpankki.fi"];
+ "hel.fi","tampere.fi","ouka.fi","turku.fi","espoo.fi","vantaa.fi","kuntaliitto.fi","vtv.fi","oikeuskansleri.fi","oikeusasiamies.fi","valvira.fi","ely-keskus.fi","avi.fi","pelastustoimi.fi","rajavartiolaitos.fi","puolustusvoimat.fi","pirkanmaa.fi","jyvaskyla.fi","kuopio.fi","lahti.fi","pori.fi","joensuu.fi","seinajoki.fi","vaasa.fi","rovaniemi.fi","kokkola.fi","ylivieska.fi","hankintailmoitukset.fi","finlex.fi","valtiokonttori.fi","hansel.fi","prh.fi","avoindata.fi","julkaisut.valtioneuvosto.fi","lausuntopalvelu.fi","otakantaa.fi","kansalaisaloite.fi","fimea.fi","ttl.fi","energiavirasto.fi","fiva.fi","suomenpankki.fi"];
+const STATUS = {};
 const PATHS = ["/", "/ajankohtaista", "/fi/ajankohtaista", "/tiedotteet", "/fi/tiedotteet", "/uutiset", "/fi/uutiset", "/ajankohtaista/tiedotteet", "/rss", "/fi/rss", "/rss-syotteet", "/fi/rss-syotteet"];
 const UA = { "user-agent": "Mozilla/5.0 (compatible; Eduskuntaseuranta/1.0; +https://eduskuntaseuranta.fi)", accept: "text/html,application/rss+xml,application/xml,*/*" };
 async function get(u) { const c = new AbortController(); const t = setTimeout(() => c.abort(), 12000); try { const r = await fetch(u, { headers: UA, signal: c.signal, redirect: "follow" }); return { ok: r.ok, status: r.status, url: r.url, text: r.ok ? await r.text() : "" }; } catch (e) { return { ok: false, status: String(e.message).slice(0, 40), text: "" }; } finally { clearTimeout(t); } }
@@ -13,6 +14,7 @@ for (const s of SITES) {
   const cands = new Set();
   for (const p of PATHS) {
     const r = await get("https://" + s + p);
+    if (p === "/") STATUS[s] = r.status;
     if (!r.ok) continue;
     if (isFeed(r.text)) { cands.add(r.url); continue; }
     for (const m of r.text.matchAll(/<link[^>]+type=["']application\/(rss|atom)\+xml["'][^>]*>/gi)) { const h = (m[0].match(/href=["']([^"']+)["']/i) || [])[1]; if (h) cands.add(new URL(h.replace(/&amp;/g, "&"), r.url).href); }
@@ -25,4 +27,5 @@ for (const s of SITES) {
   }
   if (!ok) console.log(`::warning title=EI ${s}::ehdokkaita ${cands.size}`);
 }
-console.log(JSON.stringify(found, null, 1));
+import { writeFileSync } from "node:fs";
+writeFileSync("syotekoe-tulos.json", JSON.stringify({ found, STATUS }, null, 1));
