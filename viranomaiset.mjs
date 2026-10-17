@@ -32,7 +32,11 @@ async function hae(url) {
   try {
     const r = await fetch(url, { signal: ctl.signal, headers: { "user-agent": "Mozilla/5.0 (compatible; Eduskuntaseuranta/1.0; +https://eduskuntaseuranta.fi)", accept: "application/rss+xml, application/xml, text/xml, */*" } });
     if (!r.ok) throw new Error("HTTP " + r.status);
-    return await r.text();
+    // Osa syötteistä (esim. Oulun kuulutukset) on ISO-8859-1-merkistössä: luetaan XML-esittelyn tai otsakkeen mukaan
+    const buf = new Uint8Array(await r.arrayBuffer());
+    const alku = new TextDecoder("latin1").decode(buf.slice(0, 300));
+    const cs = ((alku.match(/encoding=["']([\w-]+)["']/i) || [])[1] || (r.headers.get("content-type") || "").match(/charset=([\w-]+)/i)?.[1] || "utf-8").toLowerCase();
+    try { return new TextDecoder(cs).decode(buf); } catch { return new TextDecoder("utf-8").decode(buf); }
   } finally { clearTimeout(to); }
 }
 
