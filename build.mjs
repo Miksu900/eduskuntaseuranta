@@ -308,6 +308,10 @@ function docLinks(v) {
 }
 const shareBtns = `<div class="share"><button data-share>Jaa tämä sivu</button></div>`;
 const voteTag = a => `<span class="${a}">${AANI[a] || a}</span>`;
+// Lisäotsikko erottaa saman asian eri äänestykset (esim. aloitteen hylkääminen vs. lausumaehdotus).
+const vsub = v => (v.lisaotsikko && v.lisaotsikko !== v.otsikko) ? `<div class="meta">${esc(short(v.lisaotsikko, 160))}</div>` : "";
+// Edustajan oma ääni ja sen merkitys: "Jaa = Kansalaisaloitteen hylkääminen".
+const voteTagM = (v, a) => { const mn = voteMeaning(v); const m = mn && (a === "jaa" ? mn.jaa : a === "ei" ? mn.ei : null); return voteTag(a) + (m ? ` <span class="meta">(= ${esc(short(m, 90))})</span>` : ""); };
 
 // ---------- Pääohjelma ----------
 async function main() {
@@ -379,8 +383,8 @@ async function main() {
     const allv = byMp.get(m.henkilo) || [];
     const list = allv.slice(0, 50);
     const vmap = new Map(votings.map(v => [v.id, v]));
-    const li = list.map(x => { const v = vmap.get(x.aid) || { id: x.aid }; return `<a class="card" href="/aanestys/${v.id}/"><div>${esc(vtitle(v))}</div><div class="meta">${dateFi(v.alkoi)} · ${voteTag(x.aani)}</div></a>`; }).join("");
-    const rest = allv.slice(50).map(x => { const v = vmap.get(x.aid) || { id: x.aid }; const t = vtitle(v); return `<a class="card rv" data-q="${esc((t + " " + dateFi(v.alkoi)).toLowerCase())}" href="/aanestys/${v.id}/"><div>${esc(short(t, 140))}</div><div class="meta">${dateFi(v.alkoi)} · ${voteTag(x.aani)}</div></a>`; }).join("");
+    const li = list.map(x => { const v = vmap.get(x.aid) || { id: x.aid }; return `<a class="card" href="/aanestys/${v.id}/"><div>${esc(vtitle(v))}</div>${vsub(v)}<div class="meta">${dateFi(v.alkoi)} · ${voteTagM(v, x.aani)}</div></a>`; }).join("");
+    const rest = allv.slice(50).map(x => { const v = vmap.get(x.aid) || { id: x.aid }; const t = vtitle(v); return `<a class="card rv" data-q="${esc((t + " " + (v.lisaotsikko || "") + " " + dateFi(v.alkoi)).toLowerCase())}" href="/aanestys/${v.id}/"><div>${esc(short(t, 140))}</div>${vsub(v)}<div class="meta">${dateFi(v.alkoi)} · ${voteTagM(v, x.aani)}</div></a>`; }).join("");
     const restBlock = rest ? `<details><summary><b>Näytä kaikki ${allv.length} äänestystä</b></summary><input style="width:100%;box-sizing:border-box;padding:12px 14px;margin:8px 0 12px;font-size:16px;border-radius:10px;border:1px solid #444;background:#1a1a1a;color:inherit" type="search" placeholder="Hae äänestyksistä (esim. laki, aihe)" oninput="var q=this.value.trim().toLowerCase();this.parentNode.querySelectorAll('.rv').forEach(function(e){e.style.display=(!q||e.getAttribute('data-q').indexOf(q)>-1)?'':'none'})">${rest}</details>` : "";
     const body = `<div class="meta"><a href="/puolue/${slug(m.puolue) || "muut"}/">${esc(pname(m.puolue))}</a> · kansanedustaja${m.vaalipiiri ? ` · <a href="/vaalipiiri/${slug(vpName(m.vaalipiiri))}/">${esc(vpName(m.vaalipiiri))} vaalipiiri</a>` : ""}</div>
 <h1>${esc(nm)} – äänestykset ja läsnäolo</h1>
@@ -448,7 +452,7 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
   put("/edustajat/", shell({ title: "Kaikki kansanedustajat – äänestykset ja läsnäolo | Eduskuntaseuranta", desc: "Kaikkien kansanedustajien äänestykset, läsnäolo ja ryhmästä poikkeavat äänet.", path: "/edustajat/",
     body: `<h1>Kansanedustajat</h1><p class="meta">${mps.length} edustajaa. Hae nimellä <a href="/">etusivulta</a> tai valitse alta.</p>${sorted.map(m => `<a class="card" href="/edustaja/${mpSlug.get(m.henkilo)}/"><div>${esc(`${m.sukunimi || ""}, ${m.etunimi || ""}`)}</div><div class="meta">${esc(pname(m.puolue))} · läsnä ${lasna(m)} % · poikkeaa ryhmästä ${eri(m)} %</div></a>`).join("")}` }));
   put("/aanestykset/", shell({ title: "Uusimmat eduskunnan äänestykset | Eduskuntaseuranta", desc: "Eduskunnan uusimmat äänestykset ja niiden tulokset ryhmittäin.", path: "/aanestykset/",
-    body: `<h1>Uusimmat äänestykset</h1>${loaded.slice(0, 500).map(v => `<a class="card" href="/aanestys/${v.id}/"><div>${esc(vtitle(v))}</div><div class="meta">${dateFi(v.alkoi)} · <span class="jaa">Jaa ${v.jaa ?? "–"}</span> · <span class="ei">Ei ${v.ei ?? "–"}</span>${v.aihe ? " · " + esc(v.aihe) : ""}</div></a>`).join("")}` }));
+    body: `<h1>Uusimmat äänestykset</h1>${loaded.slice(0, 500).map(v => `<a class="card" href="/aanestys/${v.id}/"><div>${esc(vtitle(v))}</div>${vsub(v)}<div class="meta">${dateFi(v.alkoi)} · <span class="jaa">Jaa ${v.jaa ?? "–"}</span> · <span class="ei">Ei ${v.ei ?? "–"}</span>${v.aihe ? " · " + esc(v.aihe) : ""}</div></a>`).join("")}` }));
 
 
   // --- Aiheet ---
@@ -462,7 +466,7 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
     for (const t of shown) {
       const vs = groupsT.get(t.name);
       const close = vs.filter(v => (v.jaa || 0) + (v.ei || 0) >= 100).map(v => ({ v, m: Math.abs((v.jaa || 0) - (v.ei || 0)) })).sort((a, b) => a.m - b.m).slice(0, 3);
-      const closeBox = close.length ? `<h2>Niukimmat äänestykset</h2>${close.map(x => `<a class="card" href="/aanestys/${x.v.id}/"><div>${esc(short(vtitle(x.v), 160))}</div><div class="meta">${dateFi(x.v.alkoi)} · Jaa ${x.v.jaa} · Ei ${x.v.ei} (ero ${x.m} ääntä)</div></a>`).join("")}` : "";
+      const closeBox = close.length ? `<h2>Niukimmat äänestykset</h2>${close.map(x => `<a class="card" href="/aanestys/${x.v.id}/"><div>${esc(short(vtitle(x.v), 160))}</div>${vsub(x.v)}<div class="meta">${dateFi(x.v.alkoi)} · Jaa ${x.v.jaa} · Ei ${x.v.ei} (ero ${x.m} ääntä)</div></a>`).join("")}` : "";
       const list = vs.slice(0, 300).map(v => { const mn = voteMeaning(v); return `<a class="card" href="/aanestys/${v.id}/"><div>${esc(short(vtitle(v), 200))}</div><div class="meta">${dateFi(v.alkoi)} · <span class="jaa">Jaa ${v.jaa ?? "–"}</span> · <span class="ei">Ei ${v.ei ?? "–"}</span></div>${mn ? `<div class="meta">${esc([mn.jaa ? "Jaa = " + mn.jaa : "", mn.ei ? "Ei = " + mn.ei : ""].filter(Boolean).join(" · "))}</div>` : ""}</a>`; }).join("");
       put(`/aihe/${tslug(t)}/`, shell({ title: `${t.name}: eduskunnan äänestykset | Eduskuntaseuranta`, desc: `${t.info} ${vs.length} äänestystä Eduskuntaseurannassa.`, path: `/aihe/${tslug(t)}/`,
         body: `<p class="meta"><a href="/aiheet/">← Kaikki aiheet</a></p><h1>${esc(t.name)}</h1><p>${esc(t.info)}</p><p class="meta">${vs.length} äänestystä. Aihe on arvioitu otsikon avainsanoista, joten se voi olla epätarkka. Huom. Jaa tai Ei ei aina tarkoita otsikon asian kannattamista: katso kunkin äänestyksen sivulta, mitä vaihtoehdot tarkoittavat.</p>${shareBtns}${followBlock({ tyyppi: "aihe", kohde: tslug(t), nimi: t.name, osoite: `/aihe/${tslug(t)}/`, SB, KEY })}${closeBox}<h2>Äänestykset${vs.length > 300 ? " (300 uusinta)" : ""}</h2>${list}` }));
@@ -574,7 +578,7 @@ ${shareBtns}
 ${uni.length ? `<h2>Ryhmien yhtenäisyys</h2><p class="meta">Osuus jaa- ja ei-äänistä, jotka olivat ryhmän enemmistön linjalla.</p>${uni.map(u => `<div class="card"><div>${esc(pname(u.p))} <b>${u.pct} %</b></div></div>`).join("")}` : ""}
 ${topDev.length ? `<h2>Eniten ryhmän linjaa vastaan</h2><p class="meta">Vain jaa- ja ei-äänet, vähintään 5 vertailtavaa äänestystä.</p>${topDev.map(d => `<div class="card"><div>${mpLink(d.r.henkilo, full(d.r))} <span class="meta">${esc(pname(d.r.puolue))}</span></div><div class="meta">${d.eri} / ${d.n} ääntä ryhmän linjaa vastaan</div></div>`).join("")}` : ""}
 ${topAbs.length ? `<h2>Eniten poissaoloja</h2><p class="meta">Poissaolo ei kerro laiskuudesta: syynä voi olla sairaus, virkamatka tai ministerin tehtävät.</p>${topAbs.map(d => `<div class="card"><div>${mpLink(d.r.henkilo, full(d.r))} <span class="meta">${esc(pname(d.r.puolue))}</span></div><div class="meta">poissa ${d.poissa} / ${d.n} äänestyksessä</div></div>`).join("")}` : ""}
-<h2>Viikon äänestykset</h2>${items.map(i => `<a class="card" href="/aanestys/${i.v.id}/"><div>${esc(short(vtitle(i.v), 160))}</div><div class="meta">${dateFi(i.v.alkoi)} · <span class="jaa">Jaa ${i.v.jaa ?? "–"}</span> · <span class="ei">Ei ${i.v.ei ?? "–"}</span>${i.divided ? " · hallitus ja oppositio eri kannalla" : ""}</div></a>`).join("")}`;
+<h2>Viikon äänestykset</h2>${items.map(i => `<a class="card" href="/aanestys/${i.v.id}/"><div>${esc(short(vtitle(i.v), 160))}</div>${vsub(i.v)}<div class="meta">${dateFi(i.v.alkoi)} · <span class="jaa">Jaa ${i.v.jaa ?? "–"}</span> · <span class="ei">Ei ${i.v.ei ?? "–"}</span>${i.divided ? " · hallitus ja oppositio eri kannalla" : ""}</div></a>`).join("")}`;
   };
   if (weekList.length) {
     const an = weekList.map(analyse);
