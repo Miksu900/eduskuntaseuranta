@@ -1,159 +1,409 @@
 {
- "hyvaksytyt_pohjat": [
-  "A",
-  "B",
-  "C"
- ],
- "viestit": [
-  {
-   "nro": 1,
-   "organisaatio": "Tekir (Rud Pedersen Finland)",
-   "to": "rpfinland@rudpedersen.com",
-   "pohja": "B",
-   "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
-   "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:02:35.848Z",
-   "brevo_id": "<202610190702.34950155153@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 2,
-   "organisaatio": "Manifesto",
-   "to": "info@manifesto.fi",
-   "pohja": "B",
-   "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
-   "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:02:40.169Z",
-   "brevo_id": "<202610190702.87115460341@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 3,
-   "organisaatio": "Viestintätoimisto Kaiku",
-   "to": "sales@kaiku.fi",
-   "pohja": "B",
-   "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
-   "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:02:44.478Z",
-   "brevo_id": "<202610190702.39630650754@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 4,
-   "organisaatio": "Ellun Kanat",
-   "to": "ellun@ellunkanat.fi",
-   "pohja": "B",
-   "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
-   "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:02:48.803Z",
-   "brevo_id": "<202610190702.83951064593@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 5,
-   "organisaatio": "Pohjois-Pohjanmaan Yrittäjät",
-   "to": "ppy@yrittajat.fi",
-   "pohja": "A",
-   "subject": "Pohjois-Pohjanmaan Yrittäjät: päivittäinen seuranta yrittäjiä koskevista päätöksistä",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi yrittäjiä koskevat lakimuutokset, alueen kuntien päätökset ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:02:53.121Z",
-   "brevo_id": "<202610190702.13689419347@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 6,
-   "organisaatio": "Keski-Pohjanmaan Yrittäjät",
-   "to": "kpy@yrittajat.fi",
-   "pohja": "A",
-   "subject": "Keski-Pohjanmaan Yrittäjät: päivittäinen seuranta yrittäjiä koskevista päätöksistä",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi yrittäjiä koskevat lakimuutokset, alueen kuntien päätökset ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:02:57.442Z",
-   "brevo_id": "<202610190702.33571806575@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 7,
-   "organisaatio": "Oulun kauppakamari",
-   "to": "info.oulu@chamber.fi",
-   "pohja": "A",
-   "subject": "Oulun kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Pohjois-Suomen julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:01.734Z",
-   "brevo_id": "<202610190703.17767326073@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 8,
-   "organisaatio": "Tampereen kauppakamari",
-   "to": "info@tampereenkauppakamari.fi",
-   "pohja": "A",
-   "subject": "Tampereen kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Pirkanmaan julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:06.068Z",
-   "brevo_id": "<202610190703.70957684927@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 9,
-   "organisaatio": "Suomen Kiinteistöliitto",
-   "to": "info@kiinteistoliitto.fi",
-   "pohja": "A",
-   "subject": "Suomen Kiinteistöliitto: päivittäinen seuranta asumista ja taloyhtiöitä koskevista päätöksistä",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi asumista ja taloyhtiöitä koskeva lainsäädäntö. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:10.396Z",
-   "brevo_id": "<202610190703.15435962428@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 10,
-   "organisaatio": "Isännöintiliitto",
-   "to": "toimisto@isannointiliitto.fi",
-   "pohja": "A",
-   "subject": "Isännöintiliitto: päivittäinen seuranta taloyhtiöitä ja isännöintiä koskevista päätöksistä",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi taloyhtiöitä ja isännöintiä koskeva lainsäädäntö. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:14.725Z",
-   "brevo_id": "<202610190703.76089302421@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 11,
-   "organisaatio": "RAKLI",
-   "to": "rakli@rakli.fi",
-   "pohja": "A",
-   "subject": "RAKLI: päivittäinen seuranta rakentamista ja kiinteistöjä koskevista päätöksistä ja hankinnoista",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi rakentamista, kaavoitusta ja kiinteistöjä koskeva lainsäädäntö ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:19.049Z",
-   "brevo_id": "<202610190703.49539605446@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 12,
-   "organisaatio": "Suomen uusiutuvat",
-   "to": "info@renewablesfinland.fi",
-   "pohja": "A",
-   "subject": "Suomen uusiutuvat: päivittäinen seuranta energiaa ja kaavoitusta koskevista päätöksistä",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi tuulivoimaa, kaavoitusta ja energiapolitiikkaa koskevat päätökset. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:23.402Z",
-   "brevo_id": "<202610190703.74828208122@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 13,
-   "organisaatio": "Veronmaksajain Keskusliitto",
-   "to": "veronmaksajat@veronmaksajat.fi",
-   "pohja": "A",
-   "subject": "Veronmaksajain Keskusliitto: päivittäinen seuranta vero- ja kuntatalouspäätöksistä",
-   "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi verotusta ja kuntataloutta koskevat päätökset. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:27.698Z",
-   "brevo_id": "<202610190703.42121303938@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 14,
-   "organisaatio": "Suomen luonnonsuojeluliitto SLL",
-   "to": "lausunnot@sll.fi",
-   "pohja": "C",
-   "subject": "Suomen luonnonsuojeluliitto: maksuton seuranta ympäristölainsäädäntöä koskevista päätöksistä",
-   "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi luonnonsuojelu- ja ympäristölainsäädäntö. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:32.023Z",
-   "brevo_id": "<202610190703.30252729926@smtp-relay.mailin.fr>"
-  },
-  {
-   "nro": 15,
-   "organisaatio": "Eläkeliitto",
-   "to": "info@elakeliitto.fi",
-   "pohja": "C",
-   "subject": "Eläkeliitto: maksuton seuranta eläkkeitä ja vanhuspalveluja koskevista päätöksistä",
-   "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi eläkkeet ja vanhuspalvelut. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
-   "lahetetty": "2026-10-19T07:03:36.370Z",
-   "brevo_id": "<202610190703.83782037831@smtp-relay.mailin.fr>"
-  }
- ]
+  "hyvaksytyt_pohjat": [
+    "A",
+    "B",
+    "C"
+  ],
+  "viestit": [
+    {
+      "nro": 1,
+      "organisaatio": "Tekir (Rud Pedersen Finland)",
+      "to": "rpfinland@rudpedersen.com",
+      "pohja": "B",
+      "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
+      "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:02:35.848Z",
+      "brevo_id": "<202610190702.34950155153@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 2,
+      "organisaatio": "Manifesto",
+      "to": "info@manifesto.fi",
+      "pohja": "B",
+      "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
+      "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:02:40.169Z",
+      "brevo_id": "<202610190702.87115460341@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 3,
+      "organisaatio": "Viestintätoimisto Kaiku",
+      "to": "sales@kaiku.fi",
+      "pohja": "B",
+      "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
+      "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:02:44.478Z",
+      "brevo_id": "<202610190702.39630650754@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 4,
+      "organisaatio": "Ellun Kanat",
+      "to": "ellun@ellunkanat.fi",
+      "pohja": "B",
+      "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
+      "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:02:48.803Z",
+      "brevo_id": "<202610190702.83951064593@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 5,
+      "organisaatio": "Pohjois-Pohjanmaan Yrittäjät",
+      "to": "ppy@yrittajat.fi",
+      "pohja": "A",
+      "subject": "Pohjois-Pohjanmaan Yrittäjät: päivittäinen seuranta yrittäjiä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi yrittäjiä koskevat lakimuutokset, alueen kuntien päätökset ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:02:53.121Z",
+      "brevo_id": "<202610190702.13689419347@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 6,
+      "organisaatio": "Keski-Pohjanmaan Yrittäjät",
+      "to": "kpy@yrittajat.fi",
+      "pohja": "A",
+      "subject": "Keski-Pohjanmaan Yrittäjät: päivittäinen seuranta yrittäjiä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi yrittäjiä koskevat lakimuutokset, alueen kuntien päätökset ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:02:57.442Z",
+      "brevo_id": "<202610190702.33571806575@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 7,
+      "organisaatio": "Oulun kauppakamari",
+      "to": "info.oulu@chamber.fi",
+      "pohja": "A",
+      "subject": "Oulun kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Pohjois-Suomen julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:01.734Z",
+      "brevo_id": "<202610190703.17767326073@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 8,
+      "organisaatio": "Tampereen kauppakamari",
+      "to": "info@tampereenkauppakamari.fi",
+      "pohja": "A",
+      "subject": "Tampereen kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Pirkanmaan julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:06.068Z",
+      "brevo_id": "<202610190703.70957684927@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 9,
+      "organisaatio": "Suomen Kiinteistöliitto",
+      "to": "info@kiinteistoliitto.fi",
+      "pohja": "A",
+      "subject": "Suomen Kiinteistöliitto: päivittäinen seuranta asumista ja taloyhtiöitä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi asumista ja taloyhtiöitä koskeva lainsäädäntö. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:10.396Z",
+      "brevo_id": "<202610190703.15435962428@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 10,
+      "organisaatio": "Isännöintiliitto",
+      "to": "toimisto@isannointiliitto.fi",
+      "pohja": "A",
+      "subject": "Isännöintiliitto: päivittäinen seuranta taloyhtiöitä ja isännöintiä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi taloyhtiöitä ja isännöintiä koskeva lainsäädäntö. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:14.725Z",
+      "brevo_id": "<202610190703.76089302421@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 11,
+      "organisaatio": "RAKLI",
+      "to": "rakli@rakli.fi",
+      "pohja": "A",
+      "subject": "RAKLI: päivittäinen seuranta rakentamista ja kiinteistöjä koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi rakentamista, kaavoitusta ja kiinteistöjä koskeva lainsäädäntö ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:19.049Z",
+      "brevo_id": "<202610190703.49539605446@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 12,
+      "organisaatio": "Suomen uusiutuvat",
+      "to": "info@renewablesfinland.fi",
+      "pohja": "A",
+      "subject": "Suomen uusiutuvat: päivittäinen seuranta energiaa ja kaavoitusta koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi tuulivoimaa, kaavoitusta ja energiapolitiikkaa koskevat päätökset. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:23.402Z",
+      "brevo_id": "<202610190703.74828208122@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 13,
+      "organisaatio": "Veronmaksajain Keskusliitto",
+      "to": "veronmaksajat@veronmaksajat.fi",
+      "pohja": "A",
+      "subject": "Veronmaksajain Keskusliitto: päivittäinen seuranta vero- ja kuntatalouspäätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi verotusta ja kuntataloutta koskevat päätökset. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:27.698Z",
+      "brevo_id": "<202610190703.42121303938@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 14,
+      "organisaatio": "Suomen luonnonsuojeluliitto SLL",
+      "to": "lausunnot@sll.fi",
+      "pohja": "C",
+      "subject": "Suomen luonnonsuojeluliitto: maksuton seuranta ympäristölainsäädäntöä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi luonnonsuojelu- ja ympäristölainsäädäntö. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:32.023Z",
+      "brevo_id": "<202610190703.30252729926@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 15,
+      "organisaatio": "Eläkeliitto",
+      "to": "info@elakeliitto.fi",
+      "pohja": "C",
+      "subject": "Eläkeliitto: maksuton seuranta eläkkeitä ja vanhuspalveluja koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi eläkkeet ja vanhuspalvelut. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": "2026-10-19T07:03:36.370Z",
+      "brevo_id": "<202610190703.83782037831@smtp-relay.mailin.fr>"
+    },
+    {
+      "nro": 16,
+      "organisaatio": "Hill+Knowlton Helsinki",
+      "to": "info@hillandknowlton.com",
+      "pohja": "B",
+      "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
+      "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 17,
+      "organisaatio": "Marsaana Communications",
+      "to": "info@marsaana.com",
+      "pohja": "B",
+      "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
+      "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 18,
+      "organisaatio": "Netprofile",
+      "to": "hello@netprofile.fi",
+      "pohja": "B",
+      "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
+      "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 19,
+      "organisaatio": "Viestintätoimisto Drum",
+      "to": "info@drum.fi",
+      "pohja": "B",
+      "subject": "Asiakkaidenne lakihankkeiden ja hankintojen seuranta, valmis kuukausiraportti",
+      "body": "Hyvä vastaanottaja,\n\npublic affairs -työssä aikaa kuluu siihen, että eduskunnan, ministeriöiden, virastojen ja Hilman sivuja käydään läpi asiakas kerrallaan.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Määrittelette hakusanat, kuten asiakkaan nimen, toimialan tai lakihankkeen, ja saatte joka aamu koosteen uusista äänestyksistä, hallituksen esityksistä, viranomais- ja STT Info -tiedotteista sekä julkisista hankinnoista. Kaikissa on linkki alkuperäiseen lähteeseen, ja kuukauden tapahtumista saa PDF-raportin, jonka voi välittää suoraan asiakkaalle.\n\nEhdotan maksutonta 30 päivän kokeilua yhden asiakkaanne aiheilla. Lähettäkää vastauksena muutama hakusana, niin otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita ja useampi vastaanottaja. Räätälöidyt aihekoosteet ovat hinnaltaan alkaen 200 € (+ alv). Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 20,
+      "organisaatio": "Helsingin seudun kauppakamari",
+      "to": "kauppakamari@helsinki.chamber.fi",
+      "pohja": "A",
+      "subject": "Helsingin seudun kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet, pääkaupunkiseudun kuntien päätökset ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 21,
+      "organisaatio": "Turun kauppakamari",
+      "to": "kauppakamari@turku.chamber.fi",
+      "pohja": "A",
+      "subject": "Turun kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Varsinais-Suomen julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 22,
+      "organisaatio": "Keski-Suomen kauppakamari",
+      "to": "info@centralfinlandchamber.fi",
+      "pohja": "A",
+      "subject": "Keski-Suomen kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Keski-Suomen julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 23,
+      "organisaatio": "Kuopion alueen kauppakamari",
+      "to": "kauppakamari@kuopiochamber.fi",
+      "pohja": "A",
+      "subject": "Kuopion alueen kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Pohjois-Savon julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 24,
+      "organisaatio": "Pohjanmaan kauppakamari",
+      "to": "K2POH.info@chamber.fi",
+      "pohja": "A",
+      "subject": "Pohjanmaan kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Pohjanmaan julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 25,
+      "organisaatio": "Lapin kauppakamari",
+      "to": "lapinkauppakamari@chamber.fi",
+      "pohja": "A",
+      "subject": "Lapin kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Lapin julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 26,
+      "organisaatio": "Etelä-Pohjanmaan kauppakamari",
+      "to": "ep@kauppakamari.fi",
+      "pohja": "A",
+      "subject": "Etelä-Pohjanmaan kauppakamari: päivittäinen seuranta elinkeinoelämää koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinoelämää koskevat lakihankkeet ja Etelä-Pohjanmaan julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 27,
+      "organisaatio": "Keskuskauppakamari",
+      "to": "keskuskauppakamari@chamber.fi",
+      "pohja": "A",
+      "subject": "Keskuskauppakamari: päivittäinen seuranta elinkeinopolitiikkaa koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi elinkeinopoliittiset lakihankkeet, hallituksen esitykset ja ministeriöiden tiedotteet. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 28,
+      "organisaatio": "Suomen Yrittäjät",
+      "to": "toimisto@yrittajat.fi",
+      "pohja": "A",
+      "subject": "Suomen Yrittäjät: päivittäinen seuranta yrittäjiä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi yrittäjiä koskevat lakimuutokset, verotus ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 29,
+      "organisaatio": "Uudenmaan Yrittäjät",
+      "to": "uusimaa@yrittajat.fi",
+      "pohja": "A",
+      "subject": "Uudenmaan Yrittäjät: päivittäinen seuranta yrittäjiä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi yrittäjiä koskevat lakimuutokset, alueen kuntien päätökset ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 30,
+      "organisaatio": "Pirkanmaan Yrittäjät",
+      "to": "pirkanmaa@yrittajat.fi",
+      "pohja": "A",
+      "subject": "Pirkanmaan Yrittäjät: päivittäinen seuranta yrittäjiä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi yrittäjiä koskevat lakimuutokset, alueen kuntien päätökset ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 31,
+      "organisaatio": "Varsinais-Suomen Yrittäjät",
+      "to": "vsy@yrittajat.fi",
+      "pohja": "A",
+      "subject": "Varsinais-Suomen Yrittäjät: päivittäinen seuranta yrittäjiä koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi yrittäjiä koskevat lakimuutokset, alueen kuntien päätökset ja julkiset hankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 32,
+      "organisaatio": "Suomen Taksiliitto",
+      "to": "taksiliitto@taksiliitto.fi",
+      "pohja": "A",
+      "subject": "Suomen Taksiliitto: päivittäinen seuranta taksialaa koskevista päätöksistä ja hankinnoista",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi taksi- ja liikennelainsäädäntö sekä Kelan ja hyvinvointialueiden kuljetushankinnat. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 33,
+      "organisaatio": "Suomen Kuljetus ja Logistiikka SKAL",
+      "to": "viestinta@skal.fi",
+      "pohja": "A",
+      "subject": "Suomen Kuljetus ja Logistiikka SKAL: päivittäinen seuranta kuljetusalaa koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi liikenne- ja kuljetuslainsäädäntö, polttoaineverotus ja tieverkkoa koskevat päätökset. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 34,
+      "organisaatio": "MTK",
+      "to": "kirjaamo@mtk.fi",
+      "pohja": "A",
+      "subject": "MTK: päivittäinen seuranta maa- ja metsätaloutta koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi maatalous-, metsä- ja maaseutupolitiikkaa koskevat lakihankkeet ja päätökset. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 35,
+      "organisaatio": "Energiateollisuus",
+      "to": "office@energia.fi",
+      "pohja": "A",
+      "subject": "Energiateollisuus: päivittäinen seuranta energiaa koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\nedunvalvonnassa on olennaista tietää ajoissa, kun jäseniä koskeva asia etenee. Tieto on kuitenkin hajallaan eduskunnan, ministeriöiden, kuntien ja Hilman sivuilla.\n\nEduskuntaseuranta.fi kokoaa nämä lähteet yhteen. Seuraa-hälytys lähettää teille joka aamu koosteen niistä uusista äänestyksistä, hallituksen esityksistä, viranomaistiedotteista ja julkisista hankinnoista, jotka koskevat valitsemianne aiheita. Teidän kohdallanne tällaisia voisivat olla esimerkiksi energiapolitiikkaa, sähkömarkkinoita ja energiaverotusta koskevat päätökset. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte 3–5 aihetta, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana.\n\nKokeilun jälkeen organisaatiotaso maksaa 79 € kuukaudessa (+ alv). Siihen sisältyvät rajaton määrä seurattavia aiheita, useampi vastaanottaja ja kuukausiraportti. Lisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 36,
+      "organisaatio": "Autoliitto",
+      "to": "autoliitto@autoliitto.fi",
+      "pohja": "C",
+      "subject": "Autoliitto: maksuton seuranta liikennettä ja autoverotusta koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi liikenne ja autoverotus. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 37,
+      "organisaatio": "Kuluttajaliitto",
+      "to": "info@kuluttajaliitto.fi",
+      "pohja": "C",
+      "subject": "Kuluttajaliitto: maksuton seuranta kuluttajansuojaa koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi kuluttajansuoja ja kuluttajaluotot. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 38,
+      "organisaatio": "Suomen Asukasliitto",
+      "to": "asukasliitto@asukasliitto.fi",
+      "pohja": "C",
+      "subject": "Suomen Asukasliitto: maksuton seuranta asumista koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi asuminen ja asumistuki. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 39,
+      "organisaatio": "Vuokralaiset VKL",
+      "to": "toimisto@vuokralaiset.fi",
+      "pohja": "C",
+      "subject": "Vuokralaiset VKL: maksuton seuranta asumista ja vuokrausta koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi vuokralainsäädäntö ja asumistuki. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    },
+    {
+      "nro": 40,
+      "organisaatio": "Kansallinen senioriliitto",
+      "to": "toimisto@senioriliitto.fi",
+      "pohja": "C",
+      "subject": "Kansallinen senioriliitto: maksuton seuranta eläkkeitä ja vanhuspalveluja koskevista päätöksistä",
+      "body": "Hyvä vastaanottaja,\n\njärjestön vaikuttamistyössä on tärkeää huomata ajoissa, kun jäseniä koskeva asia etenee eduskunnassa tai ministeriössä. Tietoa joutuu kuitenkin etsimään monesta paikasta.\n\nEduskuntaseuranta.fi kokoaa eduskunnan äänestykset, hallituksen esitykset, viranomaistiedotteet ja julkiset hankinnat yhteen paikkaan avoimesta datasta. Seuraa-hälytys lähettää teille joka aamu koosteen uusista käänteistä valitsemissanne aiheissa, esimerkiksi eläkkeet ja vanhuspalvelut. Jokaisessa kohdassa on linkki alkuperäiseen lähteeseen.\n\nTarjoan teille maksuttoman 30 päivän kokeilun. Riittää, että vastaatte tähän viestiin ja kerrotte aiheet, joita haluatte seurata. Otan seurannan käyttöön saman päivän aikana. Kokeilun jälkeen jatko on vapaaehtoista, ja kansalaisjärjestöille sovitaan edullinen hinta.\n\nLisätietoa: https://eduskuntaseuranta.fi/ammattilaisille/\n\nYstävällisin terveisin\n\nMiika Koskela\nEduskuntaseuranta.fi\n044 777 7149\nmiika@eduskuntaseuranta.fi\n\nJos ette halua jatkossa yhteydenottoja, riittää lyhyt vastaus tähän viestiin.",
+      "lahetetty": null,
+      "brevo_id": null
+    }
+  ]
 }
