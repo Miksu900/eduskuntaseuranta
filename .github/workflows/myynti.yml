@@ -1,0 +1,24 @@
+name: Myyntiviestit (Brevo)
+on:
+  workflow_dispatch:
+    inputs:
+      testi: { description: "Testiosoite (tyhjä = lähetä hyväksytyt)", default: "" }
+permissions:
+  contents: write
+concurrency: { group: myynti, cancel-in-progress: false }
+jobs:
+  laheta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/myynti-laheta.mjs
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          TESTI: ${{ inputs.testi }}
+      - name: Tallenna lähetystila
+        if: inputs.testi == ''
+        run: |
+          git config user.name "myynti"; git config user.email "myynti@users.noreply.github.com"
+          git add myynti/viestit.json && git commit -m "Myyntiviestit lähetetty" && git pull --rebase && git push || true
