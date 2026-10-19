@@ -44,25 +44,26 @@
 </style></head><body>
 <!--HEADER-->
 <main>
-<section class="hero2">
-<h1>Suomen julkinen tieto yhdessä paikassa</h1>
-<p>Äänestykset, lait, budjetti, yritykset ja tilastot selkeästi. Kysy tekoälyltä tai selaa aiheita.</p>
-<button type="button" class="askbig" data-ask>Kysy tekoälyltä mitä tahansa<small>Esimerkiksi: mitä budjetti tekee veroille?</small></button>
-<div class="find" style="margin-top:12px"><input id="q" type="search" placeholder="Hae kansanedustajaa nimellä" autocomplete="off" aria-label="Hae kansanedustajaa nimellä"><div id="rs"></div></div>
+<section class="hero3">
+<h1>Miten kansanedustajat äänestävät?</h1>
+<p>Eduskunnan päätökset ja jokaisen kansanedustajan äänet selkeästi. Ilmainen, ei kirjautumista.</p>
+<div class="find"><input id="q" type="search" placeholder="Kirjoita kansanedustajan nimi" autocomplete="off" aria-label="Hae kansanedustajaa nimellä"><div id="rs"></div></div>
+<div class="big3">
+<a href="/oma-edustaja/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><b>Etsi oma edustajasi</b><small>Valitse vaalipiirisi ja näe, miten alueesi edustajat äänestävät</small></a>
+<a href="/viikko/"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 12.5 2.8 2.8L16 9.5"/></svg><b>Tämän viikon päätökset</b><small>Mitä eduskunta päätti, lyhyesti ja ymmärrettävästi</small></a>
+<a href="/testi/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="16.5" cy="10.5" r="2.5"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M14.5 15.2c2.6-.4 5 .8 5.8 3.8"/></svg><b>Kuka äänestää kuten sinä?</b><small>Vastaa kysymyksiin ja löydä samanmielinen edustaja</small></a>
+</div>
 </section>
-
-<section class="tilaus" aria-label="Seuraa-hälytykset">
-<div><b>Seuraa omaa aihettasi sähköpostilla</b><span>Saat tiedon, kun aiheestasi äänestetään eduskunnassa, viranomainen tiedottaa tai julkinen hankinta julkaistaan.</span></div>
-<div class="tb"><a class="btn on" href="/kirjaudu/">Aloita ilmaiseksi</a><a class="btn" href="/ammattilaisille/">Organisaatioille</a></div>
-</section>
-<style>.tilaus{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#1a3a6e,#2a5db0);color:#fff;border-radius:16px;padding:16px 18px;margin:14px 0}
-.tilaus b{display:block;font-size:17px;margin-bottom:3px}.tilaus span{font-size:14px;opacity:.9;line-height:1.45}.tilaus>div:first-child{flex:1 1 260px}
-.tilaus .tb{display:flex;gap:8px;flex-wrap:wrap}.tilaus .btn{text-decoration:none;color:#fff;background:rgba(255,255,255,.16)}.tilaus .btn.on{background:#fff;color:#1a3a6e;font-weight:700}</style>
-
-<!--TILES-->
+<style>.hero3{padding:26px 0 8px}.hero3 h1{font-size:clamp(28px,7vw,40px);line-height:1.1;margin:0 0 10px}.hero3>p{color:var(--mute);font-size:17px;margin:0 0 18px;max-width:560px}
+.hero3 #q{font-size:17px;padding:15px 16px}
+.big3{display:grid;gap:10px;margin-top:16px}@media(min-width:720px){.big3{grid-template-columns:repeat(3,1fr)}}
+.big3 a{display:grid;grid-template-columns:44px 1fr;column-gap:14px;align-items:center;text-decoration:none;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.big3 a:hover{border-color:var(--accent)}.big3 svg{grid-row:span 2;width:44px;height:44px;padding:10px;border-radius:12px;background:rgba(124,196,255,.14);fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.big3 b{font-size:18px}.big3 small{color:var(--mute);font-size:14px;line-height:1.4}
+.prostrip{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:space-between;border:1px dashed var(--line);border-radius:14px;padding:14px 16px;margin:22px 0 8px;color:var(--mute);font-size:15px}.prostrip a{font-weight:700;color:var(--accent);text-decoration:none}</style>
 
 <section class="panel" id="viimeisin" hidden>
-<h2>Viimeisin äänestys</h2>
+<h2>Viimeisin äänestys eduskunnassa</h2>
 <p class="when" id="vd"></p>
 <p class="vt" id="vt"></p>
 <svg class="hemi" id="hemi" viewBox="0 0 400 214" role="img" aria-label="Kaikki edustajat puoliympyrässä, väritetty äänen mukaan"></svg>
@@ -70,6 +71,7 @@
 <p class="cap" id="cap" aria-live="polite">Jokainen piste on yksi edustaja, puolueittain ryhmiteltynä. Napauta pistettä nähdäksesi, miten hän äänesti.</p>
 <a class="more" id="vl" href="/aanestykset/">Avaa tämä äänestys</a>
 </section>
+<p class="prostrip"><span>Teetkö työtä päätösten parissa? Saat tiedon sähköpostiin, kun aiheestasi äänestetään tai tiedotetaan.</span><a href="/ammattilaisille/">Ammattilaisille →</a></p>
 </main>
 <!--FOOT-->
 <script>

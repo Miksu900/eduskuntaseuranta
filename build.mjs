@@ -197,6 +197,12 @@ input[type=search],select{min-height:48px}
 .askbig{display:block;width:100%;text-align:left;background:linear-gradient(135deg,#1c3b78,#35307a);border:1px solid #3a5fb0;border-radius:var(--r);padding:16px 18px;color:#fff;font-size:18px;margin-top:10px}
 .askbig small{display:block;color:#b9c8e8;font-size:14px;margin-top:2px}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+.mode{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;margin-right:auto;margin-left:8px}
+.mode a{color:var(--mute);text-decoration:none;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;white-space:nowrap}
+.mode a[aria-current]{background:var(--text);color:var(--bg)}
+@media(max-width:520px){.mode a{padding:6px 8px;font-size:12px}.top .brand span{display:none}.askb{display:none}}
+.menu nav .navx{border-top:1px solid var(--line);margin-top:10px;padding-top:6px}.menu nav .navx a{color:var(--mute);font-size:15px}
+.menu nav{grid-template-columns:1fr!important}
 .asenna-l{max-width:760px;margin:8px auto 20px;padding:0 16px}.asenna-l[hidden],.asenna-l [hidden]{display:none}
 .asenna-b{width:100%;font:700 1rem inherit;font-family:inherit;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer}
 .asenna-l p{margin:0;color:var(--mute);font-size:.92rem}
@@ -254,7 +260,7 @@ var h='<div class="ai"><b>Vastaus</b><div style="white-space:pre-wrap;margin-top
 if(j.lahteet&&j.lahteet.length){h+='<h2>Lähteet</h2>'+j.lahteet.map(function(s){return'<a class="card" href="'+esc(s.url)+'"><div>'+esc(s.otsikko)+'</div></a>'}).join("")}
 A.innerHTML=h}).catch(function(){G.disabled=false;A.textContent="Haku ei onnistunut juuri nyt. Yritä myöhemmin uudelleen."})})})()</script>`;
 
-const navGroups = () => {
+const allGroups = () => {
   const g = (t, items) => `<div><b>${t}</b>${items.filter(Boolean).map(([h, l]) => `<a href="${h}">${l}</a>`).join("")}</div>`;
   return g("Kansanedustajat", [["/edustajat/", "Edustajat"], ["/aanestykset/", "Äänestykset"], ["/aiheet/", "Aiheet"], ["/puolueet/", "Puolueet"], HAS_VP ? ["/oma-edustaja/", "Oma edustaja"] : null, ["/testi/", "Kuka äänestää kuten sinä?"], ["/seuranta/", "Seurantani"]])
     + g("Raha", [["/budjetti/", "Valtion budjetti"], ["/valtion-talous/", "Valtion talous"], ["/valtionavustukset/", "Valtionavustukset"], ["/eu/rahat/", "EU:n rahat"], ["/vaalirahoitus/", "Vaalirahoitus"], ["/hankinnat/", "Julkiset hankinnat"], ["/kunnat/", "Kunnat"]])
@@ -262,7 +268,18 @@ const navGroups = () => {
     + g("Lue ja tilaa", [["/viikko/", "Viikkokatsaus"], ["/uutiset/", "Uutiset"], ["/blogi/", "Blogi"], ["/videot/", "Videot"], ["/opas/", "Tee oma datasivu (opas)"], ["/vieraskyna/", "Vieraskynä"], ["/tilaa/", "Tilaa viikkokirje"]])
     + g("Tietoa", [["/ammattilaisille/", "Ammattilaisille: hälytykset"], ["/haku/", "Kysy tekoälyltä"], ["/data/", "Data"], ["/datapankki/", "Datapankki"], ["/menetelma/", "Menetelmä"], ["/kirjaudu/\" id=\"acct", "Kirjaudu"]]);
 };
-const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><div class="tr"><button type="button" class="askb" data-ask>Kysy tekoälyltä</button><details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details></div></header>`;
+// Kevyt valikko: kansalaisille 6 kohtaa, ammattilaisille omat työkalut. Kaikki sivut löytyvät /kaikki/-sivulta.
+const PRO_PATHS = /^\/(ammattilaisille|hankinnat|lobbaus|lait|tiedotteet|valtionavustukset|yritykset?|vtv|data|datapankki|opas|eu|tilastot|kela|sahko|kunnat|valtion-talous|vaalirahoitus|kirjaudu|seuranta)(\/|$)/;
+const isPro = (path = "") => PRO_PATHS.test(path);
+const CITIZEN_NAV = () => [[HAS_VP ? "/oma-edustaja/" : "/edustajat/", "Etsi oma edustajasi"], ["/aanestykset/", "Eduskunnan päätökset"], ["/puolueet/", "Puolueet"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/budjetti/", "Valtion budjetti"], ["/viikko/", "Viikkokatsaus"]];
+const PRO_NAV = [["/ammattilaisille/", "Hälytykset ja hinnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/tiedotteet/", "Viranomaistiedotteet"], ["/lait/", "Lait ja asetukset"], ["/lobbaus/", "Lobbaus"], ["/valtionavustukset/", "Valtionavustukset"], ["/yritykset/", "Yritykset"], ["/datapankki/", "Datapankki ja tilastot"], ["/data/", "Avoin data"]];
+const navGroups = (path = "") => {
+  const list = items => items.map(([h, l]) => `<a href="${h}">${l}</a>`).join("");
+  return isPro(path)
+    ? `<div><b>Ammattilaisille</b>${list(PRO_NAV)}</div><div class="navx"><a href="/">← Kansalaisten etusivu</a><a href="/kaikki/">Kaikki sivut</a><a href="/kirjaudu/" id="acct">Kirjaudu</a></div>`
+    : `<div>${list(CITIZEN_NAV())}</div><div class="navx"><a href="/ammattilaisille/">Ammattilaisille →</a><a href="/kaikki/">Kaikki sivut</a><a href="/kirjaudu/" id="acct">Kirjaudu</a></div>`;
+};
+const headerHtml = (path = "") => `<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><nav class="mode" aria-label="Valitse näkymä"><a href="/"${isPro(path) ? "" : ' aria-current="page"'}>Kansalaisille</a><a href="/ammattilaisille/"${isPro(path) ? ' aria-current="page"' : ""}>Ammattilaisille</a></nav><div class="tr"><button type="button" class="askb" data-ask>Kysy</button><details class="menu"><summary>Valikko</summary><nav>${navGroups(path)}</nav></details></div></header>`;
 
 // Asennettava sovellus (PWA): etusivulla asennusnappi (Android/Chrome) tai ohje (iPhone); service worker kaikilla sivuilla.
 const ASENNUS_HTML = `<div class="asenna-l" id="asenna-l" hidden><button type="button" class="asenna-b" id="asenna">📲 Asenna Eduskuntaseuranta sovellukseksi</button><p id="asenna-ios" hidden>📱 Sovellukseksi iPhoneen: paina Safarin <b>Jaa</b>-painiketta ja valitse <b>Lisää Koti-valikkoon</b>.</p></div>`;
@@ -298,7 +315,7 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0a1424"><link rel="icon" type="image/png" sizes="32x32" href="/media/app/favicon-32.png"><link rel="apple-touch-icon" href="/media/app/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Eduskuntaseuranta">
 <style>${CSS}</style>${head}</head><body>
-${headerHtml()}
+${headerHtml(path)}
 <main>${commentsWanted(path) ? (body.includes("<!--KOM-->") ? body.replace("<!--KOM-->", () => commentsBlock({ path, SB, KEY })) : body + commentsBlock({ path, SB, KEY })) : body}</main>
 ${path === "/" ? ASENNUS_HTML : ""}${footerHtml(path)}
 ${ASK_HTML}${ASENNUS_JS}${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
@@ -483,6 +500,8 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
   // --- Oma kansanedustaja: vaalipiirit ---
   console.log("[aika]", Math.round(process.uptime())+"s", 'Oma kansanedustaja: vaalipiirit');
   const vps = new Map();
+  put("/kaikki/", shell({ title: "Kaikki sivut | Eduskuntaseuranta", desc: "Kaikki Eduskuntaseurannan sivut yhdellä sivulla.", path: "/kaikki/",
+      body: `<h1>Kaikki sivut</h1><p class="meta">Tässä ovat kaikki palvelun sivut. Useimmille riittää etusivu ja valikon kuusi kohtaa.</p><div class="kaikki">${allGroups()}</div><style>.kaikki{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 28px}.kaikki div{display:flex;flex-direction:column}.kaikki b{color:var(--mute);margin:18px 0 6px;font-size:14px}.kaikki a{padding:7px 0;color:var(--text)}</style>` }));
   for (const m of mps) if (m.vaalipiiri) { const k = vpName(m.vaalipiiri); if (!vps.has(k)) vps.set(k, []); vps.get(k).push(m); }
   if (vps.size) {
     const vpList = [...vps.entries()].sort((a, b) => a[0].localeCompare(b[0], "fi"));
@@ -962,7 +981,7 @@ e.respondWith(fetch(r).then(res=>{if(res.ok&&!/\\.(csv|json)$/.test(new URL(r.ur
     const topicChips = TOPICS.filter(t => loaded.some(v => topicOf(v).name === t.name) && t.name !== "Muut aiheet").map(t => `<a class="tag" href="/aihe/${tslug(t)}/">${esc(t.name)}</a>`).join("");
     const partyMap = {}; for (const [k, v] of Object.entries(PARTY)) partyMap[k] = v;
     let idx = await readFile("index.html", "utf8");
-    idx = idx.replace("/*CSS*/", () => CSS).replace("<!--HEADER-->", () => headerHtml()).replace("<!--TILES-->", () => { try { return tilesHtml2(); } catch (e) { console.log("Uudet laatat ohitettu:", e.message); return tilesHtml(); } }).replace("<!--AIHEET-->", () => topicChips)
+    idx = idx.replace("/*CSS*/", () => CSS).replace("<!--HEADER-->", () => headerHtml("/")).replace("<!--TILES-->", () => "").replace("<!--AIHEET-->", () => topicChips)
       .replace("/*PARTIES*/", () => JSON.stringify(partyMap)).replace("%%SB%%", () => SB).replace("%%KEY%%", () => KEY)
       .replace("<!--FOOT-->", () => `${ASENNUS_HTML}${footerHtml()}\n${ASK_HTML}${ACCT_JS}${ASENNUS_JS}${process.env.NO_ANALYTICS ? "" : BEACON}`)
       .replace("</head>", () => `<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0a1424"><link rel="icon" type="image/png" sizes="32x32" href="/media/app/favicon-32.png"><link rel="apple-touch-icon" href="/media/app/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Eduskuntaseuranta"></head>`);
