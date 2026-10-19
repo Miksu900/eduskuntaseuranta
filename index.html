@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eduskuntaseuranta – miten kansanedustajat äänestävät</title>
+<meta name="description" content="Katso, miten kansanedustajasi on äänestänyt eduskunnassa, kuinka usein hän on paikalla ja kuinka usein hän äänestää eri tavalla kuin oma ryhmänsä.">
+<meta property="og:title" content="Eduskuntaseuranta – miten kansanedustajat äänestävät">
+<meta property="og:description" content="Hae kansanedustajasi ja katso hänen äänestyksensä, läsnäolonsa ja eroavuudet oman ryhmän linjasta.">
+<meta property="og:image" content="https://eduskuntaseuranta.fi/og.png"><meta property="og:type" content="website"><meta property="og:locale" content="fi_FI"><meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://eduskuntaseuranta.fi/">
+<style>
+:root{color-scheme:dark;--bg:#0a1424;--surface:#101f36;--line:#1e3252;--text:#eef3fb;--mute:#93a4bd;--jaa:#3ddc97;--ei:#ff6b81;--tyhja:#ffc857;--poissa:#5b6b86;--link:#7cc4ff;--accent:#7cc4ff}*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.top{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:18px;letter-spacing:-.01em;color:var(--text)}.brand:hover{text-decoration:none}
+.tr{display:flex;align-items:center;gap:6px}
+.acct{color:var(--text);font-size:15px;padding:8px 10px;border-radius:10px}.acct:hover{background:var(--surface);text-decoration:none}
+.menu summary{list-style:none;cursor:pointer;color:var(--bg);background:var(--text);font-weight:700;font-size:15px;padding:8px 14px;border-radius:999px}
+.menu summary::-webkit-details-marker{display:none}
+.menu[open] summary{background:var(--surface);color:var(--text)}
+.menu nav{position:absolute;left:0;right:0;top:100%;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;max-height:calc(100vh - 56px);overflow:auto}
+.menu nav div{display:flex;flex-direction:column}
+.menu nav b{font-size:14px;color:var(--mute);font-weight:600;margin:14px 0 4px}
+.menu nav a{color:var(--text);padding:8px 0;font-size:16px}
+@media(min-width:720px){.menu nav{left:auto;right:16px;width:460px;border:1px solid var(--line);border-radius:16px;top:calc(100% + 6px)}}
+main{max-width:760px;margin:auto;padding:14px 16px 56px}
+h1{font-size:28px;line-height:1.15;letter-spacing:-.02em;font-weight:800;margin:10px 0 6px}h2{font-size:20px;letter-spacing:-.01em;font-weight:800;margin:30px 0 8px}
+.meta{color:var(--mute);font-size:13px}.note{color:var(--mute);font-size:13px;margin:8px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chip{background:var(--surface);border-radius:12px;padding:10px 14px;min-width:110px}
+.chip b{display:block;font-size:22px;letter-spacing:-.01em}.chip span{color:var(--mute);font-size:12px}
+.card{display:block;background:var(--surface);border-radius:14px;padding:12px 16px;margin:8px 0;color:var(--text)}
+.card:hover{text-decoration:none;background:#14284a}
+.jaa{color:var(--jaa)}.ei{color:var(--ei)}.tyhja{color:var(--tyhja)}.poissa{color:var(--poissa)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mute);font-weight:500}
+.ai{background:#0f2036;border-left:3px solid #2a5db0;border-radius:8px;padding:10px 12px;margin:12px 0}
+.ai small{display:block;color:#8aa;margin-top:6px}
+.share{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+button,.btn{font:inherit;color:var(--text);background:#1b2f50;border:0;border-radius:999px;padding:9px 16px;cursor:pointer;display:inline-block}
+button.on,.btn.on{background:#2a5db0}button:disabled{opacity:.4}
+.names a{display:inline-block;margin:2px 10px 2px 0}
+footer{max-width:760px;margin:auto;padding:0 16px 40px;color:#7d8794;font-size:12px}
+.q{background:var(--surface);border-radius:14px;padding:16px;margin:12px 0}
+.q .t{font-size:17px;margin-bottom:6px}.bar{height:6px;background:#2a2a2a;border-radius:3px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:#2a5db0}
+:root{--accent:#6cb8ff;--surface2:#16294a;--r:18px}
+body{font-size:17px;line-height:1.6}
+.top{padding:10px 16px;backdrop-filter:blur(10px);background:rgba(10,20,36,.92)}
+.brand{font-size:19px;font-weight:700;letter-spacing:-.02em}.brand span{color:var(--accent);font-weight:800}
+.askb{background:linear-gradient(135deg,#3b82f6,#7c5cff);color:#fff;font-weight:700;font-size:15px;padding:9px 14px;border-radius:999px;box-shadow:0 2px 14px rgba(80,110,255,.35)}
+.menu summary{font-size:15px;padding:9px 14px}
+.menu nav{grid-template-columns:1fr 1fr}
+.menu nav a{padding:9px 0;font-size:17px}
+main{max-width:780px;padding:18px 16px 90px}
+h1{font-size:clamp(28px,6.5vw,36px);letter-spacing:-.025em}
+h2{font-size:22px}
+.card,.q,.chip{border-radius:var(--r)}
+.card{padding:14px 18px;border:1px solid transparent}.card:hover{border-color:var(--line)}
+.note{background:var(--surface);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5}
+.btn,button{min-height:44px}
+input[type=search],select{min-height:48px}
+.tiles{display:grid;grid-template-columns:1fr;gap:10px;margin:22px 0 4px}
+@media(min-width:560px){.tiles{grid-template-columns:1fr 1fr}}
+.tile{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;color:var(--text)}
+.tile:hover{text-decoration:none;background:var(--surface2);border-color:var(--accent)}
+.tile .ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--c,#2a5db0)}
+.tile .ic svg{width:25px;height:25px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tile b{display:block;font-size:18px;letter-spacing:-.01em}
+.tile span{display:block;color:var(--mute);font-size:14px;line-height:1.4;margin-top:2px}
+.fab{position:fixed;right:16px;bottom:16px;z-index:20;border-radius:999px;padding:14px 20px;font-weight:700;font-size:16px;color:#fff;background:linear-gradient(135deg,#3b82f6,#7c5cff);box-shadow:0 6px 24px rgba(60,90,255,.5)}
+.sheet{position:fixed;inset:0;z-index:30;display:none;background:rgba(3,8,18,.7)}
+.sheet.open{display:block}
+.sheet .in{position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow:auto;background:var(--bg);border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 16px 28px;max-width:780px;margin:auto}
+.sheet h3{margin:0 0 4px;font-size:21px;letter-spacing:-.01em}
+.sheet .x{position:absolute;right:12px;top:12px;background:var(--surface);width:44px;padding:0}
+.sheet input[type=search]{width:100%;font:inherit;font-size:17px;color:var(--text);background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0}
+.sheet input[type=search]:focus{outline:none;border-color:var(--accent)}
+.sheet .go{background:linear-gradient(135deg,#3b82f6,#7c5cff);width:100%;font-weight:700;font-size:17px}
+.sheet .eg{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.sheet .eg button{background:var(--surface);font-size:14px;padding:8px 12px;min-height:0;text-align:left}
+.sheet label{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--mute);margin:6px 0 12px}
+.hero2{padding:14px 0 4px}
+.hero2 p{color:var(--mute);margin:0 0 14px;font-size:18px}
+.askbig{display:block;width:100%;text-align:left;background:linear-gradient(135deg,#1c3b78,#35307a);border:1px solid #3a5fb0;border-radius:var(--r);padding:16px 18px;color:#fff;font-size:18px;margin-top:10px}
+.askbig small{display:block;color:#b9c8e8;font-size:14px;margin-top:2px}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+.mode{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;margin-right:auto;margin-left:8px}
+.mode a{color:var(--mute);text-decoration:none;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;white-space:nowrap}
+.mode a[aria-current]{background:var(--text);color:var(--bg)}
+@media(max-width:520px){.mode a{padding:6px 8px;font-size:12px}.top .brand span{display:none}.askb{display:none}}
+.menu nav .navx{border-top:1px solid var(--line);margin-top:10px;padding-top:6px}.menu nav .navx a{color:var(--mute);font-size:15px}
+.menu nav{grid-template-columns:1fr!important}
+.asenna-l{max-width:760px;margin:8px auto 20px;padding:0 16px}.asenna-l[hidden],.asenna-l [hidden]{display:none}
+.asenna-b{width:100%;font:700 1rem inherit;font-family:inherit;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer}
+.asenna-l p{margin:0;color:var(--mute);font-size:.92rem}
+
+.tf{position:relative;margin:20px 0 0}
+.tf input{width:100%;font:inherit;font-size:17px;color:var(--text);background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px 14px 44px;min-height:52px}
+.tf input:focus{outline:none;border-color:var(--accent)}
+.tf svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;stroke:var(--mute);fill:none;stroke-width:2;stroke-linecap:round}
+.tile[hidden]{display:none}
+.tile .nw{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:#3ddc97;color:#06281a;font-size:12px;font-weight:800;vertical-align:middle;letter-spacing:.01em}
+.tnone{margin:14px 0;padding:16px;border:1px dashed var(--line);border-radius:var(--r,18px);color:var(--mute)}
+.tnone button{margin-top:10px;display:block}
+.skip{position:absolute;left:-999px;top:8px;background:#fff;color:#000;padding:10px 14px;border-radius:10px;z-index:50}
+.skip:focus{left:8px}
+
+.hero{padding:24px 0 6px}
+.hero h1{font-size:clamp(30px,8vw,44px);line-height:1.06;letter-spacing:-.025em;font-weight:800;margin:0 0 16px;max-width:13em}
+.find{position:relative}
+.find input{width:100%;font:inherit;font-size:18px;color:var(--text);background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:16px 18px}
+.find input:focus{outline:none;border-color:var(--accent)}
+.find input::placeholder{color:#6f84a3}
+.res{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:13px 4px;border-bottom:1px solid var(--line);color:var(--text)}
+.res:hover{text-decoration:none;background:var(--surface)}
+.res span{color:var(--mute);font-size:14px;white-space:nowrap}
+.hint{margin:10px 0 0;font-size:14px;color:var(--mute)}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:26px 0 0}
+.links div{display:flex;flex-direction:column}
+.links b{font-size:14px;color:var(--mute);font-weight:600;margin:16px 0 4px}
+.links a{color:var(--text);font-size:17px;padding:9px 0;border-bottom:1px solid var(--line)}
+.links a:hover{color:var(--accent);text-decoration:none}
+@media(min-width:720px){.links{grid-template-columns:repeat(4,1fr)}}
+.panel{margin-top:34px;padding:20px 14px 16px;border:1px solid var(--line);border-radius:22px;background:radial-gradient(90% 70% at 50% 100%,#17325f 0%,var(--surface) 70%)}
+.panel h2{font-size:22px;letter-spacing:-.01em;font-weight:800;margin:0 0 4px}
+.when{color:var(--mute);font-size:14px;margin:0 0 4px}
+.vt{font-size:17px;line-height:1.35;margin:0 0 6px}
+.hemi{display:block;width:100%;height:auto;margin:10px 0 6px;touch-action:manipulation}
+.d{fill:#2a3a55;cursor:pointer;transition:fill .45s}
+.d.jaa{fill:var(--jaa)}.d.ei{fill:var(--ei)}.d.tyhja{fill:var(--tyhja)}.d.poissa{fill:var(--poissa)}
+.d.sel{stroke:#fff;stroke-width:2.2}
+.leg{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0;padding:0;list-style:none;font-size:15px}
+.leg li{display:flex;align-items:center;gap:7px}
+.leg i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.leg b{font-weight:700}
+.cap{min-height:3em;margin:12px 0 0;font-size:15px;color:var(--mute)}
+.cap a{color:var(--text);font-weight:600}
+.more{display:inline-block;margin-top:10px;color:var(--text);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+@media(prefers-reduced-motion:reduce){.d{transition:none}}
+</style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0a1424"><link rel="icon" type="image/png" sizes="32x32" href="/media/app/favicon-32.png"><link rel="apple-touch-icon" href="/media/app/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Eduskuntaseuranta"></head><body>
+<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><nav class="mode" aria-label="Valitse näkymä"><a href="/" aria-current="page">Kansalaisille</a><a href="/ammattilaisille/">Ammattilaisille</a></nav><div class="tr"><button type="button" class="askb" data-ask>Kysy</button><details class="menu"><summary>Valikko</summary><nav><div><a href="/edustajat/">Etsi oma edustajasi</a><a href="/aanestykset/">Eduskunnan päätökset</a><a href="/puolueet/">Puolueet</a><a href="/testi/">Kuka äänestää kuten sinä?</a><a href="/budjetti/">Valtion budjetti</a><a href="/viikko/">Viikkokatsaus</a></div><div class="navx"><a href="/ammattilaisille/">Ammattilaisille →</a><a href="/kaikki/">Kaikki sivut</a><a href="/kirjaudu/" id="acct">Kirjaudu</a></div></nav></details></div></header>
+<main>
+<section class="hero3">
+<h1>Miten kansanedustajat äänestävät?</h1>
+<p>Eduskunnan päätökset ja jokaisen kansanedustajan äänet selkeästi. Ilmainen, ei kirjautumista.</p>
+<div class="find"><input id="q" type="search" placeholder="Kirjoita kansanedustajan nimi" autocomplete="off" aria-label="Hae kansanedustajaa nimellä"><div id="rs"></div></div>
+<div class="big3">
+<a href="/oma-edustaja/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><b>Etsi oma edustajasi</b><small>Valitse vaalipiirisi ja näe, miten alueesi edustajat äänestävät</small></a>
+<a href="/viikko/"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 12.5 2.8 2.8L16 9.5"/></svg><b>Tämän viikon päätökset</b><small>Mitä eduskunta päätti, lyhyesti ja ymmärrettävästi</small></a>
+<a href="/testi/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="16.5" cy="10.5" r="2.5"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6M14.5 15.2c2.6-.4 5 .8 5.8 3.8"/></svg><b>Kuka äänestää kuten sinä?</b><small>Vastaa kysymyksiin ja löydä samanmielinen edustaja</small></a>
+</div>
+</section>
+<style>.hero3{padding:26px 0 8px}.hero3 h1{font-size:clamp(28px,7vw,40px);line-height:1.1;margin:0 0 10px}.hero3>p{color:var(--mute);font-size:17px;margin:0 0 18px;max-width:560px}
+.hero3 #q{font-size:17px;padding:15px 16px}
+.big3{display:grid;gap:10px;margin-top:16px}@media(min-width:720px){.big3{grid-template-columns:repeat(3,1fr)}}
+.big3 a{display:grid;grid-template-columns:44px 1fr;column-gap:14px;align-items:center;text-decoration:none;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.big3 a:hover{border-color:var(--accent)}.big3 svg{grid-row:span 2;width:44px;height:44px;padding:10px;border-radius:12px;background:rgba(124,196,255,.14);fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.big3 b{font-size:18px}.big3 small{color:var(--mute);font-size:14px;line-height:1.4}
+.prostrip{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:space-between;border:1px dashed var(--line);border-radius:14px;padding:14px 16px;margin:22px 0 8px;color:var(--mute);font-size:15px}.prostrip a{font-weight:700;color:var(--accent);text-decoration:none}</style>
+
+<section class="panel" id="viimeisin" hidden>
+<h2>Viimeisin äänestys eduskunnassa</h2>
+<p class="when" id="vd"></p>
+<p class="vt" id="vt"></p>
+<svg class="hemi" id="hemi" viewBox="0 0 400 214" role="img" aria-label="Kaikki edustajat puoliympyrässä, väritetty äänen mukaan"></svg>
+<ul class="leg" id="leg"></ul>
+<p class="cap" id="cap" aria-live="polite">Jokainen piste on yksi edustaja, puolueittain ryhmiteltynä. Napauta pistettä nähdäksesi, miten hän äänesti.</p>
+<a class="more" id="vl" href="/aanestykset/">Avaa tämä äänestys</a>
+</section>
+<p class="prostrip"><span>Teetkö työtä päätösten parissa? Saat tiedon sähköpostiin, kun aiheestasi äänestetään tai tiedotetaan.</span><a href="/ammattilaisille/">Ammattilaisille →</a></p>
+</main>
+<div class="asenna-l" id="asenna-l" hidden><button type="button" class="asenna-b" id="asenna">📲 Asenna Eduskuntaseuranta sovellukseksi</button><p id="asenna-ios" hidden>📱 Sovellukseksi iPhoneen: paina Safarin <b>Jaa</b>-painiketta ja valitse <b>Lisää Koti-valikkoon</b>.</p></div><footer>Lähde: Eduskunnan avoin data. Tiedot on laskettu koneellisesti ja ne ovat vain yksi osa edustajan työtä. <a href="/menetelma/">Lue, miten luvut lasketaan.</a> Päivitetty 19.10.2026.</footer>
+<button type="button" class="fab" data-ask aria-label="Kysy tekoälyltä">Kysy tekoälyltä</button>
+<div class="sheet" id="asksheet" role="dialog" aria-modal="true" aria-labelledby="askt"><div class="in"><button type="button" class="x" id="askx" aria-label="Sulje">✕</button>
+<h3 id="askt">Kysy tekoälyltä</h3><p class="meta" style="margin:0">Vastaa äänestysten, lakialoitteiden, hallituksen esitysten ja budjetin perusteella ja näyttää lähteet. Voi erehtyä, tarkista tärkeät asiat lähteestä.</p>
+<form id="askf"><input id="askq" type="search" maxlength="300" placeholder="Kirjoita kysymys" autocomplete="off"><div class="eg"><button type="button" data-eg="Mitä budjetti 2027 tekee veroille?">Mitä budjetti 2027 tekee veroille?</button><button type="button" data-eg="Milloin eduskunta äänesti kissoista?">Milloin eduskunta äänesti kissoista?</button><button type="button" data-eg="Miten eduskunta äänesti viimeksi?">Miten eduskunta äänesti viimeksi?</button></div>
+<label><input type="checkbox" id="askl"> Laaja haku (käyttää myös verkkoa, hitaampi)</label><button type="submit" class="go" id="askg">Kysy</button></form><div id="aska" aria-live="polite" style="margin-top:14px"></div></div></div>
+<script>(function(){var S=document.getElementById("asksheet"),q=document.getElementById("askq"),A=document.getElementById("aska"),G=document.getElementById("askg"),F=document.getElementById("askf");
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function open(){S.classList.add("open");document.body.style.overflow="hidden";setTimeout(function(){q.focus()},50)}
+function close(){S.classList.remove("open");document.body.style.overflow=""}
+document.querySelectorAll("[data-ask]").forEach(function(b){b.addEventListener("click",open)});
+document.getElementById("askx").onclick=close;S.addEventListener("click",function(e){if(e.target===S)close()});document.addEventListener("keydown",function(e){if(e.key==="Escape")close()});
+document.querySelectorAll("[data-eg]").forEach(function(b){b.onclick=function(){q.value=b.getAttribute("data-eg");F.requestSubmit()}});
+if(/[?&]kysy=1/.test(location.search))open();
+F.addEventListener("submit",function(e){e.preventDefault();var v=q.value.trim();if(v.length<3){A.textContent="Kirjoita kysymys.";return}G.disabled=true;A.textContent="Haetaan…";
+fetch("https://arwenhbwzoavbonlwkdr.supabase.co/functions/v1/haku",{method:"POST",headers:{"Content-Type":"application/json",apikey:"sb_publishable_7baeuteHYaarCEv4-j8C_g_OLxcKzJp",Authorization:"Bearer "+"sb_publishable_7baeuteHYaarCEv4-j8C_g_OLxcKzJp"},body:JSON.stringify({q:v,laaja:!!document.getElementById("askl").checked})}).then(function(r){return r.json()}).then(function(j){G.disabled=false;
+if(j.virhe){A.innerHTML='<div class="ai">'+esc(j.virhe)+'</div>';return}
+var h='<div class="ai"><b>Vastaus</b><div style="white-space:pre-wrap;margin-top:6px">'+esc(j.vastaus||"")+'</div><small>'+(j.laaja?"Laaja haku: tekoäly käytti verkkoa ja omaa tulkintaansa, tiedot eivät ole Eduskuntaseurannan vahvistamia.":"Tekoälyn tekemä vastaus sivuston tietojen perusteella, voi sisältää virheitä.")+'</small></div>';
+if(j.lahteet&&j.lahteet.length){h+='<h2>Lähteet</h2>'+j.lahteet.map(function(s){return'<a class="card" href="'+esc(s.url)+'"><div>'+esc(s.otsikko)+'</div></a>'}).join("")}
+A.innerHTML=h}).catch(function(){G.disabled=false;A.textContent="Haku ei onnistunut juuri nyt. Yritä myöhemmin uudelleen."})})})()</script><script>(function(){try{var n=localStorage.getItem("es_nick"),a=document.getElementById("acct");if(a&&n){a.textContent=n;a.href="/kirjaudu/"}}catch(e){}})()</script><script>(function(){if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});var L=document.getElementById("asenna-l");if(!L)return;if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone)return;var A=document.getElementById("asenna"),I=document.getElementById("asenna-ios"),ip=null;window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();ip=e;L.hidden=false;A.hidden=false});A.onclick=function(){if(!ip)return;ip.prompt();ip.userChoice.then(function(){L.hidden=true;ip=null})};if(/iphone|ipad|ipod/i.test(navigator.userAgent)){L.hidden=false;A.hidden=true;I.hidden=false}})();</script>
+<script>
+const URL_="https://arwenhbwzoavbonlwkdr.supabase.co", KEY="sb_publishable_7baeuteHYaarCEv4-j8C_g_OLxcKzJp", P={"kok":"Kokoomus","ps":"Perussuomalaiset","sd":"SDP","kesk":"Keskusta","vihr":"Vihreät","vas":"Vasemmistoliitto","rkp":"RKP","r":"RKP","kd":"Kristillisdemokraatit","liik":"Liike Nyt"};
+const H={apikey:KEY};
+const $=id=>document.getElementById(id);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e};
+const pk=p=>{p=String(p||"").trim().toLowerCase();return p==="r"?"rkp":p};
+const pn=c=>P[c]||(c?c.toUpperCase():"Ei ryhmää");
+const slug=s=>String(s||"").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const full=m=>((m.etunimi||"")+" "+(m.sukunimi||"")).trim();
+const fd=d=>d?new Date(d).toLocaleDateString("fi-FI"):"";
+const AANI={jaa:"Jaa",ei:"Ei",tyhja:"Tyhjää",poissa:"Poissa"};
+const COL={jaa:"var(--jaa)",ei:"var(--ei)",tyhja:"var(--tyhja)",poissa:"var(--poissa)"};
+async function get(path){const r=await fetch(URL_+"/rest/v1/"+path,{headers:H});if(!r.ok)throw new Error(r.status);return r.json()}
+let mps=[],slugs=new Map();
+function makeSlugs(){const c={};mps.forEach(m=>{const b=slug(full(m))||String(m.henkilo);c[b]=(c[b]||0)+1});slugs=new Map(mps.map(m=>{const b=slug(full(m))||String(m.henkilo);return[m.henkilo,c[b]>1?b+"-"+m.henkilo:b]}))}
+const mpUrl=m=>"/edustaja/"+(slugs.get(m.henkilo)||m.henkilo)+"/";
+const norm=s=>String(s||"").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"");
+
+// Haku
+$("q").addEventListener("input",function(){
+  const n=norm(this.value).trim(),box=$("rs");box.textContent="";
+  if(n.length<2)return;
+  mps.filter(m=>norm(full(m)).includes(n)).slice(0,6).forEach(m=>{
+    const a=el("a","res");a.href=mpUrl(m);a.appendChild(el("b","",full(m)));a.appendChild(el("span","",pn(pk(m.puolue))));box.appendChild(a)});
+  if(!box.children.length)box.appendChild(el("p","hint","Ei tuloksia. Kokeile sukunimeä."));
+});
+
+// Puoliympyrä: yksi piste per edustaja
+function layout(n){
+  const R=7,r0=72,r1=192,rs=[];for(let i=0;i<R;i++)rs.push(r0+(r1-r0)*i/(R-1));
+  const sum=rs.reduce((a,b)=>a+b,0),cnt=rs.map(r=>Math.round(n*r/sum));
+  cnt[R-1]+=n-cnt.reduce((a,b)=>a+b,0);
+  const pts=[];rs.forEach((r,i)=>{const k=cnt[i];for(let j=0;j<k;j++){const t=Math.PI*(1-(k===1?.5:j/(k-1)));pts.push({t,r,x:200+r*Math.cos(t),y:204-r*Math.sin(t)})}});
+  return pts.sort((a,b)=>b.t-a.t||a.r-b.r);
+}
+function hemi(v,votes){
+  const size={};mps.forEach(m=>{const p=pk(m.puolue);size[p]=(size[p]||0)+1});
+  const order=mps.slice().sort((a,b)=>size[pk(b.puolue)]-size[pk(a.puolue)]||pk(a.puolue).localeCompare(pk(b.puolue))||(a.sukunimi||"").localeCompare(b.sukunimi||"","fi"));
+  const pts=layout(order.length),svg=$("hemi"),NS="http://www.w3.org/2000/svg";
+  svg.textContent="";const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const cs=[];
+  order.forEach((m,i)=>{
+    const c=document.createElementNS(NS,"circle");c.setAttribute("cx",pts[i].x.toFixed(1));c.setAttribute("cy",pts[i].y.toFixed(1));c.setAttribute("r","5.8");c.setAttribute("class","d");c.dataset.i=i;
+    svg.appendChild(c);cs.push(c)});
+  const aani=m=>votes.get(m.henkilo)||"poissa";
+  setTimeout(()=>cs.forEach((c,i)=>{if(!reduce)c.style.transitionDelay=(i*2.5)+"ms";c.classList.add(aani(order[i]))}),60);
+  svg.onclick=e=>{const c=e.target.closest(".d");if(!c)return;
+    cs.forEach(x=>x.classList.remove("sel"));c.classList.add("sel");
+    const m=order[+c.dataset.i],cap=$("cap");cap.textContent="";
+    const a=el("a","",full(m));a.href=mpUrl(m);cap.appendChild(a);
+    cap.appendChild(document.createTextNode(" ("+pn(pk(m.puolue))+"): "+AANI[aani(m)]))};
+}
+function bar(v){
+  const t=["jaa","ei","tyhja","poissa"].reduce((s,k)=>s+(v[k]||0),0)||1,b=el("div","sb");
+  ["jaa","ei","tyhja","poissa"].forEach(k=>{const i=el("i");i.style.width=(100*(v[k]||0)/t)+"%";i.style.background=COL[k];b.appendChild(i)});return b}
+function title(v){return v.otsikko||v.lisaotsikko||"Äänestys "+v.id}
+
+async function init(){
+  try{
+    const [m,vs]=await Promise.all([
+      get("mp_stats?select=henkilo,etunimi,sukunimi,puolue&limit=1000"),
+      get("aanestykset?select=id,otsikko,lisaotsikko,alkoi,jaa,ei,tyhja,poissa&ladattu=eq.true&order=alkoi.desc,id.desc&limit=1")]);
+    mps=m;makeSlugs();
+    if(!vs.length)return;
+    const v=vs[0];
+    $("viimeisin").hidden=false;
+    $("vd").textContent=fd(v.alkoi);$("vt").textContent=title(v);$("vl").href="/aanestys/"+v.id+"/";
+    const L=$("leg");[["jaa",v.jaa],["ei",v.ei],["tyhja",v.tyhja],["poissa",v.poissa]].forEach(([k,n])=>{
+      const li=el("li");const i=el("i");i.style.background=COL[k];li.appendChild(i);li.appendChild(document.createTextNode(AANI[k]+" "));li.appendChild(el("b","",String(n??"–")));L.appendChild(li)});
+    try{
+      const r=await get("aanestys_edustaja?aanestys_id=eq."+v.id+"&select=henkilo,aani&limit=400");
+      hemi(v,new Map(r.map(x=>[x.henkilo,x.aani])));
+    }catch(e){$("hemi").hidden=true;$("cap").textContent=""}
+  }catch(e){$("rs").textContent=""}
+}
+init();
+</script></body></html>
