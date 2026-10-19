@@ -1,5 +1,9 @@
 {
- "hyvaksytyt_pohjat": [],
+ "hyvaksytyt_pohjat": [
+  "A",
+  "B",
+  "C"
+ ],
  "viestit": [
   {
    "nro": 1,
