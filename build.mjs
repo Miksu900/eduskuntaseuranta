@@ -197,6 +197,9 @@ input[type=search],select{min-height:48px}
 .askbig{display:block;width:100%;text-align:left;background:linear-gradient(135deg,#1c3b78,#35307a);border:1px solid #3a5fb0;border-radius:var(--r);padding:16px 18px;color:#fff;font-size:18px;margin-top:10px}
 .askbig small{display:block;color:#b9c8e8;font-size:14px;margin-top:2px}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+.asenna-l{max-width:760px;margin:8px auto 20px;padding:0 16px}.asenna-l[hidden],.asenna-l [hidden]{display:none}
+.asenna-b{width:100%;font:700 1rem inherit;font-family:inherit;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer}
+.asenna-l p{margin:0;color:var(--mute);font-size:.92rem}
 `;
 CSS += EXTRA_CSS;
 CSS += TILE_CSS;
@@ -261,6 +264,9 @@ const navGroups = () => {
 };
 const headerHtml = () => `<header class="top"><a class="brand" href="/">Eduskunta<span>seuranta</span></a><div class="tr"><button type="button" class="askb" data-ask>Kysy tekoälyltä</button><details class="menu"><summary>Valikko</summary><nav>${navGroups()}</nav></details></div></header>`;
 
+// Asennettava sovellus (PWA): etusivulla asennusnappi (Android/Chrome) tai ohje (iPhone); service worker kaikilla sivuilla.
+const ASENNUS_HTML = `<div class="asenna-l" id="asenna-l" hidden><button type="button" class="asenna-b" id="asenna">📲 Asenna Eduskuntaseuranta sovellukseksi</button><p id="asenna-ios" hidden>📱 Sovellukseksi iPhoneen: paina Safarin <b>Jaa</b>-painiketta ja valitse <b>Lisää Koti-valikkoon</b>.</p></div>`;
+const ASENNUS_JS = `<script>(function(){if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});var L=document.getElementById("asenna-l");if(!L)return;if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone)return;var A=document.getElementById("asenna"),I=document.getElementById("asenna-ios"),ip=null;window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();ip=e;L.hidden=false;A.hidden=false});A.onclick=function(){if(!ip)return;ip.prompt();ip.userChoice.then(function(){L.hidden=true;ip=null})};if(/iphone|ipad|ipod/i.test(navigator.userAgent)){L.hidden=false;A.hidden=true;I.hidden=false}})();</script>`;
 const SHARE_JS = `<script>document.querySelectorAll("[data-share]").forEach(function(b){b.onclick=function(){var u=location.href,t=document.title;if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){b.textContent="Linkki kopioitu"})}else{prompt("Kopioi linkki",u)}}})</script>`;
 
 let HAS_VP = false;
@@ -290,11 +296,12 @@ function shell({ title, desc, path, body, head = "" }) {
 <meta property="og:type" content="website"><meta property="og:locale" content="fi_FI"><meta property="og:site_name" content="Eduskuntaseuranta">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0a1424"><link rel="icon" type="image/png" sizes="32x32" href="/media/app/favicon-32.png"><link rel="apple-touch-icon" href="/media/app/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Eduskuntaseuranta">
 <style>${CSS}</style>${head}</head><body>
 ${headerHtml()}
 <main>${commentsWanted(path) ? (body.includes("<!--KOM-->") ? body.replace("<!--KOM-->", () => commentsBlock({ path, SB, KEY })) : body + commentsBlock({ path, SB, KEY })) : body}</main>
-${footerHtml(path)}
-${ASK_HTML}${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
+${path === "/" ? ASENNUS_HTML : ""}${footerHtml(path)}
+${ASK_HTML}${ASENNUS_JS}${SHARE_JS}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}</body></html>`;
 }
 
 // Asiakirjatunnukset (HE 123/2026, VaVM 5/2026 ...) otsikosta -> linkit Eduskunnan omille sivuille
@@ -941,6 +948,16 @@ ${FILES.map(f => { const M = META[f.name] || { title: f.name, what: f.desc, row:
   if (blogRss) await writeFile(OUT + "/blogi/rss.xml", blogRss);
   if (existsSync("og.png")) await copyFile("og.png", `${OUT}/og.png`);
   if (existsSync("media")) await cp("media", `${OUT}/media`, { recursive: true });
+  await writeFile(OUT + "/manifest.webmanifest", JSON.stringify({ name: "Eduskuntaseuranta", short_name: "Eduskuntaseuranta", lang: "fi",
+    description: "Miten kansanedustajat äänestävät: eduskunnan äänestykset, hallituksen esitykset ja hankinnat avoimesta datasta.",
+    start_url: "/", scope: "/", display: "standalone", background_color: "#0a1424", theme_color: "#0a1424",
+    icons: [{ src: "/media/app/icon-192.png", sizes: "192x192", type: "image/png" }, { src: "/media/app/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/media/app/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" }] }, null, 1));
+  // Service worker: verkko ensin (luvut aina tuoreina), välimuisti varalla ilman verkkoa.
+  await writeFile(OUT + "/sw.js", `const C="es-v1";self.addEventListener("install",()=>self.skipWaiting());
+self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
+self.addEventListener("fetch",e=>{const r=e.request;if(r.method!=="GET"||new URL(r.url).origin!==location.origin)return;
+e.respondWith(fetch(r).then(res=>{if(res.ok&&!/\\.(csv|json)$/.test(new URL(r.url).pathname)){const cp=res.clone();caches.open(C).then(c=>c.put(r,cp))}return res}).catch(()=>caches.match(r).then(m=>m||caches.match("/"))))});`);
   {
     const topicChips = TOPICS.filter(t => loaded.some(v => topicOf(v).name === t.name) && t.name !== "Muut aiheet").map(t => `<a class="tag" href="/aihe/${tslug(t)}/">${esc(t.name)}</a>`).join("");
     const partyMap = {}; for (const [k, v] of Object.entries(PARTY)) partyMap[k] = v;
