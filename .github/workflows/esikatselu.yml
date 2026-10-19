@@ -1,0 +1,27 @@
+name: Esikatselu (rakenna haara, ei julkaisua)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/cache/restore@v4
+        with: { path: .cache, key: fetch-${{ github.run_id }}, restore-keys: fetch- }
+      - run: node build.mjs
+        env:
+          HILMA_API_KEY: ${{ secrets.HILMA_API_KEY }}
+          FETCH_TTL_H: "48"
+          NO_ANALYTICS: "1"
+      - name: Tallenna osa sivuista haaraan esikatselu
+        run: |
+          mkdir out && cd dist && cp --parents index.html kaikki/index.html ammattilaisille/index.html aanestykset/index.html out 2>/dev/null || true
+          cp --parents index.html kaikki/index.html ammattilaisille/index.html aanestykset/index.html ../out/ 2>/dev/null || true
+          f=$(ls -d edustaja/*/ | head -1); cp --parents ${f}index.html ../out/ || true
+          cp manifest.webmanifest ../out/ 2>/dev/null || true
+          cd ../out && git init -q && git checkout -q -b esikatselu && git add -A && git -c user.name=bot -c user.email=bot@x commit -qm esikatselu
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" esikatselu
