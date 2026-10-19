@@ -271,7 +271,7 @@ const allGroups = () => {
 // Kevyt valikko: kansalaisille 6 kohtaa, ammattilaisille omat työkalut. Kaikki sivut löytyvät /kaikki/-sivulta.
 const PRO_PATHS = /^\/(ammattilaisille|hankinnat|lobbaus|lait|tiedotteet|valtionavustukset|yritykset?|vtv|data|datapankki|opas|eu|tilastot|kela|sahko|kunnat|valtion-talous|vaalirahoitus|kirjaudu|seuranta)(\/|$)/;
 const isPro = (path = "") => PRO_PATHS.test(path);
-const CITIZEN_NAV = () => [[HAS_VP ? "/oma-edustaja/" : "/edustajat/", "Etsi oma edustajasi"], ["/aanestykset/", "Eduskunnan päätökset"], ["/puolueet/", "Puolueet"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/budjetti/", "Valtion budjetti"], ["/viikko/", "Viikkokatsaus"]];
+const CITIZEN_NAV = () => [["/oma-edustaja/", "Etsi oma edustajasi"], ["/aanestykset/", "Eduskunnan päätökset"], ["/puolueet/", "Puolueet"], ["/testi/", "Kuka äänestää kuten sinä?"], ["/budjetti/", "Valtion budjetti"], ["/viikko/", "Viikkokatsaus"]];
 const PRO_NAV = [["/ammattilaisille/", "Hälytykset ja hinnat"], ["/hankinnat/", "Julkiset hankinnat"], ["/tiedotteet/", "Viranomaistiedotteet"], ["/lait/", "Lait ja asetukset"], ["/lobbaus/", "Lobbaus"], ["/valtionavustukset/", "Valtionavustukset"], ["/yritykset/", "Yritykset"], ["/datapankki/", "Datapankki ja tilastot"], ["/data/", "Avoin data"]];
 const navGroups = (path = "") => {
   const list = items => items.map(([h, l]) => `<a href="${h}">${l}</a>`).join("");
@@ -512,6 +512,12 @@ ${shareBtns}<!--KOM-->${ptab}${who}`;
     }
     put("/oma-edustaja/", shell({ title: "Oma kansanedustaja: löydä vaalipiirisi edustajat | Eduskuntaseuranta", desc: "Valitse vaalipiirisi ja näe alueesi kansanedustajat sekä se, miten he ovat äänestäneet.", path: "/oma-edustaja/",
       body: `<h1>Oma kansanedustaja</h1><p>Valitse vaalipiirisi, niin näet alueesi kansanedustajat ja sen, miten he ovat äänestäneet eduskunnassa.</p><p class="meta">Vaalipiiri on yleensä oma maakuntasi. Esimerkiksi Ylivieska kuuluu Oulun vaalipiiriin. Jos et ole varma, vaalipiirin voi tarkistaa oikeusministeriön vaalit.fi-sivulta.</p>${vpList.map(([k, ms]) => `<a class="card" href="/vaalipiiri/${slug(k)}/"><div>${esc(k)} vaalipiiri</div><div class="meta">${ms.length} edustajaa</div></a>`).join("")}` }));
+  } else {
+    const byP = new Map();
+    for (const m of mps) { const k = pname(m.puolue) || "Muut"; if (!byP.has(k)) byP.set(k, []); byP.get(k).push(m); }
+    const groups = [...byP.entries()].sort((a, b) => b[1].length - a[1].length);
+    put("/oma-edustaja/", shell({ title: "Etsi oma kansanedustajasi | Eduskuntaseuranta", desc: "Etsi kansanedustaja nimellä ja näe, miten hän on äänestänyt eduskunnassa.", path: "/oma-edustaja/",
+      body: `<h1>Etsi oma kansanedustajasi</h1><p>Kirjoita nimi tai valitse listasta. Näet, miten edustaja on äänestänyt eduskunnassa.</p><input id="oe" type="search" placeholder="Kirjoita kansanedustajan nimi" autocomplete="off" style="width:100%;padding:14px 16px;font-size:17px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);margin:8px 0 18px">${groups.map(([k, ms]) => `<section class="oeg"><h2>${esc(k)} <span class="meta">(${ms.length})</span></h2>${ms.slice().sort((a, b) => String(a.sukunimi).localeCompare(String(b.sukunimi), "fi")).map(m => `<a class="card" data-n="${esc(full(m).toLowerCase())}" href="/edustaja/${mpSlug.get(m.henkilo)}/"><div>${esc(full(m))}</div><div class="meta">läsnä ${lasna(m)} % · poikkeaa ryhmästä ${eri(m)} %</div></a>`).join("")}</section>`).join("")}<script>(()=>{const i=document.getElementById("oe");const q=new URLSearchParams(location.search).get("q");if(q)i.value=q;const f=()=>{const v=i.value.trim().toLowerCase();document.querySelectorAll(".oeg").forEach(g=>{let n=0;g.querySelectorAll("a.card").forEach(a=>{const ok=!v||a.dataset.n.includes(v);a.style.display=ok?"":"none";if(ok)n++});g.style.display=n?"":"none"})};i.addEventListener("input",f);f()})()</script>` }));
   }
 
   // --- Viikkokatsaus: koneellisesti laskettu yhteenveto ja tulkinta ---
