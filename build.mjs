@@ -200,7 +200,7 @@ input[type=search],select{min-height:48px}
 .mode{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;margin-right:auto;margin-left:8px}
 .mode a{color:var(--mute);text-decoration:none;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;white-space:nowrap}
 .mode a[aria-current]{background:var(--text);color:var(--bg)}
-@media(max-width:520px){.mode a{padding:6px 8px;font-size:12px}.top .brand span{display:none}.askb{display:none}}
+@media(max-width:620px){.top{flex-wrap:wrap;row-gap:8px}.mode{order:3;width:100%;margin:0}.mode a{flex:1;text-align:center;padding:8px 6px;font-size:14px}.askb{display:none}}
 .menu nav .navx{border-top:1px solid var(--line);margin-top:10px;padding-top:6px}.menu nav .navx a{color:var(--mute);font-size:15px}
 .menu nav{grid-template-columns:1fr!important}
 .asenna-l{max-width:760px;margin:8px auto 20px;padding:0 16px}.asenna-l[hidden],.asenna-l [hidden]{display:none}
