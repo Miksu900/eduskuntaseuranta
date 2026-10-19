@@ -964,7 +964,8 @@ e.respondWith(fetch(r).then(res=>{if(res.ok&&!/\\.(csv|json)$/.test(new URL(r.ur
     let idx = await readFile("index.html", "utf8");
     idx = idx.replace("/*CSS*/", () => CSS).replace("<!--HEADER-->", () => headerHtml()).replace("<!--TILES-->", () => { try { return tilesHtml2(); } catch (e) { console.log("Uudet laatat ohitettu:", e.message); return tilesHtml(); } }).replace("<!--AIHEET-->", () => topicChips)
       .replace("/*PARTIES*/", () => JSON.stringify(partyMap)).replace("%%SB%%", () => SB).replace("%%KEY%%", () => KEY)
-      .replace("<!--FOOT-->", () => `${footerHtml()}\n${ASK_HTML}${ACCT_JS}${process.env.NO_ANALYTICS ? "" : BEACON}`);
+      .replace("<!--FOOT-->", () => `${ASENNUS_HTML}${footerHtml()}\n${ASK_HTML}${ACCT_JS}${ASENNUS_JS}${process.env.NO_ANALYTICS ? "" : BEACON}`)
+      .replace("</head>", () => `<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0a1424"><link rel="icon" type="image/png" sizes="32x32" href="/media/app/favicon-32.png"><link rel="apple-touch-icon" href="/media/app/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Eduskuntaseuranta"></head>`);
     await writeFile(`${OUT}/index.html`, idx);
   }
   const today = new Date().toISOString().slice(0, 10);
