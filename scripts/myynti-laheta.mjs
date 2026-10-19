@@ -22,6 +22,7 @@ if (TESTI) {
 let k = 0;
 for (const v of D.viestit) {
   if (v.lahetetty || !D.hyvaksytyt_pohjat.includes(v.pohja)) continue;
+  if (v.aikaisintaan && v.aikaisintaan > new Date().toISOString().slice(0, 10)) continue;  // jonossa myöhempää päivää varten
   try { v.brevo_id = await laheta(v.to, v.subject, v.body, KOPIO); v.lahetetty = new Date().toISOString(); k++; n("Lähetetty", `${v.nro}. ${v.organisaatio} <${v.to}>`); }
   catch (e) { n("VIRHE", `${v.nro}. ${v.organisaatio}: ${e.message}`); }
   await new Promise(r => setTimeout(r, 4000));
