@@ -2,7 +2,8 @@
  "hyvaksytyt_pohjat": [
   "A",
   "B",
-  "C"
+  "C",
+  "M1"
  ],
  "viestit": [
   {
@@ -1102,6 +1103,30 @@
    "lahetetty": "2026-10-21T06:02:40.062Z",
    "brevo_id": "<202610210602.58693210209@smtp-relay.mailin.fr>",
    "aikaisintaan": "2026-10-21"
+  },
+  {
+   "nro": 104,
+   "organisaatio": "Ilkka-Pohjalainen",
+   "to": "toimitus@ilkkapohjalainen.fi",
+   "pohja": "M1",
+   "subject": "Juttuvinkki: näin Vaasan vaalipiirin kansanedustajat ovat äänestäneet – data valmiina",
+   "body": "Hei,\n\nOlen ylivieskalainen Miika Koskela, ja olen rakentanut maksuttoman palvelun Eduskuntaseuranta.fi. Se kokoaa eduskunnan avoimesta datasta jokaisen kansanedustajan äänestykset, poissaolot ja puheenvuorot yhteen paikkaan ja selkokielelle.\n\nAjattelin, että siitä voisi olla iloa myös teidän lukijoillenne: palvelusta näkee suoraan, miten Vaasan vaalipiirin kansanedustajat ovat äänestäneet esimerkiksi budjetista ja muista tämän syksyn isoista asioista, kuka on ollut eniten poissa ja kuka äänestää useimmiten puoluetta vastaan.\n\nKaikki tiedot perustuvat eduskunnan julkiseen avoimeen dataan, ja jokaisesta äänestyksestä on linkki alkuperäiseen lähteeseen. Palvelu on puolueeton, siinä ei ole mainoksia eikä seurantaa.\n\nKerron mielelläni lisää tai haen valmiiksi tietyn alueen tai tietyn äänestyksen luvut, jos aihe kiinnostaa.\n\nYstävällisin terveisin\nMiika Koskela\nEduskuntaseuranta.fi\nmiika@eduskuntaseuranta.fi"
+  },
+  {
+   "nro": 105,
+   "organisaatio": "Savon Sanomat",
+   "to": "uutiset@savonsanomat.fi",
+   "pohja": "M1",
+   "subject": "Juttuvinkki: näin Savo-Karjalan vaalipiirin kansanedustajat ovat äänestäneet – data valmiina",
+   "body": "Hei,\n\nOlen ylivieskalainen Miika Koskela, ja olen rakentanut maksuttoman palvelun Eduskuntaseuranta.fi. Se kokoaa eduskunnan avoimesta datasta jokaisen kansanedustajan äänestykset, poissaolot ja puheenvuorot yhteen paikkaan ja selkokielelle.\n\nAjattelin, että siitä voisi olla iloa myös teidän lukijoillenne: palvelusta näkee suoraan, miten Savo-Karjalan vaalipiirin kansanedustajat ovat äänestäneet esimerkiksi budjetista ja muista tämän syksyn isoista asioista, kuka on ollut eniten poissa ja kuka äänestää useimmiten puoluetta vastaan.\n\nKaikki tiedot perustuvat eduskunnan julkiseen avoimeen dataan, ja jokaisesta äänestyksestä on linkki alkuperäiseen lähteeseen. Palvelu on puolueeton, siinä ei ole mainoksia eikä seurantaa.\n\nKerron mielelläni lisää tai haen valmiiksi tietyn alueen tai tietyn äänestyksen luvut, jos aihe kiinnostaa.\n\nYstävällisin terveisin\nMiika Koskela\nEduskuntaseuranta.fi\nmiika@eduskuntaseuranta.fi"
+  },
+  {
+   "nro": 106,
+   "organisaatio": "Keskisuomalainen",
+   "to": "uutiset@keskisuomalainen.fi",
+   "pohja": "M1",
+   "subject": "Juttuvinkki: näin Keski-Suomen vaalipiirin kansanedustajat ovat äänestäneet – data valmiina",
+   "body": "Hei,\n\nOlen ylivieskalainen Miika Koskela, ja olen rakentanut maksuttoman palvelun Eduskuntaseuranta.fi. Se kokoaa eduskunnan avoimesta datasta jokaisen kansanedustajan äänestykset, poissaolot ja puheenvuorot yhteen paikkaan ja selkokielelle.\n\nAjattelin, että siitä voisi olla iloa myös teidän lukijoillenne: palvelusta näkee suoraan, miten Keski-Suomen vaalipiirin kansanedustajat ovat äänestäneet esimerkiksi budjetista ja muista tämän syksyn isoista asioista, kuka on ollut eniten poissa ja kuka äänestää useimmiten puoluetta vastaan.\n\nKaikki tiedot perustuvat eduskunnan julkiseen avoimeen dataan, ja jokaisesta äänestyksestä on linkki alkuperäiseen lähteeseen. Palvelu on puolueeton, siinä ei ole mainoksia eikä seurantaa.\n\nKerron mielelläni lisää tai haen valmiiksi tietyn alueen tai tietyn äänestyksen luvut, jos aihe kiinnostaa.\n\nYstävällisin terveisin\nMiika Koskela\nEduskuntaseuranta.fi\nmiika@eduskuntaseuranta.fi"
   }
  ]
 }
